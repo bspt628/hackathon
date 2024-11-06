@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="hackathon@23.251.145.87" uuid="2f2365d5-5640-42d5-9f34-706a93931643">
+    <data-source source="LOCAL" name="CloudSQL" uuid="2f2365d5-5640-42d5-9f34-706a93931643">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>
