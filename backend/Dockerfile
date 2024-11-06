@@ -3,11 +3,8 @@ FROM golang:1.21 AS build
 
 WORKDIR /app
 
-# バックエンドのソースコードをコピー
-COPY backend/ ./backend/
-
-# 作業ディレクトリをbackendに変更
-WORKDIR /app/backend
+# 現在のディレクトリ（backend）の内容をコピー
+COPY . .
 
 # 依存関係をダウンロード
 RUN go mod download
@@ -23,7 +20,11 @@ RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/
 WORKDIR /app
 
 # ビルドしたバイナリをコピー
-COPY --from=build /app/backend/app .
+COPY --from=build /app/app .
+
+# 設定ファイルと証明書をコピー（必要な場合）
+COPY config ./config
+COPY cert ./cert
 
 # ポート8080を公開（必要に応じて変更）
 EXPOSE 8080
