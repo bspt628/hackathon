@@ -3,8 +3,11 @@ package main
 import (
 	"database/sql"
 	"fmt"
-	_ "github.com/go-sql-driver/mysql"
 	"log"
+	"net/http"
+	"os"
+
+	_ "github.com/go-sql-driver/mysql"
 )
 
 func main() {
@@ -18,6 +21,12 @@ func main() {
 	mysqlPwd := "rootpass"
 	mysqlHost := "unix(/cloudsql/term6-hiroto-uchida:us-central1:uttc6)"
 	mysqlDatabase := "hackathon"
+
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+	http.ListenAndServe(":"+port, nil)
 
 	// データベースを初期化します
 	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
