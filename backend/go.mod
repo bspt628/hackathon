@@ -2,7 +2,7 @@ module example.com/hackathon
 
 replace example.com/hackathon/config => ./config
 
-go 1.22.3
+go 1.21
 
 require (
 	github.com/go-sql-driver/mysql v1.8.1
