@@ -37,7 +37,7 @@ func main() {
 	}
 	defer db.Close()
 
-	fmt.Println("データベースの初期化に成功しました")
+	fmt.Println("データベースの初期化に成功しました！")
 
 	if err := db.Ping(); err != nil {
 		log.Fatal(err)
