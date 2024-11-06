@@ -22,9 +22,8 @@ WORKDIR /app
 # ビルドしたバイナリをコピー
 COPY --from=build /app/app .
 
-# 設定ファイルと証明書をコピー（必要な場合）
+# 設定ファイルをコピー
 COPY config ./config
-COPY cert ./cert
 
 # ポート8080を公開（必要に応じて変更）
 EXPOSE 8080
