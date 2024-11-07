@@ -11,15 +11,15 @@ import (
 
 func main() {
 	//
-	//mysqlUser := os.Getenv("MYSQL_USER")
-	//mysqlPwd := os.Getenv("MYSQL_PWD")
-	//mysqlHost := os.Getenv("MYSQL_HOST")
-	//mysqlDatabase := os.Getenv("MYSQL_DATABASE")
+	mysqlUser := os.Getenv("DB_USER")
+	mysqlPwd := os.Getenv("DB_PASSWORD")
+	mysqlHost := os.Getenv("DB_HOST")
+	mysqlDatabase := os.Getenv("DB_NAME")
 
-	mysqlUser := "root"
-	mysqlPwd := "rootpass"
-	mysqlHost := "unix(/cloudsql/term6-hiroto-uchida:us-central1:uttc6)"
-	mysqlDatabase := "hackathon"
+	// mysqlUser := 
+	// mysqlPwd := "password"
+	// mysqlHost := "tcp(23.251.145.87:3306)"
+	// mysqlDatabase := "hackathon"
 
 	// データベースを初期化します
 	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
@@ -31,7 +31,7 @@ func main() {
 	defer db.Close()
 
 	fmt.Println("データベースの初期化に成功しました！")
-	fmt.Printf("%s\n",db)
+	//fmt.Printf("%s\n", db)
 
 	if err := db.Ping(); err != nil {
 		log.Fatal(err)
