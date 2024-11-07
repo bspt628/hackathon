@@ -23,7 +23,7 @@ type AddBlockParams struct {
 }
 
 func (q *Queries) AddBlock(ctx context.Context, arg AddBlockParams) error {
-	_, err := q.exec(ctx, q.addBlockStmt, addBlock, arg.ID, arg.Blockedbyid, arg.Blockeduserid)
+	_, err := q.db.ExecContext(ctx, addBlock, arg.ID, arg.Blockedbyid, arg.Blockeduserid)
 	return err
 }
 
@@ -39,7 +39,7 @@ type AddFollowParams struct {
 }
 
 func (q *Queries) AddFollow(ctx context.Context, arg AddFollowParams) error {
-	_, err := q.exec(ctx, q.addFollowStmt, addFollow, arg.ID, arg.Followerid, arg.Followingid)
+	_, err := q.db.ExecContext(ctx, addFollow, arg.ID, arg.Followerid, arg.Followingid)
 	return err
 }
 
@@ -55,7 +55,7 @@ type AddLikeParams struct {
 }
 
 func (q *Queries) AddLike(ctx context.Context, arg AddLikeParams) error {
-	_, err := q.exec(ctx, q.addLikeStmt, addLike, arg.ID, arg.Userid, arg.Postid)
+	_, err := q.db.ExecContext(ctx, addLike, arg.ID, arg.Userid, arg.Postid)
 	return err
 }
 
@@ -72,7 +72,7 @@ type CreateNotificationParams struct {
 }
 
 func (q *Queries) CreateNotification(ctx context.Context, arg CreateNotificationParams) error {
-	_, err := q.exec(ctx, q.createNotificationStmt, createNotification,
+	_, err := q.db.ExecContext(ctx, createNotification,
 		arg.ID,
 		arg.Userid,
 		arg.Type,
@@ -93,7 +93,7 @@ type CreatePostParams struct {
 }
 
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (sql.Result, error) {
-	return q.exec(ctx, q.createPostStmt, createPost, arg.ID, arg.UserID, arg.Content)
+	return q.db.ExecContext(ctx, createPost, arg.ID, arg.UserID, arg.Content)
 }
 
 const createRepost = `-- name: CreateRepost :exec
@@ -110,7 +110,7 @@ type CreateRepostParams struct {
 }
 
 func (q *Queries) CreateRepost(ctx context.Context, arg CreateRepostParams) error {
-	_, err := q.exec(ctx, q.createRepostStmt, createRepost,
+	_, err := q.db.ExecContext(ctx, createRepost,
 		arg.ID,
 		arg.UserID,
 		arg.OriginalPostID,
@@ -134,7 +134,7 @@ type CreateUserParams struct {
 }
 
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error) {
-	return q.exec(ctx, q.createUserStmt, createUser,
+	return q.db.ExecContext(ctx, createUser,
 		arg.ID,
 		arg.Email,
 		arg.PasswordHash,
@@ -159,7 +159,7 @@ type GetDMConversationParams struct {
 }
 
 func (q *Queries) GetDMConversation(ctx context.Context, arg GetDMConversationParams) ([]Dm, error) {
-	rows, err := q.query(ctx, q.getDMConversationStmt, getDMConversation,
+	rows, err := q.db.QueryContext(ctx, getDMConversation,
 		arg.Senderid,
 		arg.Receiverid,
 		arg.Senderid_2,
@@ -169,7 +169,7 @@ func (q *Queries) GetDMConversation(ctx context.Context, arg GetDMConversationPa
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Dm{}
+	var items []Dm
 	for rows.Next() {
 		var i Dm
 		if err := rows.Scan(
@@ -228,12 +228,12 @@ type GetRecentPostsRow struct {
 }
 
 func (q *Queries) GetRecentPosts(ctx context.Context, limit int32) ([]GetRecentPostsRow, error) {
-	rows, err := q.query(ctx, q.getRecentPostsStmt, getRecentPosts, limit)
+	rows, err := q.db.QueryContext(ctx, getRecentPosts, limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetRecentPostsRow{}
+	var items []GetRecentPostsRow
 	for rows.Next() {
 		var i GetRecentPostsRow
 		if err := rows.Scan(
@@ -282,12 +282,12 @@ ORDER BY createdAt DESC
 `
 
 func (q *Queries) GetUnreadNotifications(ctx context.Context, userid sql.NullString) ([]Notification, error) {
-	rows, err := q.query(ctx, q.getUnreadNotificationsStmt, getUnreadNotifications, userid)
+	rows, err := q.db.QueryContext(ctx, getUnreadNotifications, userid)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []Notification{}
+	var items []Notification
 	for rows.Next() {
 		var i Notification
 		if err := rows.Scan(
@@ -336,7 +336,7 @@ type GetUserStatsRow struct {
 }
 
 func (q *Queries) GetUserStats(ctx context.Context, id string) (GetUserStatsRow, error) {
-	row := q.queryRow(ctx, q.getUserStatsStmt, getUserStats, id)
+	row := q.db.QueryRowContext(ctx, getUserStats, id)
 	var i GetUserStatsRow
 	err := row.Scan(
 		&i.ID,
@@ -395,12 +395,12 @@ type GetUserTimelineRow struct {
 }
 
 func (q *Queries) GetUserTimeline(ctx context.Context, arg GetUserTimelineParams) ([]GetUserTimelineRow, error) {
-	rows, err := q.query(ctx, q.getUserTimelineStmt, getUserTimeline, arg.Followerid, arg.UserID, arg.Limit)
+	rows, err := q.db.QueryContext(ctx, getUserTimeline, arg.Followerid, arg.UserID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []GetUserTimelineRow{}
+	var items []GetUserTimelineRow
 	for rows.Next() {
 		var i GetUserTimelineRow
 		if err := rows.Scan(
@@ -482,12 +482,12 @@ type SearchPostsByHashtagRow struct {
 }
 
 func (q *Queries) SearchPostsByHashtag(ctx context.Context, arg SearchPostsByHashtagParams) ([]SearchPostsByHashtagRow, error) {
-	rows, err := q.query(ctx, q.searchPostsByHashtagStmt, searchPostsByHashtag, arg.Content, arg.Limit)
+	rows, err := q.db.QueryContext(ctx, searchPostsByHashtag, arg.Content, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []SearchPostsByHashtagRow{}
+	var items []SearchPostsByHashtagRow
 	for rows.Next() {
 		var i SearchPostsByHashtagRow
 		if err := rows.Scan(
@@ -541,7 +541,7 @@ type SendDMParams struct {
 }
 
 func (q *Queries) SendDM(ctx context.Context, arg SendDMParams) error {
-	_, err := q.exec(ctx, q.sendDMStmt, sendDM,
+	_, err := q.db.ExecContext(ctx, sendDM,
 		arg.ID,
 		arg.Senderid,
 		arg.Receiverid,
@@ -559,7 +559,7 @@ WHERE users.id = ?
 `
 
 func (q *Queries) UpdateFollowersCount(ctx context.Context, id string) error {
-	_, err := q.exec(ctx, q.updateFollowersCountStmt, updateFollowersCount, id)
+	_, err := q.db.ExecContext(ctx, updateFollowersCount, id)
 	return err
 }
 
@@ -572,7 +572,7 @@ WHERE posts.id = ?
 `
 
 func (q *Queries) UpdatePostLikesCount(ctx context.Context, id string) error {
-	_, err := q.exec(ctx, q.updatePostLikesCountStmt, updatePostLikesCount, id)
+	_, err := q.db.ExecContext(ctx, updatePostLikesCount, id)
 	return err
 }
 
@@ -589,6 +589,6 @@ type UpdateUserInfoParams struct {
 }
 
 func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) error {
-	_, err := q.exec(ctx, q.updateUserInfoStmt, updateUserInfo, arg.Bio, arg.Location, arg.ID)
+	_, err := q.db.ExecContext(ctx, updateUserInfo, arg.Bio, arg.Location, arg.ID)
 	return err
 }

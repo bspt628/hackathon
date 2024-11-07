@@ -1,0 +1,25 @@
+version: "2"
+
+sql:
+  - schema:
+      - "./migrations/01_create_database.sql"
+      - "./migrations/02_create_users_table.sql"
+      - "./migrations/03_create_posts_table.sql"
+      - "./migrations/04_create_reposts_table.sql"
+      - "./migrations/05_create_likes_table.sql"
+      - "./migrations/06_create_replies_table.sql"
+      - "./migrations/07_create_follows_table.sql"
+      - "./migrations/08_create_blocks_table.sql"
+      - "./migrations/09_create_notifications_table.sql"
+      - "./migrations/10_create_dms_table.sql"
+
+    queries:
+      - "./queries/query.sql"
+
+    engine: "mysql"
+
+    gen:
+      go:
+        package: "db"
+        out: "./generated"
+        emit_json_tags: true
