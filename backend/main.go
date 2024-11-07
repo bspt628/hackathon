@@ -11,18 +11,11 @@ import (
 
 func main() {
 	//
-	mysqlUser := os.Getenv("DB_USER")
-	mysqlPwd := os.Getenv("DB_PASSWORD")
-	mysqlHost := os.Getenv("DB_HOST")
-	mysqlDatabase := os.Getenv("DB_NAME")
+	mysqlUser := os.Getenv("MYSQL_USER")
+	mysqlPwd := os.Getenv("MYSQL_PASSWORD")
+	mysqlDatabase := os.Getenv("MYSQL_NAME")
 
-	// mysqlUser := 
-	// mysqlPwd := "password"
-	// mysqlHost := "tcp(23.251.145.87:3306)"
-	// mysqlDatabase := "hackathon"
-
-	// データベースを初期化します
-	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
+	connStr := fmt.Sprintf("%s:%s@(localhost:3308)/%s", mysqlUser, mysqlPwd, mysqlDatabase)
 	fmt.Println(connStr)
 	db, err := sql.Open("mysql", connStr)
 	if err != nil {

@@ -1,7 +1,7 @@
 -- schema.sql
 
-CREATE DATABASE IF NOT EXISTS social_media_platform;
-USE social_media_platform;
+CREATE DATABASE IF NOT EXISTS hackathon;
+USE hackathon;
 
 CREATE TABLE users (
     id VARCHAR(36) PRIMARY KEY,
