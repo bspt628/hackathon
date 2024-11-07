@@ -6,84 +6,112 @@ package db
 
 import (
 	"database/sql"
-	"time"
+	"encoding/json"
 )
 
 type Block struct {
-	ID            string    `json:"id"`
-	BlockedByID   string    `json:"blocked_by_id"`
-	BlockedUserID string    `json:"blocked_user_id"`
-	CreatedAt     time.Time `json:"created_at"`
+	ID            string         `json:"id"`
+	Blockedbyid   sql.NullString `json:"blockedbyid"`
+	Blockeduserid sql.NullString `json:"blockeduserid"`
+	Createdat     sql.NullTime   `json:"createdat"`
 }
 
 type Dm struct {
-	ID         string    `json:"id"`
-	SenderID   string    `json:"sender_id"`
-	ReceiverID string    `json:"receiver_id"`
-	Content    string    `json:"content"`
-	CreatedAt  time.Time `json:"created_at"`
+	ID         string         `json:"id"`
+	Senderid   sql.NullString `json:"senderid"`
+	Receiverid sql.NullString `json:"receiverid"`
+	Content    sql.NullString `json:"content"`
+	Createdat  sql.NullTime   `json:"createdat"`
 }
 
 type Follow struct {
-	ID          string    `json:"id"`
-	FollowerID  string    `json:"follower_id"`
-	FollowingID string    `json:"following_id"`
-	CreatedAt   time.Time `json:"created_at"`
+	ID          string         `json:"id"`
+	Followerid  sql.NullString `json:"followerid"`
+	Followingid sql.NullString `json:"followingid"`
+	Createdat   sql.NullTime   `json:"createdat"`
 }
 
 type Like struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
-	TweetID   string    `json:"tweet_id"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        string         `json:"id"`
+	Userid    sql.NullString `json:"userid"`
+	Postid    sql.NullString `json:"postid"`
+	Createdat sql.NullTime   `json:"createdat"`
 }
 
 type Notification struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
-	Type      string    `json:"type"`
-	Message   string    `json:"message"`
-	CreatedAt time.Time `json:"created_at"`
-	IsRead    bool      `json:"is_read"`
+	ID        string         `json:"id"`
+	Userid    sql.NullString `json:"userid"`
+	Type      sql.NullString `json:"type"`
+	Message   sql.NullString `json:"message"`
+	Createdat sql.NullTime   `json:"createdat"`
+	Isread    sql.NullBool   `json:"isread"`
 }
 
-type Profile struct {
-	ID        string         `json:"id"`
-	UserID    string         `json:"user_id"`
-	Bio       sql.NullString `json:"bio"`
-	Location  sql.NullString `json:"location"`
-	Website   sql.NullString `json:"website"`
-	IsPrivate bool           `json:"is_private"`
+type Post struct {
+	ID             string          `json:"id"`
+	UserID         sql.NullString  `json:"user_id"`
+	Content        sql.NullString  `json:"content"`
+	CreatedAt      sql.NullTime    `json:"created_at"`
+	UpdatedAt      sql.NullTime    `json:"updated_at"`
+	IsRepost       sql.NullBool    `json:"is_repost"`
+	OriginalPostID sql.NullString  `json:"original_post_id"`
+	ReplyToID      sql.NullString  `json:"reply_to_id"`
+	RootPostID     sql.NullString  `json:"root_post_id"`
+	IsReply        sql.NullBool    `json:"is_reply"`
+	MediaUrls      json.RawMessage `json:"media_urls"`
+	LikesCount     sql.NullInt32   `json:"likes_count"`
+	RepostsCount   sql.NullInt32   `json:"reposts_count"`
+	RepliesCount   sql.NullInt32   `json:"replies_count"`
+	ViewsCount     sql.NullInt32   `json:"views_count"`
+	Visibility     sql.NullString  `json:"visibility"`
+	Language       sql.NullString  `json:"language"`
+	Location       sql.NullString  `json:"location"`
+	Device         sql.NullString  `json:"device"`
+	IsPinned       sql.NullBool    `json:"is_pinned"`
+	IsDeleted      sql.NullBool    `json:"is_deleted"`
 }
 
 type Reply struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
-	TweetID   string    `json:"tweet_id"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created_at"`
+	ID        string         `json:"id"`
+	Userid    sql.NullString `json:"userid"`
+	Postid    sql.NullString `json:"postid"`
+	Content   sql.NullString `json:"content"`
+	Createdat sql.NullTime   `json:"createdat"`
 }
 
-type Retweet struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
-	TweetID   string    `json:"tweet_id"`
-	CreatedAt time.Time `json:"created_at"`
-}
-
-type Tweet struct {
-	ID        string    `json:"id"`
-	UserID    string    `json:"user_id"`
-	Content   string    `json:"content"`
-	CreatedAt time.Time `json:"created_at"`
-	IsDeleted bool      `json:"is_deleted"`
+type Repost struct {
+	ID                string         `json:"id"`
+	UserID            sql.NullString `json:"user_id"`
+	OriginalPostID    sql.NullString `json:"original_post_id"`
+	RepostedAt        sql.NullTime   `json:"reposted_at"`
+	IsQuoteRepost     sql.NullBool   `json:"is_quote_repost"`
+	AdditionalComment sql.NullString `json:"additional_comment"`
 }
 
 type User struct {
-	ID        string         `json:"id"`
-	Username  string         `json:"username"`
-	Email     string         `json:"email"`
-	Password  string         `json:"password"`
-	CreatedAt time.Time      `json:"created_at"`
-	Status    sql.NullString `json:"status"`
+	ID                   string          `json:"id"`
+	Email                string          `json:"email"`
+	PasswordHash         string          `json:"password_hash"`
+	Username             string          `json:"username"`
+	DisplayName          sql.NullString  `json:"display_name"`
+	ProfileImageUrl      sql.NullString  `json:"profile_image_url"`
+	Bio                  sql.NullString  `json:"bio"`
+	Location             sql.NullString  `json:"location"`
+	Website              sql.NullString  `json:"website"`
+	BirthDate            sql.NullTime    `json:"birth_date"`
+	CreatedAt            sql.NullTime    `json:"created_at"`
+	UpdatedAt            sql.NullTime    `json:"updated_at"`
+	LastLoginAt          sql.NullTime    `json:"last_login_at"`
+	IsVerified           sql.NullBool    `json:"is_verified"`
+	IsPrivate            sql.NullBool    `json:"is_private"`
+	IsBanned             sql.NullBool    `json:"is_banned"`
+	FollowersCount       sql.NullInt32   `json:"followers_count"`
+	FollowingCount       sql.NullInt32   `json:"following_count"`
+	PostsCount           sql.NullInt32   `json:"posts_count"`
+	LikesCount           sql.NullInt32   `json:"likes_count"`
+	Language             sql.NullString  `json:"language"`
+	Theme                sql.NullString  `json:"theme"`
+	NotificationSettings json.RawMessage `json:"notification_settings"`
+	TwoFactorEnabled     sql.NullBool    `json:"two_factor_enabled"`
+	LastPasswordChange   sql.NullTime    `json:"last_password_change"`
 }

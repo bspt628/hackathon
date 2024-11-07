@@ -24,119 +24,90 @@ func New(db DBTX) *Queries {
 func Prepare(ctx context.Context, db DBTX) (*Queries, error) {
 	q := Queries{db: db}
 	var err error
-	if q.createBlockStmt, err = db.PrepareContext(ctx, createBlock); err != nil {
-		return nil, fmt.Errorf("error preparing query CreateBlock: %w", err)
+	if q.addBlockStmt, err = db.PrepareContext(ctx, addBlock); err != nil {
+		return nil, fmt.Errorf("error preparing query AddBlock: %w", err)
 	}
-	if q.createDMStmt, err = db.PrepareContext(ctx, createDM); err != nil {
-		return nil, fmt.Errorf("error preparing query CreateDM: %w", err)
+	if q.addFollowStmt, err = db.PrepareContext(ctx, addFollow); err != nil {
+		return nil, fmt.Errorf("error preparing query AddFollow: %w", err)
 	}
-	if q.createFollowStmt, err = db.PrepareContext(ctx, createFollow); err != nil {
-		return nil, fmt.Errorf("error preparing query CreateFollow: %w", err)
+	if q.addLikeStmt, err = db.PrepareContext(ctx, addLike); err != nil {
+		return nil, fmt.Errorf("error preparing query AddLike: %w", err)
 	}
-	if q.createLikeStmt, err = db.PrepareContext(ctx, createLike); err != nil {
-		return nil, fmt.Errorf("error preparing query CreateLike: %w", err)
+	if q.createNotificationStmt, err = db.PrepareContext(ctx, createNotification); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateNotification: %w", err)
 	}
-	if q.createReplyStmt, err = db.PrepareContext(ctx, createReply); err != nil {
-		return nil, fmt.Errorf("error preparing query CreateReply: %w", err)
+	if q.createPostStmt, err = db.PrepareContext(ctx, createPost); err != nil {
+		return nil, fmt.Errorf("error preparing query CreatePost: %w", err)
 	}
-	if q.createRetweetStmt, err = db.PrepareContext(ctx, createRetweet); err != nil {
-		return nil, fmt.Errorf("error preparing query CreateRetweet: %w", err)
-	}
-	if q.createTweetStmt, err = db.PrepareContext(ctx, createTweet); err != nil {
-		return nil, fmt.Errorf("error preparing query CreateTweet: %w", err)
+	if q.createRepostStmt, err = db.PrepareContext(ctx, createRepost); err != nil {
+		return nil, fmt.Errorf("error preparing query CreateRepost: %w", err)
 	}
 	if q.createUserStmt, err = db.PrepareContext(ctx, createUser); err != nil {
 		return nil, fmt.Errorf("error preparing query CreateUser: %w", err)
 	}
-	if q.deleteBlockStmt, err = db.PrepareContext(ctx, deleteBlock); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteBlock: %w", err)
+	if q.getDMConversationStmt, err = db.PrepareContext(ctx, getDMConversation); err != nil {
+		return nil, fmt.Errorf("error preparing query GetDMConversation: %w", err)
 	}
-	if q.deleteFollowStmt, err = db.PrepareContext(ctx, deleteFollow); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteFollow: %w", err)
+	if q.getRecentPostsStmt, err = db.PrepareContext(ctx, getRecentPosts); err != nil {
+		return nil, fmt.Errorf("error preparing query GetRecentPosts: %w", err)
 	}
-	if q.deleteLikeStmt, err = db.PrepareContext(ctx, deleteLike); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteLike: %w", err)
+	if q.getUnreadNotificationsStmt, err = db.PrepareContext(ctx, getUnreadNotifications); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUnreadNotifications: %w", err)
 	}
-	if q.deleteRetweetStmt, err = db.PrepareContext(ctx, deleteRetweet); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteRetweet: %w", err)
+	if q.getUserStatsStmt, err = db.PrepareContext(ctx, getUserStats); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserStats: %w", err)
 	}
-	if q.deleteTweetStmt, err = db.PrepareContext(ctx, deleteTweet); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteTweet: %w", err)
+	if q.getUserTimelineStmt, err = db.PrepareContext(ctx, getUserTimeline); err != nil {
+		return nil, fmt.Errorf("error preparing query GetUserTimeline: %w", err)
 	}
-	if q.deleteUserStmt, err = db.PrepareContext(ctx, deleteUser); err != nil {
-		return nil, fmt.Errorf("error preparing query DeleteUser: %w", err)
+	if q.searchPostsByHashtagStmt, err = db.PrepareContext(ctx, searchPostsByHashtag); err != nil {
+		return nil, fmt.Errorf("error preparing query SearchPostsByHashtag: %w", err)
 	}
-	if q.getProfileStmt, err = db.PrepareContext(ctx, getProfile); err != nil {
-		return nil, fmt.Errorf("error preparing query GetProfile: %w", err)
+	if q.sendDMStmt, err = db.PrepareContext(ctx, sendDM); err != nil {
+		return nil, fmt.Errorf("error preparing query SendDM: %w", err)
 	}
-	if q.getTweetStmt, err = db.PrepareContext(ctx, getTweet); err != nil {
-		return nil, fmt.Errorf("error preparing query GetTweet: %w", err)
+	if q.updateFollowersCountStmt, err = db.PrepareContext(ctx, updateFollowersCount); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateFollowersCount: %w", err)
 	}
-	if q.getUserStmt, err = db.PrepareContext(ctx, getUser); err != nil {
-		return nil, fmt.Errorf("error preparing query GetUser: %w", err)
+	if q.updatePostLikesCountStmt, err = db.PrepareContext(ctx, updatePostLikesCount); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdatePostLikesCount: %w", err)
 	}
-	if q.listDMsStmt, err = db.PrepareContext(ctx, listDMs); err != nil {
-		return nil, fmt.Errorf("error preparing query ListDMs: %w", err)
-	}
-	if q.listNotificationsStmt, err = db.PrepareContext(ctx, listNotifications); err != nil {
-		return nil, fmt.Errorf("error preparing query ListNotifications: %w", err)
-	}
-	if q.listRepliesStmt, err = db.PrepareContext(ctx, listReplies); err != nil {
-		return nil, fmt.Errorf("error preparing query ListReplies: %w", err)
-	}
-	if q.listTweetsStmt, err = db.PrepareContext(ctx, listTweets); err != nil {
-		return nil, fmt.Errorf("error preparing query ListTweets: %w", err)
-	}
-	if q.listUsersStmt, err = db.PrepareContext(ctx, listUsers); err != nil {
-		return nil, fmt.Errorf("error preparing query ListUsers: %w", err)
-	}
-	if q.markNotificationAsReadStmt, err = db.PrepareContext(ctx, markNotificationAsRead); err != nil {
-		return nil, fmt.Errorf("error preparing query MarkNotificationAsRead: %w", err)
-	}
-	if q.updateProfileStmt, err = db.PrepareContext(ctx, updateProfile); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateProfile: %w", err)
-	}
-	if q.updateUserStmt, err = db.PrepareContext(ctx, updateUser); err != nil {
-		return nil, fmt.Errorf("error preparing query UpdateUser: %w", err)
+	if q.updateUserInfoStmt, err = db.PrepareContext(ctx, updateUserInfo); err != nil {
+		return nil, fmt.Errorf("error preparing query UpdateUserInfo: %w", err)
 	}
 	return &q, nil
 }
 
 func (q *Queries) Close() error {
 	var err error
-	if q.createBlockStmt != nil {
-		if cerr := q.createBlockStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createBlockStmt: %w", cerr)
+	if q.addBlockStmt != nil {
+		if cerr := q.addBlockStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addBlockStmt: %w", cerr)
 		}
 	}
-	if q.createDMStmt != nil {
-		if cerr := q.createDMStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createDMStmt: %w", cerr)
+	if q.addFollowStmt != nil {
+		if cerr := q.addFollowStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addFollowStmt: %w", cerr)
 		}
 	}
-	if q.createFollowStmt != nil {
-		if cerr := q.createFollowStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createFollowStmt: %w", cerr)
+	if q.addLikeStmt != nil {
+		if cerr := q.addLikeStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing addLikeStmt: %w", cerr)
 		}
 	}
-	if q.createLikeStmt != nil {
-		if cerr := q.createLikeStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createLikeStmt: %w", cerr)
+	if q.createNotificationStmt != nil {
+		if cerr := q.createNotificationStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createNotificationStmt: %w", cerr)
 		}
 	}
-	if q.createReplyStmt != nil {
-		if cerr := q.createReplyStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createReplyStmt: %w", cerr)
+	if q.createPostStmt != nil {
+		if cerr := q.createPostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createPostStmt: %w", cerr)
 		}
 	}
-	if q.createRetweetStmt != nil {
-		if cerr := q.createRetweetStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createRetweetStmt: %w", cerr)
-		}
-	}
-	if q.createTweetStmt != nil {
-		if cerr := q.createTweetStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing createTweetStmt: %w", cerr)
+	if q.createRepostStmt != nil {
+		if cerr := q.createRepostStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing createRepostStmt: %w", cerr)
 		}
 	}
 	if q.createUserStmt != nil {
@@ -144,89 +115,54 @@ func (q *Queries) Close() error {
 			err = fmt.Errorf("error closing createUserStmt: %w", cerr)
 		}
 	}
-	if q.deleteBlockStmt != nil {
-		if cerr := q.deleteBlockStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteBlockStmt: %w", cerr)
+	if q.getDMConversationStmt != nil {
+		if cerr := q.getDMConversationStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getDMConversationStmt: %w", cerr)
 		}
 	}
-	if q.deleteFollowStmt != nil {
-		if cerr := q.deleteFollowStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteFollowStmt: %w", cerr)
+	if q.getRecentPostsStmt != nil {
+		if cerr := q.getRecentPostsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getRecentPostsStmt: %w", cerr)
 		}
 	}
-	if q.deleteLikeStmt != nil {
-		if cerr := q.deleteLikeStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteLikeStmt: %w", cerr)
+	if q.getUnreadNotificationsStmt != nil {
+		if cerr := q.getUnreadNotificationsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUnreadNotificationsStmt: %w", cerr)
 		}
 	}
-	if q.deleteRetweetStmt != nil {
-		if cerr := q.deleteRetweetStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteRetweetStmt: %w", cerr)
+	if q.getUserStatsStmt != nil {
+		if cerr := q.getUserStatsStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserStatsStmt: %w", cerr)
 		}
 	}
-	if q.deleteTweetStmt != nil {
-		if cerr := q.deleteTweetStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteTweetStmt: %w", cerr)
+	if q.getUserTimelineStmt != nil {
+		if cerr := q.getUserTimelineStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing getUserTimelineStmt: %w", cerr)
 		}
 	}
-	if q.deleteUserStmt != nil {
-		if cerr := q.deleteUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing deleteUserStmt: %w", cerr)
+	if q.searchPostsByHashtagStmt != nil {
+		if cerr := q.searchPostsByHashtagStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing searchPostsByHashtagStmt: %w", cerr)
 		}
 	}
-	if q.getProfileStmt != nil {
-		if cerr := q.getProfileStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getProfileStmt: %w", cerr)
+	if q.sendDMStmt != nil {
+		if cerr := q.sendDMStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing sendDMStmt: %w", cerr)
 		}
 	}
-	if q.getTweetStmt != nil {
-		if cerr := q.getTweetStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getTweetStmt: %w", cerr)
+	if q.updateFollowersCountStmt != nil {
+		if cerr := q.updateFollowersCountStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateFollowersCountStmt: %w", cerr)
 		}
 	}
-	if q.getUserStmt != nil {
-		if cerr := q.getUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing getUserStmt: %w", cerr)
+	if q.updatePostLikesCountStmt != nil {
+		if cerr := q.updatePostLikesCountStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updatePostLikesCountStmt: %w", cerr)
 		}
 	}
-	if q.listDMsStmt != nil {
-		if cerr := q.listDMsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing listDMsStmt: %w", cerr)
-		}
-	}
-	if q.listNotificationsStmt != nil {
-		if cerr := q.listNotificationsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing listNotificationsStmt: %w", cerr)
-		}
-	}
-	if q.listRepliesStmt != nil {
-		if cerr := q.listRepliesStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing listRepliesStmt: %w", cerr)
-		}
-	}
-	if q.listTweetsStmt != nil {
-		if cerr := q.listTweetsStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing listTweetsStmt: %w", cerr)
-		}
-	}
-	if q.listUsersStmt != nil {
-		if cerr := q.listUsersStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing listUsersStmt: %w", cerr)
-		}
-	}
-	if q.markNotificationAsReadStmt != nil {
-		if cerr := q.markNotificationAsReadStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing markNotificationAsReadStmt: %w", cerr)
-		}
-	}
-	if q.updateProfileStmt != nil {
-		if cerr := q.updateProfileStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateProfileStmt: %w", cerr)
-		}
-	}
-	if q.updateUserStmt != nil {
-		if cerr := q.updateUserStmt.Close(); cerr != nil {
-			err = fmt.Errorf("error closing updateUserStmt: %w", cerr)
+	if q.updateUserInfoStmt != nil {
+		if cerr := q.updateUserInfoStmt.Close(); cerr != nil {
+			err = fmt.Errorf("error closing updateUserInfoStmt: %w", cerr)
 		}
 	}
 	return err
@@ -268,61 +204,45 @@ func (q *Queries) queryRow(ctx context.Context, stmt *sql.Stmt, query string, ar
 type Queries struct {
 	db                         DBTX
 	tx                         *sql.Tx
-	createBlockStmt            *sql.Stmt
-	createDMStmt               *sql.Stmt
-	createFollowStmt           *sql.Stmt
-	createLikeStmt             *sql.Stmt
-	createReplyStmt            *sql.Stmt
-	createRetweetStmt          *sql.Stmt
-	createTweetStmt            *sql.Stmt
+	addBlockStmt               *sql.Stmt
+	addFollowStmt              *sql.Stmt
+	addLikeStmt                *sql.Stmt
+	createNotificationStmt     *sql.Stmt
+	createPostStmt             *sql.Stmt
+	createRepostStmt           *sql.Stmt
 	createUserStmt             *sql.Stmt
-	deleteBlockStmt            *sql.Stmt
-	deleteFollowStmt           *sql.Stmt
-	deleteLikeStmt             *sql.Stmt
-	deleteRetweetStmt          *sql.Stmt
-	deleteTweetStmt            *sql.Stmt
-	deleteUserStmt             *sql.Stmt
-	getProfileStmt             *sql.Stmt
-	getTweetStmt               *sql.Stmt
-	getUserStmt                *sql.Stmt
-	listDMsStmt                *sql.Stmt
-	listNotificationsStmt      *sql.Stmt
-	listRepliesStmt            *sql.Stmt
-	listTweetsStmt             *sql.Stmt
-	listUsersStmt              *sql.Stmt
-	markNotificationAsReadStmt *sql.Stmt
-	updateProfileStmt          *sql.Stmt
-	updateUserStmt             *sql.Stmt
+	getDMConversationStmt      *sql.Stmt
+	getRecentPostsStmt         *sql.Stmt
+	getUnreadNotificationsStmt *sql.Stmt
+	getUserStatsStmt           *sql.Stmt
+	getUserTimelineStmt        *sql.Stmt
+	searchPostsByHashtagStmt   *sql.Stmt
+	sendDMStmt                 *sql.Stmt
+	updateFollowersCountStmt   *sql.Stmt
+	updatePostLikesCountStmt   *sql.Stmt
+	updateUserInfoStmt         *sql.Stmt
 }
 
 func (q *Queries) WithTx(tx *sql.Tx) *Queries {
 	return &Queries{
 		db:                         tx,
 		tx:                         tx,
-		createBlockStmt:            q.createBlockStmt,
-		createDMStmt:               q.createDMStmt,
-		createFollowStmt:           q.createFollowStmt,
-		createLikeStmt:             q.createLikeStmt,
-		createReplyStmt:            q.createReplyStmt,
-		createRetweetStmt:          q.createRetweetStmt,
-		createTweetStmt:            q.createTweetStmt,
+		addBlockStmt:               q.addBlockStmt,
+		addFollowStmt:              q.addFollowStmt,
+		addLikeStmt:                q.addLikeStmt,
+		createNotificationStmt:     q.createNotificationStmt,
+		createPostStmt:             q.createPostStmt,
+		createRepostStmt:           q.createRepostStmt,
 		createUserStmt:             q.createUserStmt,
-		deleteBlockStmt:            q.deleteBlockStmt,
-		deleteFollowStmt:           q.deleteFollowStmt,
-		deleteLikeStmt:             q.deleteLikeStmt,
-		deleteRetweetStmt:          q.deleteRetweetStmt,
-		deleteTweetStmt:            q.deleteTweetStmt,
-		deleteUserStmt:             q.deleteUserStmt,
-		getProfileStmt:             q.getProfileStmt,
-		getTweetStmt:               q.getTweetStmt,
-		getUserStmt:                q.getUserStmt,
-		listDMsStmt:                q.listDMsStmt,
-		listNotificationsStmt:      q.listNotificationsStmt,
-		listRepliesStmt:            q.listRepliesStmt,
-		listTweetsStmt:             q.listTweetsStmt,
-		listUsersStmt:              q.listUsersStmt,
-		markNotificationAsReadStmt: q.markNotificationAsReadStmt,
-		updateProfileStmt:          q.updateProfileStmt,
-		updateUserStmt:             q.updateUserStmt,
+		getDMConversationStmt:      q.getDMConversationStmt,
+		getRecentPostsStmt:         q.getRecentPostsStmt,
+		getUnreadNotificationsStmt: q.getUnreadNotificationsStmt,
+		getUserStatsStmt:           q.getUserStatsStmt,
+		getUserTimelineStmt:        q.getUserTimelineStmt,
+		searchPostsByHashtagStmt:   q.searchPostsByHashtagStmt,
+		sendDMStmt:                 q.sendDMStmt,
+		updateFollowersCountStmt:   q.updateFollowersCountStmt,
+		updatePostLikesCountStmt:   q.updatePostLikesCountStmt,
+		updateUserInfoStmt:         q.updateUserInfoStmt,
 	}
 }

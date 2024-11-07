@@ -1,109 +1,105 @@
--- name: GetUser :one
-SELECT * FROM users
-WHERE id = ? LIMIT 1;
-
--- name: ListUsers :many
-SELECT * FROM users
-ORDER BY username;
-
 -- name: CreateUser :execresult
-INSERT INTO users (id, username, email, password, status)
+INSERT INTO users (id, email, password_hash, username, display_name)
 VALUES (?, ?, ?, ?, ?);
 
--- name: UpdateUser :exec
+-- name: UpdateUserInfo :exec
 UPDATE users
-SET username = ?, email = ?, password = ?, status = ?
+SET bio = ?, location = ?
 WHERE id = ?;
 
--- name: DeleteUser :exec
-DELETE FROM users
-WHERE id = ?;
-
--- name: GetTweet :one
-SELECT * FROM tweets
-WHERE id = ? LIMIT 1;
-
--- name: ListTweets :many
-SELECT * FROM tweets
-WHERE user_id = ?
-ORDER BY created_at DESC;
-
--- name: CreateTweet :execresult
-INSERT INTO tweets (id, user_id, content)
+-- name: CreatePost :execresult
+INSERT INTO posts (id, user_id, content)
 VALUES (?, ?, ?);
 
--- name: DeleteTweet :exec
-UPDATE tweets
-SET is_deleted = TRUE
-WHERE id = ?;
-
--- name: CreateRetweet :execresult
-INSERT INTO retweets (id, user_id, tweet_id)
-VALUES (?, ?, ?);
-
--- name: DeleteRetweet :exec
-DELETE FROM retweets
-WHERE id = ?;
-
--- name: CreateLike :execresult
-INSERT INTO likes (id, user_id, tweet_id)
-VALUES (?, ?, ?);
-
--- name: DeleteLike :exec
-DELETE FROM likes
-WHERE id = ?;
-
--- name: CreateReply :execresult
-INSERT INTO replies (id, user_id, tweet_id, content)
-VALUES (?, ?, ?, ?);
-
--- name: ListReplies :many
-SELECT * FROM replies
-WHERE tweet_id = ?
-ORDER BY created_at;
-
--- name: CreateFollow :execresult
-INSERT INTO follows (id, follower_id, following_id)
-VALUES (?, ?, ?);
-
--- name: DeleteFollow :exec
-DELETE FROM follows
-WHERE follower_id = ? AND following_id = ?;
-
--- name: CreateBlock :execresult
-INSERT INTO blocks (id, blocked_by_id, blocked_user_id)
-VALUES (?, ?, ?);
-
--- name: DeleteBlock :exec
-DELETE FROM blocks
-WHERE blocked_by_id = ? AND blocked_user_id = ?;
-
--- name: GetProfile :one
-SELECT * FROM profiles
-WHERE user_id = ? LIMIT 1;
-
--- name: UpdateProfile :exec
-UPDATE profiles
-SET bio = ?, location = ?, website = ?, is_private = ?
-WHERE user_id = ?;
-
--- name: ListNotifications :many
-SELECT * FROM notifications
-WHERE user_id = ?
-ORDER BY created_at DESC
+-- name: GetRecentPosts :many
+SELECT p.*, u.username, u.display_name
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE p.is_deleted = FALSE
+ORDER BY p.created_at DESC
 LIMIT ?;
 
--- name: MarkNotificationAsRead :exec
-UPDATE notifications
-SET is_read = TRUE
-WHERE id = ?;
+-- name: AddLike :exec
+INSERT INTO likes (id, userId, postId)
+VALUES (?, ?, ?);
 
--- name: CreateDM :execresult
-INSERT INTO dms (id, sender_id, receiver_id, content)
+-- name: CreateRepost :exec
+INSERT INTO reposts (id, user_id, original_post_id, is_quote_repost, additional_comment)
+VALUES (?, ?, ?, ?, ?);
+
+-- name: AddFollow :exec
+INSERT INTO follows (id, followerId, followingId)
+VALUES (?, ?, ?);
+
+-- name: AddBlock :exec
+INSERT INTO blocks (id, blockedById, blockedUserId)
+VALUES (?, ?, ?);
+
+-- name: CreateNotification :exec
+INSERT INTO notifications (id, userId, type, message)
 VALUES (?, ?, ?, ?);
 
--- name: ListDMs :many
-SELECT * FROM dms
-WHERE (sender_id = ? AND receiver_id = ?) OR (sender_id = ? AND receiver_id = ?)
-ORDER BY created_at DESC
+-- name: SendDM :exec
+INSERT INTO dms (id, senderId, receiverId, content)
+VALUES (?, ?, ?, ?);
+
+-- name: UpdateFollowersCount :exec
+UPDATE users
+SET followers_count = (
+    SELECT COUNT(*) FROM follows WHERE followingId = users.id
+)
+WHERE users.id = ?;
+
+-- name: UpdatePostLikesCount :exec
+UPDATE posts
+SET likes_count = (
+    SELECT COUNT(*) FROM likes WHERE postId = posts.id
+)
+WHERE posts.id = ?;
+
+-- name: GetUserTimeline :many
+SELECT p.*, u.username, u.display_name
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE p.user_id IN (
+    SELECT followingId
+    FROM follows
+    WHERE followerId = ?
+) OR p.user_id = ?
+ORDER BY p.created_at DESC
 LIMIT ?;
+
+-- name: SearchPostsByHashtag :many
+SELECT p.*, u.username, u.display_name
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE p.content LIKE ?
+ORDER BY p.created_at DESC
+LIMIT ?;
+
+-- name: GetUserStats :one
+SELECT
+    u.id,
+    u.username,
+    u.followers_count,
+    u.following_count,
+    u.posts_count,
+    COUNT(DISTINCT l.id) AS total_likes_received
+FROM users u
+LEFT JOIN posts p ON u.id = p.user_id
+LEFT JOIN likes l ON p.id = l.postId
+WHERE u.id = ?
+GROUP BY u.id;
+
+-- name: GetUnreadNotifications :many
+SELECT *
+FROM notifications
+WHERE userId = ? AND isRead = FALSE
+ORDER BY createdAt DESC;
+
+-- name: GetDMConversation :many
+SELECT *
+FROM dms
+WHERE (senderId = ? AND receiverId = ?)
+   OR (senderId = ? AND receiverId = ?)
+ORDER BY createdAt ASC;

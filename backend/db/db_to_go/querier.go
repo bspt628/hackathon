@@ -10,31 +10,23 @@ import (
 )
 
 type Querier interface {
-	CreateBlock(ctx context.Context, arg CreateBlockParams) (sql.Result, error)
-	CreateDM(ctx context.Context, arg CreateDMParams) (sql.Result, error)
-	CreateFollow(ctx context.Context, arg CreateFollowParams) (sql.Result, error)
-	CreateLike(ctx context.Context, arg CreateLikeParams) (sql.Result, error)
-	CreateReply(ctx context.Context, arg CreateReplyParams) (sql.Result, error)
-	CreateRetweet(ctx context.Context, arg CreateRetweetParams) (sql.Result, error)
-	CreateTweet(ctx context.Context, arg CreateTweetParams) (sql.Result, error)
+	AddBlock(ctx context.Context, arg AddBlockParams) error
+	AddFollow(ctx context.Context, arg AddFollowParams) error
+	AddLike(ctx context.Context, arg AddLikeParams) error
+	CreateNotification(ctx context.Context, arg CreateNotificationParams) error
+	CreatePost(ctx context.Context, arg CreatePostParams) (sql.Result, error)
+	CreateRepost(ctx context.Context, arg CreateRepostParams) error
 	CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error)
-	DeleteBlock(ctx context.Context, arg DeleteBlockParams) error
-	DeleteFollow(ctx context.Context, arg DeleteFollowParams) error
-	DeleteLike(ctx context.Context, id string) error
-	DeleteRetweet(ctx context.Context, id string) error
-	DeleteTweet(ctx context.Context, id string) error
-	DeleteUser(ctx context.Context, id string) error
-	GetProfile(ctx context.Context, userID string) (Profile, error)
-	GetTweet(ctx context.Context, id string) (Tweet, error)
-	GetUser(ctx context.Context, id string) (User, error)
-	ListDMs(ctx context.Context, arg ListDMsParams) ([]Dm, error)
-	ListNotifications(ctx context.Context, arg ListNotificationsParams) ([]Notification, error)
-	ListReplies(ctx context.Context, tweetID string) ([]Reply, error)
-	ListTweets(ctx context.Context, userID string) ([]Tweet, error)
-	ListUsers(ctx context.Context) ([]User, error)
-	MarkNotificationAsRead(ctx context.Context, id string) error
-	UpdateProfile(ctx context.Context, arg UpdateProfileParams) error
-	UpdateUser(ctx context.Context, arg UpdateUserParams) error
+	GetDMConversation(ctx context.Context, arg GetDMConversationParams) ([]Dm, error)
+	GetRecentPosts(ctx context.Context, limit int32) ([]GetRecentPostsRow, error)
+	GetUnreadNotifications(ctx context.Context, userid sql.NullString) ([]Notification, error)
+	GetUserStats(ctx context.Context, id string) (GetUserStatsRow, error)
+	GetUserTimeline(ctx context.Context, arg GetUserTimelineParams) ([]GetUserTimelineRow, error)
+	SearchPostsByHashtag(ctx context.Context, arg SearchPostsByHashtagParams) ([]SearchPostsByHashtagRow, error)
+	SendDM(ctx context.Context, arg SendDMParams) error
+	UpdateFollowersCount(ctx context.Context, id string) error
+	UpdatePostLikesCount(ctx context.Context, id string) error
+	UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) error
 }
 
 var _ Querier = (*Queries)(nil)

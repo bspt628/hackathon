@@ -1,105 +1,128 @@
--- init.sql for MySQL with CASCADE
+-- schema.sql
 
--- Users table
+CREATE DATABASE IF NOT EXISTS social_media_platform;
+USE social_media_platform;
+
 CREATE TABLE users (
-    id VARCHAR(255) PRIMARY KEY,
-    username VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    status VARCHAR(50)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Tweets table
-CREATE TABLE tweets (
-    id VARCHAR(255) PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_deleted BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Retweets table
-CREATE TABLE retweets (
-    id VARCHAR(255) PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
-    tweet_id VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (tweet_id) REFERENCES tweets(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Likes table
-CREATE TABLE likes (
-    id VARCHAR(255) PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
-    tweet_id VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (tweet_id) REFERENCES tweets(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Replies table
-CREATE TABLE replies (
-    id VARCHAR(255) PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
-    tweet_id VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (tweet_id) REFERENCES tweets(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Follows table
-CREATE TABLE follows (
-    id VARCHAR(255) PRIMARY KEY,
-    follower_id VARCHAR(255) NOT NULL,
-    following_id VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Blocks table
-CREATE TABLE blocks (
-    id VARCHAR(255) PRIMARY KEY,
-    blocked_by_id VARCHAR(255) NOT NULL,
-    blocked_user_id VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (blocked_by_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (blocked_user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- Profiles table
-CREATE TABLE profiles (
-    id VARCHAR(255) PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL UNIQUE,
+    id VARCHAR(36) PRIMARY KEY,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    username VARCHAR(50) UNIQUE NOT NULL,
+    display_name VARCHAR(100),
+    profile_image_url VARCHAR(255),
     bio TEXT,
-    location VARCHAR(255),
+    location VARCHAR(100),
     website VARCHAR(255),
-    is_private BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    birth_date DATE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    last_login_at TIMESTAMP,
+    is_verified BOOLEAN DEFAULT FALSE,
+    is_private BOOLEAN DEFAULT FALSE,
+    is_banned BOOLEAN DEFAULT FALSE,
+    followers_count INT DEFAULT 0,
+    following_count INT DEFAULT 0,
+    posts_count INT DEFAULT 0,
+    likes_count INT DEFAULT 0,
+    language VARCHAR(10),
+    theme VARCHAR(20),
+    notification_settings JSON,
+    two_factor_enabled BOOLEAN DEFAULT FALSE,
+    last_password_change TIMESTAMP
+);
 
--- Notifications table
+CREATE TABLE posts (
+    id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36),
+    content TEXT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    is_repost BOOLEAN DEFAULT FALSE,
+    original_post_id VARCHAR(36),
+    reply_to_id VARCHAR(36),
+    root_post_id VARCHAR(36),
+    is_reply BOOLEAN DEFAULT FALSE,
+    media_urls JSON,
+    likes_count INT DEFAULT 0,
+    reposts_count INT DEFAULT 0,
+    replies_count INT DEFAULT 0,
+    views_count INT DEFAULT 0,
+    visibility VARCHAR(20),
+    language VARCHAR(10),
+    location VARCHAR(100),
+    device VARCHAR(50),
+    is_pinned BOOLEAN DEFAULT FALSE,
+    is_deleted BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (original_post_id) REFERENCES posts(id),
+    FOREIGN KEY (reply_to_id) REFERENCES posts(id),
+    FOREIGN KEY (root_post_id) REFERENCES posts(id)
+);
+
+CREATE TABLE reposts (
+    id VARCHAR(36) PRIMARY KEY,
+    user_id VARCHAR(36),
+    original_post_id VARCHAR(36),
+    reposted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    is_quote_repost BOOLEAN DEFAULT FALSE,
+    additional_comment TEXT,
+    FOREIGN KEY (user_id) REFERENCES users(id),
+    FOREIGN KEY (original_post_id) REFERENCES posts(id)
+);
+
+CREATE TABLE likes (
+    id VARCHAR(36) PRIMARY KEY,
+    userId VARCHAR(36),
+    postId VARCHAR(36),
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES users(id),
+    FOREIGN KEY (postId) REFERENCES posts(id)
+);
+
+CREATE TABLE replies (
+    id VARCHAR(36) PRIMARY KEY,
+    userId VARCHAR(36),
+    postId VARCHAR(36),
+    content TEXT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (userId) REFERENCES users(id),
+    FOREIGN KEY (postId) REFERENCES posts(id)
+);
+
+CREATE TABLE follows (
+    id VARCHAR(36) PRIMARY KEY,
+    followerId VARCHAR(36),
+    followingId VARCHAR(36),
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (followerId) REFERENCES users(id),
+    FOREIGN KEY (followingId) REFERENCES users(id)
+);
+
+CREATE TABLE blocks (
+    id VARCHAR(36) PRIMARY KEY,
+    blockedById VARCHAR(36),
+    blockedUserId VARCHAR(36),
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (blockedById) REFERENCES users(id),
+    FOREIGN KEY (blockedUserId) REFERENCES users(id)
+);
+
 CREATE TABLE notifications (
-    id VARCHAR(255) PRIMARY KEY,
-    user_id VARCHAR(255) NOT NULL,
-    type VARCHAR(50) NOT NULL,
-    message TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    is_read BOOLEAN NOT NULL DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    id VARCHAR(36) PRIMARY KEY,
+    userId VARCHAR(36),
+    type VARCHAR(50),
+    message TEXT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    isRead BOOLEAN DEFAULT FALSE,
+    FOREIGN KEY (userId) REFERENCES users(id)
+);
 
--- Direct Messages table
 CREATE TABLE dms (
-    id VARCHAR(255) PRIMARY KEY,
-    sender_id VARCHAR(255) NOT NULL,
-    receiver_id VARCHAR(255) NOT NULL,
-    content TEXT NOT NULL,
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (sender_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (receiver_id) REFERENCES users(id) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+    id VARCHAR(36) PRIMARY KEY,
+    senderId VARCHAR(36),
+    receiverId VARCHAR(36),
+    content TEXT,
+    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (senderId) REFERENCES users(id),
+    FOREIGN KEY (receiverId) REFERENCES users(id)
+);
