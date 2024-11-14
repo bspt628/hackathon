@@ -311,6 +311,41 @@ func (q *Queries) GetUnreadNotifications(ctx context.Context, userid sql.NullStr
 	return items, nil
 }
 
+const getUserById = `-- name: GetUserById :one
+SELECT id, email, username, display_name, bio, location, followers_count, following_count, posts_count
+FROM users
+WHERE id = ?
+`
+
+type GetUserByIdRow struct {
+	ID             string         `json:"id"`
+	Email          string         `json:"email"`
+	Username       string         `json:"username"`
+	DisplayName    sql.NullString `json:"display_name"`
+	Bio            sql.NullString `json:"bio"`
+	Location       sql.NullString `json:"location"`
+	FollowersCount sql.NullInt32  `json:"followers_count"`
+	FollowingCount sql.NullInt32  `json:"following_count"`
+	PostsCount     sql.NullInt32  `json:"posts_count"`
+}
+
+func (q *Queries) GetUserById(ctx context.Context, id string) (GetUserByIdRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserById, id)
+	var i GetUserByIdRow
+	err := row.Scan(
+		&i.ID,
+		&i.Email,
+		&i.Username,
+		&i.DisplayName,
+		&i.Bio,
+		&i.Location,
+		&i.FollowersCount,
+		&i.FollowingCount,
+		&i.PostsCount,
+	)
+	return i, err
+}
+
 const getUserStats = `-- name: GetUserStats :one
 SELECT
     u.id,

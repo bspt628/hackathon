@@ -19,6 +19,11 @@ WHERE p.is_deleted = FALSE
 ORDER BY p.created_at DESC
 LIMIT ?;
 
+-- name: GetUserById :one
+SELECT id, email, username, display_name, bio, location, followers_count, following_count, posts_count
+FROM users
+WHERE id = ?;
+
 -- name: AddLike :exec
 INSERT INTO likes (id, userId, postId)
 VALUES (?, ?, ?);
