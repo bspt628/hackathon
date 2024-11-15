@@ -2,6 +2,7 @@ package dao
 
 import (
 	"context"
+	"github.com/oklog/ulid"
 	"hackathon/db/sqlc/generated"
 )
 
@@ -31,6 +32,31 @@ func (dao *UserDAO) GetUserByID(ctx context.Context, id string) (*db.User, error
 		FollowersCount: row.FollowersCount,
 		FollowingCount: row.FollowingCount,
 		PostsCount:    row.PostsCount,
+	}
+
+	return user, nil
+}
+
+func (dao *UserDAO) CreateUser(ctx context.Context, arg db.CreateUserParams) (*db.User, error) {
+	// IDをulidで自動生成する
+	
+	myid := ulid.MustNew(ulid.Now(), nil).String()
+	// SQLクエリを実行して新しいユーザーを作成
+	_, err := dao.db.CreateUser(ctx, db.CreateUserParams{
+		ID: 		  myid,
+		Email:        arg.Email,
+		PasswordHash: arg.PasswordHash,
+		Username:     arg.Username,
+		DisplayName:  arg.DisplayName,
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	// 新しく作成されたユーザーの ID で情報を再取得
+	user, err := dao.GetUserByID(ctx, myid)
+	if err != nil {
+		return nil, err
 	}
 
 	return user, nil

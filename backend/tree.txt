@@ -1,0 +1,44 @@
+.
+├── Dockerfile
+├── config
+│   └── init.sql
+├── db
+│   ├── connection.go
+│   └── sqlc
+│       ├── generated
+│       │   ├── db.go
+│       │   ├── models.go
+│       │   └── query.sql.go
+│       ├── migrations
+│       │   ├── 01_create_database.sql
+│       │   ├── 02_create_users_table.sql
+│       │   ├── 03_create_posts_table.sql
+│       │   ├── 04_create_reposts_table.sql
+│       │   ├── 05_create_likes_table.sql
+│       │   ├── 06_create_replies_table.sql
+│       │   ├── 07_create_follows_table.sql
+│       │   ├── 08_create_blocks_table.sql
+│       │   ├── 09_create_notifications_table.sql
+│       │   └── 10_create_dms_table.sql
+│       ├── queries
+│       │   └── query.sql
+│       └── sqlc.yaml
+├── docker-compose.yaml
+├── go.mod
+├── go.sum
+├── internal
+│   ├── controller
+│   │   └── user_controller.go
+│   ├── dao
+│   │   └── user_dao.go
+│   ├── model
+│   │   └── user_model.go
+│   ├── server
+│   │   ├── router.go
+│   │   └── server.go
+│   └── usecase
+│       └── user_usecase.go
+├── main.go
+└── tree.txt
+
+13 directories, 29 files
