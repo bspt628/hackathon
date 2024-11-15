@@ -4,6 +4,7 @@
 │   └── init.sql
 ├── db
 │   ├── connection.go
+│   ├── schema.sql
 │   └── sqlc
 │       ├── generated
 │       │   ├── db.go
@@ -28,17 +29,37 @@
 ├── go.sum
 ├── internal
 │   ├── controller
+│   │   ├── follow
+│   │   ├── like
+│   │   ├── message
+│   │   ├── notification
+│   │   ├── post
+│   │   ├── user
 │   │   └── user_controller.go
 │   ├── dao
-│   │   └── user_dao.go
+│   │   ├── follow
+│   │   ├── like
+│   │   ├── message
+│   │   ├── notification
+│   │   ├── post
+│   │   └── user
+│   │       └── user_dao.go
 │   ├── model
 │   │   └── user_model.go
 │   ├── server
 │   │   ├── router.go
 │   │   └── server.go
 │   └── usecase
-│       └── user_usecase.go
+│       ├── follow
+│       ├── like
+│       ├── message
+│       ├── notification
+│       ├── post
+│       └── user
+│           ├── user_create.go
+│           ├── user_get.go
+│           └── user_usecase.go
 ├── main.go
 └── tree.txt
 
-13 directories, 29 files
+31 directories, 32 files

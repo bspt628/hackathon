@@ -6,18 +6,52 @@ import (
 	"github.com/gorilla/mux"
 )
 
-// ルーターを設定する関数
 func NewRouter(dbConn *sql.DB) *mux.Router {
 	router := mux.NewRouter()
 
-	// ユーザーのコントローラー設定
+	// コントローラーの初期化
 	userController := controller.NewUserController(dbConn)
-	
-	// ユーザー作成のためのエンドポイント
-	router.HandleFunc("/user", userController.CreateUser).Methods("POST") // POST /user
+	// postController := controller.NewPostController(dbConn)
+	// likeController := controller.NewLikeController(dbConn)
+	// followController := controller.NewFollowController(dbConn)
+	// notificationController := controller.NewNotificationController(dbConn)
+	// messageController := controller.NewMessageController(dbConn)
 
-	// ユーザー情報取得のためのエンドポイント
-	router.HandleFunc("/user/{id}", userController.GetUserByID).Methods("GET") // GET /user/{id}
-	
+	// ユーザー関連
+	router.HandleFunc("/api/users", userController.CreateUser).Methods("POST")
+	router.HandleFunc("/api/users/{id}", userController.GetUserByID).Methods("GET")
+	// router.HandleFunc("/api/users/{id}", userController.UpdateUserInfo).Methods("PUT")
+	// router.HandleFunc("/api/users/{id}/stats", userController.GetUserStats).Methods("GET")
+
+	// // 投稿関連
+	// router.HandleFunc("/api/posts", postController.CreatePost).Methods("POST")
+	// router.HandleFunc("/api/posts/recent", postController.GetRecentPosts).Methods("GET")
+	// router.HandleFunc("/api/posts/search", postController.SearchPostsByHashtag).Methods("GET")
+
+	// // タイムライン
+	// router.HandleFunc("/api/timeline", postController.GetUserTimeline).Methods("GET")
+
+	// // いいね機能
+	// router.HandleFunc("/api/posts/{id}/likes", likeController.AddLike).Methods("POST")
+	// router.HandleFunc("/api/posts/{id}/likes/count", likeController.UpdatePostLikesCount).Methods("PUT")
+
+	// // フォロー機能
+	// router.HandleFunc("/api/users/{id}/follow", followController.AddFollow).Methods("POST")
+	// router.HandleFunc("/api/users/{id}/followers/count", followController.UpdateFollowersCount).Methods("PUT")
+
+	// // リポスト機能
+	// router.HandleFunc("/api/posts/{id}/repost", postController.CreateRepost).Methods("POST")
+
+	// // ブロック機能
+	// router.HandleFunc("/api/users/{id}/block", userController.AddBlock).Methods("POST")
+
+	// // ダイレクトメッセージ
+	// router.HandleFunc("/api/messages", messageController.SendDM).Methods("POST")
+	// router.HandleFunc("/api/messages/{userId}", messageController.GetDMConversation).Methods("GET")
+
+	// // 通知機能
+	// router.HandleFunc("/api/notifications", notificationController.CreateNotification).Methods("POST")
+	// router.HandleFunc("/api/notifications/unread", notificationController.GetUnreadNotifications).Methods("GET")
+
 	return router
 }

@@ -5,6 +5,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"fmt"
+	"github.com/gorilla/mux"
 	"hackathon/db/sqlc/generated"
 	"hackathon/internal/dao"
 	"hackathon/internal/usecase"
@@ -24,8 +25,11 @@ func NewUserController(dbConn *sql.DB) *UserController {
 
 // GetUserByID はユーザーIDを指定してユーザー情報を取得するエンドポイント
 func (uc *UserController) GetUserByID(w http.ResponseWriter, r *http.Request) {
+	// ぱすぱらめーたからユーザーIDを取得
+	vars := mux.Vars(r)
+	userID := vars["id"]
 	// クエリパラメータからユーザーIDを取得
-	userID := r.URL.Query().Get("id")
+	// userID := r.URL.Query().Get("id")
 	if userID == "" {
 		http.Error(w, "IDパラメータが指定されていません", http.StatusBadRequest)
 		return
