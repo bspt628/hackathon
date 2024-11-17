@@ -2,7 +2,7 @@ package server
 
 import (
 	"database/sql"
-	"hackathon/internal/controller"
+	"hackathon/internal/controller/user"
 	"github.com/gorilla/mux"
 )
 
