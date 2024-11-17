@@ -5,7 +5,7 @@ import (
 	"hackathon/db/sqlc/generated"
 )
 
-func (dao *UserDAO) GetUserByID(ctx context.Context, id string) (*db.User, error) {
+func (dao *UserDAO) GetUser(ctx context.Context, id string) (*sqlc.User, error) {
 	// GetUserByIdを呼び出して、返り値のGetUserByIdRowを受け取る
 	row, err := dao.db.GetUserById(ctx, id)
 	if err != nil {
@@ -13,7 +13,7 @@ func (dao *UserDAO) GetUserByID(ctx context.Context, id string) (*db.User, error
 	}
 
 	// GetUserByIdRowからdb.Userに変換
-	user := &db.User{
+	user := &sqlc.User{
 		ID:            row.ID,
 		Email:         row.Email,
 		Username:      row.Username,

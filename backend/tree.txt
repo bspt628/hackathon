@@ -34,8 +34,11 @@
 │   │   ├── message
 │   │   ├── notification
 │   │   ├── post
-│   │   ├── user
-│   │   └── user_controller.go
+│   │   └── user
+│   │       ├── user_controller.go
+│   │       ├── user_create.go
+│   │       ├── user_delete.go
+│   │       └── user_get.go
 │   ├── dao
 │   │   ├── follow
 │   │   ├── like
@@ -43,7 +46,10 @@
 │   │   ├── notification
 │   │   ├── post
 │   │   └── user
-│   │       └── user_dao.go
+│   │       ├── createuser_dao.go
+│   │       ├── getuser_dao.go
+│   │       ├── user_dao.go
+│   │       └── user_delete_dao.go
 │   ├── model
 │   │   └── user_model.go
 │   ├── server
@@ -57,9 +63,10 @@
 │       ├── post
 │       └── user
 │           ├── user_create.go
+│           ├── user_delete.go
 │           ├── user_get.go
 │           └── user_usecase.go
 ├── main.go
 └── tree.txt
 
-31 directories, 32 files
+31 directories, 39 files

@@ -19,7 +19,8 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 
 	// ユーザー関連
 	router.HandleFunc("/api/users", userController.CreateUser).Methods("POST")
-	router.HandleFunc("/api/users/{id}", userController.GetUserByID).Methods("GET")
+	router.HandleFunc("/api/users/{id}", userController.GetUser).Methods("GET")
+	router.HandleFunc("/api/users/{id}", userController.DeleteUser).Methods("DELETE")
 	// router.HandleFunc("/api/users/{id}", userController.UpdateUserInfo).Methods("PUT")
 	// router.HandleFunc("/api/users/{id}/stats", userController.GetUserStats).Methods("GET")
 

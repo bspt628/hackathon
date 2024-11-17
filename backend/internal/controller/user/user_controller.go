@@ -12,7 +12,7 @@ type UserController struct {
 }
 
 func NewUserController(dbConn *sql.DB) *UserController {
-	queries := db.New(dbConn)
+	queries := sqlc.New(dbConn)
 	userDAO := dao.NewUserDAO(queries)
 	userUsecase := usecase.NewUserUsecase(userDAO)
 	return &UserController{userUsecase: userUsecase}

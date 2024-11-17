@@ -5,10 +5,10 @@ import (
 )
 
 type UserDAO struct {
-	db *db.Queries
+	db *sqlc.Queries
 }
 
-func NewUserDAO(db *db.Queries) *UserDAO {
+func NewUserDAO(db *sqlc.Queries) *UserDAO {
 	return &UserDAO{db: db}
 }
 

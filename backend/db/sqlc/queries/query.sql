@@ -7,6 +7,9 @@ UPDATE users
 SET bio = ?, location = ?
 WHERE id = ?;
 
+-- name: DeleteUser :exec
+DELETE FROM users WHERE id = ?;
+
 -- name: CreatePost :execresult
 INSERT INTO posts (id, user_id, content)
 VALUES (?, ?, ?);

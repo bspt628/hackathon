@@ -7,12 +7,12 @@ import (
 )
 
 
-func (dao *UserDAO) CreateUser(ctx context.Context, arg db.CreateUserParams) (*db.User, error) {
+func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (*sqlc.User, error) {
 	// IDをulidで自動生成する
 	
 	myid := ulid.MustNew(ulid.Now(), nil).String()
 	// SQLクエリを実行して新しいユーザーを作成
-	_, err := dao.db.CreateUser(ctx, db.CreateUserParams{
+	_, err := dao.db.CreateUser(ctx, sqlc.CreateUserParams{
 		ID: 		  myid,
 		Email:        arg.Email,
 		PasswordHash: arg.PasswordHash,
@@ -24,7 +24,7 @@ func (dao *UserDAO) CreateUser(ctx context.Context, arg db.CreateUserParams) (*d
 	}
 
 	// 新しく作成されたユーザーの ID で情報を再取得
-	user, err := dao.GetUserByID(ctx, myid)
+	user, err := dao.GetUser(ctx, myid)
 	if err != nil {
 		return nil, err
 	}
