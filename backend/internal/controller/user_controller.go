@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	"hackathon/db/sqlc/generated"
-	"hackathon/internal/dao"
-	"hackathon/internal/usecase"
+	"hackathon/internal/dao/user"
+	"hackathon/internal/usecase/user"
 	"net/http"
 )
 

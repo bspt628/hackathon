@@ -1,7 +1,7 @@
 package usecase
 
 import (
-	"hackathon/internal/dao"
+	"hackathon/internal/dao/user"
 )
 
 type UserUsecase struct {
