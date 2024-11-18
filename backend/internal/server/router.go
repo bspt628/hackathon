@@ -7,6 +7,7 @@ import (
 
 	"hackathon/internal/auth"
 	"github.com/gorilla/mux"
+	"net/http"
 )
 
 func NewRouter(dbConn *sql.DB) *mux.Router {
@@ -30,7 +31,13 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 
 	// ユーザー関連
 	router.HandleFunc("/api/users", userController.CreateUser).Methods("POST")
-	router.HandleFunc("/api/users/{id}", userController.GetUser).Methods("GET")
+	// router.HandleFunc("/api/users/{id}", userController.GetUser).Methods("GET")
+
+	router.Handle("/api/users/{id}", auth.FirebaseAuthMiddleware(http.HandlerFunc(controller.GetUserHandler))).Methods("GET")
+
+	// 他のエンドポイントの設定
+	// ...
+
 	apiRouter.HandleFunc("/users/{id}", userController.DeleteUser).Methods("DELETE")
 	// router.HandleFunc("/api/users/{id}", userController.UpdateUserInfo).Methods("PUT")
 	// router.HandleFunc("/api/users/{id}/stats", userController.GetUserStats).Methods("GET")

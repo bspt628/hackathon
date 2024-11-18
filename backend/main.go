@@ -4,6 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"hackathon/internal/server"
 	"log"
+	"hackathon/internal/auth"
 )
 
 func main() {
@@ -12,6 +13,12 @@ func main() {
 	if err != nil {
 		log.Fatalf(".env ファイルの読み込みに失敗しました: %v", err)
 	}
+
+	// Firebaseの初期化
+    err = auth.InitFirebase()
+    if err != nil {
+        log.Fatalf("Firebase initialization failed: %v", err)
+    }
 
 	// サーバーのセットアップと起動
 	if err := server.Start(); err != nil {
