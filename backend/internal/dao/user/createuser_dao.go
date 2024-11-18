@@ -4,6 +4,7 @@ import (
 	"context"
 	"github.com/oklog/ulid"
 	"hackathon/db/sqlc/generated"
+	"golang.org/x/crypto/bcrypt"
 )
 
 
@@ -12,10 +13,17 @@ func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (
 	
 	myid := ulid.MustNew(ulid.Now(), nil).String()
 	// SQLクエリを実行して新しいユーザーを作成
-	_, err := dao.db.CreateUser(ctx, sqlc.CreateUserParams{
+
+	// bcyptでパスワードをハッシュ化
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(arg.PasswordHash), bcrypt.DefaultCost)
+	if err != nil {
+		return nil, err
+	}
+
+	_, err = dao.db.CreateUser(ctx, sqlc.CreateUserParams{
 		ID: 		  myid,
 		Email:        arg.Email,
-		PasswordHash: arg.PasswordHash,
+		PasswordHash: string(hashedPassword),
 		Username:     arg.Username,
 		DisplayName:  arg.DisplayName,
 	})

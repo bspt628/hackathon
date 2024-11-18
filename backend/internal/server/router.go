@@ -3,6 +3,9 @@ package server
 import (
 	"database/sql"
 	"hackathon/internal/controller/user"
+	"hackathon/internal/controller/auth"
+
+	"hackathon/internal/auth"
 	"github.com/gorilla/mux"
 )
 
@@ -17,10 +20,18 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// notificationController := controller.NewNotificationController(dbConn)
 	// messageController := controller.NewMessageController(dbConn)
 
+	// 認証ミドルウェアを適用するルートグループ
+	apiRouter := router.PathPrefix("/api").Subrouter()
+	apiRouter.Use(auth.AuthMiddleware)
+
+	// トークン生成エンドポイントを追加
+	authController := authController.NewAuthController(dbConn)
+	router.HandleFunc("/auth/signin", authController.SignIn).Methods("POST")
+
 	// ユーザー関連
 	router.HandleFunc("/api/users", userController.CreateUser).Methods("POST")
 	router.HandleFunc("/api/users/{id}", userController.GetUser).Methods("GET")
-	router.HandleFunc("/api/users/{id}", userController.DeleteUser).Methods("DELETE")
+	apiRouter.HandleFunc("/users/{id}", userController.DeleteUser).Methods("DELETE")
 	// router.HandleFunc("/api/users/{id}", userController.UpdateUserInfo).Methods("PUT")
 	// router.HandleFunc("/api/users/{id}/stats", userController.GetUserStats).Methods("GET")
 
