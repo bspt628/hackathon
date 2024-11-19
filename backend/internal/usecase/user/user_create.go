@@ -6,7 +6,7 @@ import (
 	"hackathon/db/sqlc/generated"
 )
 
-func (usecase *UserUsecase) CreateUser(ctx context.Context, email, passwordHash, username, displayName string) (*sqlc.User, error) {
+func (uc *UserUsecase) CreateUser(ctx context.Context, email, passwordHash, username, displayName string) (*sqlc.User, error) {
 	// CreateUserParams構造体にデータをセット
 	arg := sqlc.CreateUserParams{
 		Email:        email,
@@ -16,7 +16,7 @@ func (usecase *UserUsecase) CreateUser(ctx context.Context, email, passwordHash,
 	}
 
 	// ユーザーをDBに作成
-	user, err := usecase.dao.CreateUser(ctx, arg)
+	user, err := uc.dao.CreateUser(ctx, arg)
 	if err != nil {
 		return nil, err
 	}

@@ -7,7 +7,7 @@ import (
 
 	"hackathon/internal/auth"
 	"github.com/gorilla/mux"
-	"net/http"
+	
 )
 
 func NewRouter(dbConn *sql.DB) *mux.Router {
@@ -25,7 +25,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 
 	// 認証ミドルウェアを適用するルートグループ
 	apiRouter := router.PathPrefix("/api").Subrouter()
-	apiRouter.Use(auth.AuthMiddleware)
+	apiRouter.Use(auth.FirebaseAuthMiddleware)
 
 	// トークン生成エンドポイントを追加
 	
@@ -35,7 +35,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	router.HandleFunc("/api/users", userController.CreateUser).Methods("POST")
 	// router.HandleFunc("/api/users/{id}", userController.GetUser).Methods("GET")
 
-	router.Handle("/api/users/{id}", auth.FirebaseAuthMiddleware(http.HandlerFunc(controller.GetUserHandler))).Methods("GET")
+	apiRouter.HandleFunc("/users/{id}", userController.GetUser).Methods("GET")
 
 	// 他のエンドポイントの設定
 	// ...

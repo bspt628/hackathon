@@ -41,7 +41,6 @@ func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (
 		displayNameStr = ""
 	}
 
-	// Firebaseに新しいユーザーを作成
 	// Firebaseに新規ユーザーを登録
 	_, err = auth.CreateFirebaseUser(arg.Email, arg.PasswordHash, arg.Username, displayNameStr)
 	if err != nil {
