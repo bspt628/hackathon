@@ -1,16 +1,15 @@
+// firebaseの認証処理をまとめる
 package auth
 
 import (
 	"context"
 	"fmt"
-
 	"firebase.google.com/go"
 	"firebase.google.com/go/auth"
 	"google.golang.org/api/option"
 )
 
 var firebaseAuthClient *auth.Client
-var authClient *auth.Client
 
 // Firebase Admin SDKの初期化
 func InitFirebase() error {
@@ -44,11 +43,21 @@ func CreateFirebaseUser(email, password, username, displayName string) (*auth.Us
 
 	return userRecord, nil
 }
-// Firebase認証を使ってユーザー情報を取得する例
+
+// Firebase認証を使ってユーザー情報を取得
 func GetUserInfo(uid string) (*auth.UserRecord, error) {
-    userRecord, err := authClient.GetUser(context.Background(), uid)
-    if err != nil {
-        return nil, fmt.Errorf("error getting user: %v", err)
-    }
-    return userRecord, nil
+	userRecord, err := firebaseAuthClient.GetUser(context.Background(), uid)
+	if err != nil {
+		return nil, fmt.Errorf("error getting user: %v", err)
+	}
+	return userRecord, nil
+}
+
+// FirebaseのIDトークンを検証し、UIDを取得する
+func VerifyIDToken(idToken string) (string, error) {
+	token, err := firebaseAuthClient.VerifyIDToken(context.Background(), idToken)
+	if err != nil {
+		return "", fmt.Errorf("error verifying ID token: %v", err)
+	}
+	return token.UID, nil
 }

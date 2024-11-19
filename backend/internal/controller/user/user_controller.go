@@ -25,6 +25,8 @@ func NewUserController(dbConn *sql.DB) *UserController {
 // ユーザー情報取得のハンドラー
 func GetUserHandler(w http.ResponseWriter, r *http.Request) {
     userID := r.Header.Get("UserID") // Firebase認証から設定したUserID
+	//ログを出力
+	fmt.Println("UserID: ", userID)
 
     // ここでuserIDを使ってユーザー情報を取得する
     userRecord, err := auth.GetUserInfo(userID)

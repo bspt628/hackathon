@@ -26,6 +26,9 @@
 │       │   └── query.sql
 │       └── sqlc.yaml
 ├── docker-compose.yaml
+├── frontend_test
+│   ├── firebaseAuth.js
+│   └── index.html
 ├── go.mod
 ├── go.sum
 ├── internal
@@ -79,4 +82,4 @@
 ├── main.go
 └── tree.txt
 
-33 directories, 47 files
+34 directories, 49 files

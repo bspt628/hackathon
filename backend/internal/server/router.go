@@ -15,6 +15,8 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 
 	// コントローラーの初期化
 	userController := controller.NewUserController(dbConn)
+	authController := authController.NewAuthController(dbConn)
+	
 	// postController := controller.NewPostController(dbConn)
 	// likeController := controller.NewLikeController(dbConn)
 	// followController := controller.NewFollowController(dbConn)
@@ -26,7 +28,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.Use(auth.AuthMiddleware)
 
 	// トークン生成エンドポイントを追加
-	authController := authController.NewAuthController(dbConn)
+	
 	router.HandleFunc("/auth/signin", authController.SignIn).Methods("POST")
 
 	// ユーザー関連

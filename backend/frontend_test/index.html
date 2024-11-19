@@ -1,18 +1,77 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Firebase Authentication</title>
-    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.0.2/firebase-auth.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Firebase Authentication</title>
 </head>
 <body>
-    <h1>Firebase Authentication</h1>
-    
-    <!-- IDトークンを表示するための要素 -->
-    <div id="id-token"></div>
 
-    <script src="firebaseAuth.js"></script>
+  <h1>Firebase Authentication</h1>
+  <button onclick="signIn()">Sign In</button>
+  <p id="auth-result"></p>
+  <p id="message"></p>
+
+  <!-- Firebase SDKの読み込み -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+    import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+    const firebaseConfig = {
+        apiKey: "AIzaSyCI6Sny25W-XtA8xIp1YV13epZkUxZGe4s",
+        authDomain: "your-auth-domain.firebaseapp.com",  // 自分の設定に合わせて修正
+        projectId: "your-project-id",                    // 自分の設定に合わせて修正
+        storageBucket: "your-storage-bucket.appspot.com",// 自分の設定に合わせて修正
+        messagingSenderId: "your-messaging-sender-id",   // 自分の設定に合わせて修正
+        appId: "your-app-id"                             // 自分の設定に合わせて修正
+    };
+
+    // Firebase アプリを初期化
+    initializeApp(firebaseConfig);
+    const auth = getAuth();
+    const authResultElement = document.getElementById("auth-result");
+
+    // Firebase 認証
+    window.signIn = function()  {
+      signInWithEmailAndPassword(auth, "test9@example.com", "password")
+        .then((userCredential) => {
+          const user = userCredential.user;
+          user.getIdToken().then((idToken) => {
+            // 認証成功メッセージとトークンを表示
+            authResultElement.textContent = `Authentication successful! ID Token: ${idToken}`;
+            authResultElement.style.color = "green";
+            console.log("ID Token:", idToken);
+            // バックエンドAPIにリクエストを送信
+            sendRequestToBackend(idToken);
+          });
+        })
+        .catch((error) => {
+          // エラーメッセージを表示
+          authResultElement.textContent = `Authentication failed: ${error.message}`;
+          authResultElement.style.color = "red";
+        });
+    }
+
+    // バックエンドAPIにリクエストを送信
+    function sendRequestToBackend(idToken) {
+      fetch('http://localhost:8080/api/users/12345', {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${idToken}`
+        }
+      })
+      .then(response => response.json())
+      .then(data => {
+        console.log('Response:', data);
+        // レスポンスを画面に表示
+        document.getElementById("message").textContent = JSON.stringify(data);
+      })
+      .catch((error) => {
+        console.error('Error:', error);
+        document.getElementById("message").textContent = 'Error: ' + error.message;
+      });
+    }
+  </script>
+
 </body>
 </html>
