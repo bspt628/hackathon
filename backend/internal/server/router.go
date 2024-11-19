@@ -2,12 +2,11 @@ package server
 
 import (
 	"database/sql"
-	"hackathon/internal/controller/user"
-	"hackathon/internal/controller/auth"
-
 	"hackathon/internal/auth"
+	authController "hackathon/internal/controller/auth"
+	controller "hackathon/internal/controller/user"
+
 	"github.com/gorilla/mux"
-	
 )
 
 func NewRouter(dbConn *sql.DB) *mux.Router {
@@ -16,7 +15,8 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// コントローラーの初期化
 	userController := controller.NewUserController(dbConn)
 	authController := authController.NewAuthController(dbConn)
-	
+	passwordResetController := authController.NewPasswordResetController(dbConn)
+
 	// postController := controller.NewPostController(dbConn)
 	// likeController := controller.NewLikeController(dbConn)
 	// followController := controller.NewFollowController(dbConn)
@@ -28,7 +28,9 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.Use(auth.FirebaseAuthMiddleware)
 
 	// トークン生成エンドポイントを追加
-	
+	router.HandleFunc("/auth/password-reset/request", authController.HandlePasswordResetRequest) // パスワードリセットリクエスト
+	router.HandleFunc("/auth/password-reset/reset", authController.ResetPassword)                // パスワードリセット
+
 	router.HandleFunc("/auth/signin", authController.SignIn).Methods("POST")
 
 	// ユーザー関連

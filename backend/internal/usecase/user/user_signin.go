@@ -5,20 +5,13 @@ import (
 	"errors"
 	"fmt"
 	"hackathon/internal/auth"
-	"hackathon/internal/dao/user"
 
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
 )
 
-type UserSignInUsecase struct {
-	dao *dao.UserSignInDAO
-}
 
-func NewUserSignInUsecase(dao *dao.UserSignInDAO) *UserSignInUsecase {
-	return &UserSignInUsecase{dao: dao}
-}
 
 // サインイン処理
 func (uc *UserSignInUsecase) SignIn(ctx context.Context, username, password string) (string, error) {

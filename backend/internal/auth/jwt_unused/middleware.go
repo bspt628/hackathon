@@ -1,4 +1,4 @@
-package auth
+package jwtunused
 
 import (
 	"context"
@@ -29,15 +29,15 @@ func AuthMiddleware(next http.Handler) http.Handler {
 		}
 
 		// トークンを検証
-		claims, err := ValidateToken(token)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusUnauthorized)
-			return
-		}
+		// claims, err := ValidateToken(token)
+		// if err != nil {
+		// 	http.Error(w, err.Error(), http.StatusUnauthorized)
+		// 	return
+		// }
 
-		// ユーザーIDをコンテキストに格納
-		ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
-		next.ServeHTTP(w, r.WithContext(ctx))
+		// // ユーザーIDをコンテキストに格納
+		// ctx := context.WithValue(r.Context(), UserIDKey, claims.UserID)
+		// next.ServeHTTP(w, r.WithContext(ctx))
 	})
 }
 
