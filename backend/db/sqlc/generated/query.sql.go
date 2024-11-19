@@ -636,3 +636,14 @@ func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) 
 	_, err := q.db.ExecContext(ctx, updateUserInfo, arg.Bio, arg.Location, arg.ID)
 	return err
 }
+
+const getEmailfromUsername = `-- name: getEmailfromUsername :one
+SELECT email FROM users WHERE username = ?
+`
+
+func (q *Queries) GetEmailfromUsername(ctx context.Context, username string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getEmailfromUsername, username)
+	var email string
+	err := row.Scan(&email)
+	return email, err
+}

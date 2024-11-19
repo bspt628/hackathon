@@ -21,11 +21,11 @@ func NewUserSignInUsecase(dao *dao.UserSignInDAO) *UserSignInUsecase {
 }
 
 // サインイン処理
-func (uc *UserSignInUsecase) SignIn(ctx context.Context, email, password string) (string, error) {
+func (uc *UserSignInUsecase) SignIn(ctx context.Context, username, password string) (string, error) {
 	// DAOからユーザー情報を取得
 	// emailを出力
-	fmt.Printf("email: %s\n", email)
-	userID, passwordHash, err := uc.dao.GetUserByEmail(ctx, email)
+	fmt.Printf("username: %s\n", username)
+	userID, passwordHash, err := uc.dao.GetUserByEmail(ctx, username)
 	if err != nil {
 		return "", err
 	}

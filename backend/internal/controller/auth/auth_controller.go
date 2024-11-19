@@ -24,7 +24,7 @@ func NewAuthController(dbConn *sql.DB) *AuthController {
 // サインインエンドポイント
 func (ac *AuthController) SignIn(w http.ResponseWriter, r *http.Request) {
 	var request struct {
-		Email    string `json:"email"`
+		Username string `json:"username"`
 		Password string `json:"password"`
 	}
 
@@ -35,19 +35,19 @@ func (ac *AuthController) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 必須フィールドの検証
-	if request.Email == "" || request.Password == "" {
-		http.Error(w, "メールアドレスとパスワードが必要です", http.StatusBadRequest)
+	if request.Username == "" || request.Password == "" {
+		http.Error(w, "ユーザー名とパスワードが必要です", http.StatusBadRequest)
 		return
 	}
 
 	// サインイン処理
-	token, err := ac.signInUsecase.SignIn(r.Context(), request.Email, request.Password)
+	token, err := ac.signInUsecase.SignIn(r.Context(), request.Username, request.Password)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("サインイン失敗: %v", err), http.StatusUnauthorized)
 		return
 	}
 	// 成功したらログに出力
-	fmt.Printf("サインイン成功: %s\n", request.Email)
+	fmt.Printf("サインイン成功: %s\n", request.Username)
 
 	// トークンを返す
 	w.Header().Set("Content-Type", "application/json")

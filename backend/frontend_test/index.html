@@ -11,8 +11,8 @@
 
   <!-- フォームの追加 -->
   <form id="sign-in-form">
-    <label for="email">Email:</label>
-    <input type="email" id="email" required><br><br>
+    <label for="username">Username:</label>
+    <input type="username" id="username" required><br><br>
     
     <label for="password">Password:</label>
     <input type="password" id="password" required><br><br>
@@ -47,8 +47,11 @@
       event.preventDefault(); // フォームのデフォルトの送信を防ぐ
       
       // 入力されたメールアドレスとパスワードを取得
-      const email = document.getElementById("email").value;
+      const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
+
+      // ユーザー名からメールアドレスをデータベースから取得
+      
 
       // Firebase 認証
       signInWithEmailAndPassword(auth, email, password)

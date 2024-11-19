@@ -36,6 +36,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// router.HandleFunc("/api/users/{id}", userController.GetUser).Methods("GET")
 
 	apiRouter.HandleFunc("/users/{id}", userController.GetUser).Methods("GET")
+	router.HandleFunc("/api/users/email/{username}", userController.GetUserEmailByUsername).Methods("GET")
 
 	// 他のエンドポイントの設定
 	// ...

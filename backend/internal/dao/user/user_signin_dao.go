@@ -15,12 +15,12 @@ func NewUserSignInDAO(db *sql.DB) *UserSignInDAO {
 }
 
 // メールアドレスからユーザー情報を取得
-func (dao *UserSignInDAO) GetUserByEmail(ctx context.Context, email string) (string, string, error) {
+func (dao *UserSignInDAO) GetUserByEmail(ctx context.Context, username string) (string, string, error) {
 	var userID string
 	var passwordHash string
 
 	query := "SELECT id, password_hash FROM users WHERE email = ?"
-	err := dao.db.QueryRowContext(ctx, query, email).Scan(&userID, &passwordHash)
+	err := dao.db.QueryRowContext(ctx, query, username).Scan(&userID, &passwordHash)
 	if err == sql.ErrNoRows {
 		return "", "", errors.New("ユーザーが存在しません")
 	}

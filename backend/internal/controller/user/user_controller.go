@@ -2,12 +2,12 @@ package controller
 
 import (
 	"database/sql"
-	"hackathon/db/sqlc/generated"
-	"hackathon/internal/dao/user"
-	"hackathon/internal/usecase/user"
-	"hackathon/internal/auth"
 	"encoding/json"
 	"fmt"
+	"hackathon/db/sqlc/generated"
+	"hackathon/internal/auth"
+	"hackathon/internal/dao/user"
+	"hackathon/internal/usecase/user"
 	"net/http"
 )
 

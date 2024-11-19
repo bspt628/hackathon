@@ -10,6 +10,9 @@ WHERE id = ?;
 -- name: DeleteUser :exec
 DELETE FROM users WHERE id = ?;
 
+-- name: getEmailfromUsername :one
+SELECT email FROM users WHERE username = ?;
+
 -- name: CreatePost :execresult
 INSERT INTO posts (id, user_id, content)
 VALUES (?, ?, ?);
