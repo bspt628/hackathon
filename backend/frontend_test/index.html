@@ -30,11 +30,11 @@
 
     const firebaseConfig = {
         apiKey: "AIzaSyCI6Sny25W-XtA8xIp1YV13epZkUxZGe4s",
-        // authDomain: "your-auth-domain.firebaseapp.com",  // 自分の設定に合わせて修正
-        // projectId: "your-project-id",                    // 自分の設定に合わせて修正
-        // storageBucket: "your-storage-bucket.appspot.com",// 自分の設定に合わせて修正
-        // messagingSenderId: "your-messaging-sender-id",   // 自分の設定に合わせて修正
-        // appId: "your-app-id"                             // 自分の設定に合わせて修正
+        authDomain: "your-auth-domain.firebaseapp.com",  // 自分の設定に合わせて修正
+        projectId: "your-project-id",                    // 自分の設定に合わせて修正
+        storageBucket: "your-storage-bucket.appspot.com",// 自分の設定に合わせて修正
+        messagingSenderId: "your-messaging-sender-id",   // 自分の設定に合わせて修正
+        appId: "your-app-id"                             // 自分の設定に合わせて修正
     };
 
     // Firebase アプリを初期化
@@ -46,29 +46,41 @@
     document.getElementById("sign-in-form").addEventListener("submit", function(event) {
       event.preventDefault(); // フォームのデフォルトの送信を防ぐ
       
-      // 入力されたメールアドレスとパスワードを取得
+      // 入力されたユーザー名とパスワードを取得
       const username = document.getElementById("username").value;
       const password = document.getElementById("password").value;
 
-      // ユーザー名からメールアドレスをデータベースから取得
-      
-
-      // Firebase 認証
-      signInWithEmailAndPassword(auth, email, password)
-        .then((userCredential) => {
-          const user = userCredential.user;
-          user.getIdToken().then((idToken) => {
-            // 認証成功メッセージとトークンを表示
-            authResultElement.textContent = `Authentication successful! ID Token: ${idToken}`;
-            authResultElement.style.color = "green";
-            console.log("ID Token:", idToken);
-            // バックエンドAPIにリクエストを送信
-            sendRequestToBackend(idToken);
-          });
+      // バックエンドAPIからユーザー名に対応するメールアドレスを取得
+      fetch(`/api/users/email/${username}`)
+        .then(response => response.json())
+        .then(data => {
+          if (data.email) {
+            // Firebase 認証
+            signInWithEmailAndPassword(auth, data.email, password)
+              .then((userCredential) => {
+                const user = userCredential.user;
+                user.getIdToken().then((idToken) => {
+                  // 認証成功メッセージとトークンを表示
+                  authResultElement.textContent = `Authentication successful! ID Token: ${idToken}`;
+                  authResultElement.style.color = "green";
+                  console.log("ID Token:", idToken);
+                  // バックエンドAPIにリクエストを送信
+                  sendRequestToBackend(idToken);
+                });
+              })
+              .catch((error) => {
+                // エラーメッセージを表示
+                authResultElement.textContent = `Authentication failed: ${error.message}`;
+                authResultElement.style.color = "red";
+              });
+          } else {
+            authResultElement.textContent = "Email not found for the username";
+            authResultElement.style.color = "red";
+          }
         })
         .catch((error) => {
-          // エラーメッセージを表示
-          authResultElement.textContent = `Authentication failed: ${error.message}`;
+          console.error("Error fetching email:", error);
+          authResultElement.textContent = `Failed to fetch email: ${error.message}`;
           authResultElement.style.color = "red";
         });
     });
