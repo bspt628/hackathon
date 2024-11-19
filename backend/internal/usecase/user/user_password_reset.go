@@ -26,9 +26,9 @@ func (u *UserPasswordResetUsecase) RequestPasswordReset(ctx context.Context, ema
 	}
 
 	// メール送信
-	resetLink := fmt.Sprintf("https://example.com/reset-password?token=%s", token)
-	body := fmt.Sprintf("以下のリンクをクリックしてパスワードをリセットしてください:\n%s", resetLink)
-	return u.emailSender.SendEmail(email, "パスワードリセット", body)
+	// resetLink := fmt.Sprintf("https://example.com/reset-password?token=%s", token)
+	// body := fmt.Sprintf("以下のリンクをクリックしてパスワードをリセットしてください:\n%s", resetLink)
+	return nil
 }
 
 // パスワードリセット処理

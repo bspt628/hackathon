@@ -12,13 +12,17 @@ type EmailSender struct {
 	password string
 }
 
-func NewEmailSender(host, port, username, password string) *EmailSender {
-	return &EmailSender{
-		smtpHost: host,
-		smtpPort: port,
-		username: username,
-		password: password,
-	}
+func NewEmailSender(smtpServer, smtpPort, username, password string) *EmailSender {
+    if smtpServer == "" || smtpPort == "" || username == "" || password == "" {
+        fmt.Println("EmailSender initialization failed due to empty parameters.")
+        return nil
+    }
+    return &EmailSender{
+        smtpHost: smtpServer,
+        smtpPort:   smtpPort,
+        username:   username,
+        password:   password,
+    }
 }
 
 func (es *EmailSender) SendEmail(to, subject, body string) error {

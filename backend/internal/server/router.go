@@ -14,7 +14,8 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 
 	// コントローラーの初期化
 	userController := controller.NewUserController(dbConn)
-	authController := authController.NewAuthController(dbConn)
+	myauthController := authController.NewAuthController(dbConn)
+	// パスワードリセットコントローラーの初期化
 	passwordResetController := authController.NewPasswordResetController(dbConn)
 
 	// postController := controller.NewPostController(dbConn)
@@ -28,10 +29,10 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.Use(auth.FirebaseAuthMiddleware)
 
 	// トークン生成エンドポイントを追加
-	router.HandleFunc("/auth/password-reset/request", authController.HandlePasswordResetRequest) // パスワードリセットリクエスト
-	router.HandleFunc("/auth/password-reset/reset", authController.ResetPassword)                // パスワードリセット
+	router.HandleFunc("/auth/password-reset/request", passwordResetController.HandlePasswordResetRequest).Methods("POST") // パスワードリセットリクエスト
+	router.HandleFunc("/auth/password-reset/reset", passwordResetController.ResetPassword).Methods("POST")                // パスワードリセット
 
-	router.HandleFunc("/auth/signin", authController.SignIn).Methods("POST")
+	router.HandleFunc("/auth/signin", myauthController.SignIn).Methods("POST")
 
 	// ユーザー関連
 	router.HandleFunc("/api/users", userController.CreateUser).Methods("POST")

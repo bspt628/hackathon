@@ -2,7 +2,6 @@ package usecase
 
 import (
 	"hackathon/internal/dao/user"
-	"hackathon/internal/email"
 )
 
 type UserUsecase struct {
@@ -24,10 +23,9 @@ func NewUserSignInUsecase(dao *dao.UserSignInDAO) *UserSignInUsecase {
 
 type UserPasswordResetUsecase struct {
 	passwordResetDAO *dao.UserPasswordResetDAO
-	emailSender *email.EmailSender
 }
 
-func NewUserPasswordResetUsecase(passwordResetDAO *dao.UserPasswordResetDAO, emailSender *email.EmailSender) *UserPasswordResetUsecase {
+func NewUserPasswordResetUsecase(passwordResetDAO *dao.UserPasswordResetDAO) *UserPasswordResetUsecase {
 	return &UserPasswordResetUsecase{
 		passwordResetDAO: passwordResetDAO,
 	}

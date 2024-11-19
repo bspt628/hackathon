@@ -1,54 +1,87 @@
 package authController
 
 import (
-	"github.com/gin-gonic/gin"
 	"fmt"
 	"net/http"
+	"database/sql"
+	"hackathon/internal/dao/user"
+	"hackathon/internal/usecase/user"
+	"encoding/json"
 )
 
+type PasswordResetController struct {
+	passwordResetUsecase *usecase.UserPasswordResetUsecase
+}
+
+func NewPasswordResetController(dbConn *sql.DB) *PasswordResetController {
+	passwordResetDAO := dao.NewUserPasswordResetDAO(dbConn)
+	passwordResetUsecase := usecase.NewUserPasswordResetUsecase(passwordResetDAO)
+	return &PasswordResetController{passwordResetUsecase: passwordResetUsecase}
+}
+
 // パスワードリセットリクエスト (トークン送信)
-func (prc *PasswordResetController) HandlePasswordResetRequest(c *gin.Context) {
+func (prc *PasswordResetController) HandlePasswordResetRequest(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		Email string `json:"email" binding:"required,email"`
+		Email string `json:"email"`
 	}
 
 	// リクエスト解析
-	if err := c.ShouldBindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "無効なリクエスト"})
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&req); err != nil {
+		http.Error(w, "無効なリクエスト", http.StatusBadRequest)
+		return
+	}
+
+	// メールアドレスが必要かどうかのバリデーション
+	if req.Email == "" {
+		http.Error(w, "メールアドレスは必須です", http.StatusBadRequest)
 		return
 	}
 
 	// パスワードリセット処理
-	err := prc.passwordResetUsecase.RequestPasswordReset(c.Request.Context(), req.Email)
+	err := prc.passwordResetUsecase.RequestPasswordReset(r.Context(), req.Email)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("パスワードリセットに失敗しました: %v", err)})
+		http.Error(w, fmt.Sprintf("パスワードリセットに失敗しました: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	// 成功レスポンス
-	c.JSON(http.StatusOK, gin.H{"message": "パスワードリセットメールを送信しました"})
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "パスワードリセットメールを送信しました",
+	})
 }
 
 // パスワード変更 (トークン検証とパスワード更新)
-func (prc *PasswordResetController) ResetPassword(c *gin.Context) {
-	var request struct {
-		Token    string `json:"token" binding:"required"`
-		Password string `json:"password" binding:"required,min=8"`
+func (prc *PasswordResetController) ResetPassword(w http.ResponseWriter, r *http.Request) {
+	var req struct {
+		Token    string `json:"token"`
+		Password string `json:"password"`
 	}
 
 	// リクエスト解析
-	if err := c.ShouldBindJSON(&request); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("リクエスト解析エラー: %v", err)})
+	decoder := json.NewDecoder(r.Body)
+	if err := decoder.Decode(&req); err != nil {
+		http.Error(w, fmt.Sprintf("リクエスト解析エラー: %v", err), http.StatusBadRequest)
+		return
+	}
+
+	// トークンとパスワードのバリデーション
+	if req.Token == "" || req.Password == "" {
+		http.Error(w, "トークンとパスワードは必須です", http.StatusBadRequest)
 		return
 	}
 
 	// パスワード更新処理
-	err := prc.passwordResetUsecase.ResetPassword(c.Request.Context(), request.Token, request.Password)
+	err := prc.passwordResetUsecase.ResetPassword(r.Context(), req.Token, req.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": fmt.Sprintf("パスワード更新失敗: %v", err)})
+		http.Error(w, fmt.Sprintf("パスワード更新失敗: %v", err), http.StatusInternalServerError)
 		return
 	}
 
 	// 成功レスポンス
-	c.JSON(http.StatusOK, gin.H{"message": "パスワードが更新されました"})
+	w.WriteHeader(http.StatusOK)
+	json.NewEncoder(w).Encode(map[string]string{
+		"message": "パスワードが更新されました",
+	})
 }
