@@ -143,4 +143,14 @@ DELETE FROM password_reset_tokens
 WHERE token = ?;
 
 -- name: GetUserByEmail :one
-SELECT id, password_hash FROM users WHERE username = ?
+SELECT id, password_hash FROM users WHERE username = ?;
+
+-- name: UpdateUserProfile :exec
+UPDATE users
+SET 
+    profile_image_url = COALESCE(?, profile_image_url),
+    bio = COALESCE(?, bio),
+    location = COALESCE(?, location),
+    website = COALESCE(?, website),
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;

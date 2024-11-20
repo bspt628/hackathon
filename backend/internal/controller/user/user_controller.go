@@ -2,13 +2,9 @@ package controller
 
 import (
 	"database/sql"
-	"encoding/json"
-	"fmt"
 	"hackathon/db/sqlc/generated"
-	"hackathon/internal/auth"
 	"hackathon/internal/dao/user"
 	"hackathon/internal/usecase/user"
-	"net/http"
 )
 
 type UserController struct {
@@ -20,23 +16,4 @@ func NewUserController(dbConn *sql.DB) *UserController {
 	userDAO := dao.NewUserDAO(queries)
 	userUsecase := usecase.NewUserUsecase(userDAO)
 	return &UserController{userUsecase: userUsecase}
-}
-
-// ユーザー情報取得のハンドラー
-func GetUserHandler(w http.ResponseWriter, r *http.Request) {
-    userID := r.Header.Get("UserID") // Firebase認証から設定したUserID
-	//ログを出力
-	fmt.Println("UserID: ", userID)
-
-    // ここでuserIDを使ってユーザー情報を取得する
-    userRecord, err := auth.GetUserInfo(userID)
-    if err != nil {
-        http.Error(w, fmt.Sprintf("User retrieval failed: %v", err), http.StatusInternalServerError)
-        return
-    }
-
-    // ユーザー情報をJSONとして返す
-    response := map[string]string{"userID": userRecord.UID, "email": userRecord.Email}
-    w.Header().Set("Content-Type", "application/json")
-    json.NewEncoder(w).Encode(response)
 }

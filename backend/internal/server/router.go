@@ -45,6 +45,23 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// ...
 
 	apiRouter.HandleFunc("/users/{id}", userController.DeleteUser).Methods("DELETE")
+
+// 	- /api/users/{id}/profile
+// - /api/users/{id}/settings
+// - /api/users/{id}/notification-settings
+// - /api/users/{id}/privacy
+// - /api/users/{id}/ban-status
+// - /api/users/{id}/username
+// - /api/users/{id}/email
+
+	apiRouter.HandleFunc("/users/{id}/profile", userController.UpdateUserProfile).Methods("PUT")
+	// apiRouter.HandleFunc("/users/{id}/settings", userController.UpdateUserSettings).Methods("PUT")
+	// apiRouter.HandleFunc("/users/{id}/notification-settings", userController.UpdateUserNotificationSettings).Methods("PUT")
+	// apiRouter.HandleFunc("/users/{id}/privacy", userController.UpdateUserPrivacy).Methods("PUT")
+	// apiRouter.HandleFunc("/users/{id}/ban-status", userController.UpdateUserBanStatus).Methods("PUT")
+	// apiRouter.HandleFunc("/users/{id}/username", userController.UpdateUsername).Methods("PUT")
+	// apiRouter.HandleFunc("/users/{id}/email", userController.UpdateEmail).Methods("PUT")
+
 	// router.HandleFunc("/api/users/{id}", userController.UpdateUserInfo).Methods("PUT")
 	// router.HandleFunc("/api/users/{id}/stats", userController.GetUserStats).Methods("GET")
 
