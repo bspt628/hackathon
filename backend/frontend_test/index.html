@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Firebase Authentication</title>
+  </head>
+
+  <body>
+
+    <h1>Hackathon Authentication by Firebase</h1>
+
+    <!-- フォームの追加 -->
+    <form id="sign-in-form">
+      <label for="username">Username:</label>
+      <input type="username" id="username" required><br><br>
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" required><br><br>
+
+      <button type="submit">Sign In</button>
+    </form>
+
+    <p id="auth-result"></p>
+    <p id="message"></p>
+
+    <!-- Firebase SDKの読み込み -->
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
+      import { getAuth, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-auth.js";
+
+      const firebaseConfig = {
+        apiKey: "AIzaSyCI6Sny25W-XtA8xIp1YV13epZkUxZGe4s",
+      };
+
+      // Firebase アプリを初期化
+      initializeApp(firebaseConfig);
+      const auth = getAuth();
+      const authResultElement = document.getElementById("auth-result");
+
+      // フォーム送信イベントの設定
+      document.getElementById("sign-in-form").addEventListener("submit", function (event) {
+        event.preventDefault(); // フォームのデフォルトの送信を防ぐ
+
+        // 入力されたユーザー名とパスワードを取得
+        const username = document.getElementById("username").value;
+        const password = document.getElementById("password").value;
+
+        // バックエンドAPIからユーザー名に対応するメールアドレスを取得
+        fetch(`http://localhost:8080/api/users/email/${username}`)
+          .then(response => response.json())
+          .then(data => {
+            if (data.email) {
+              // Firebase 認証
+              signInWithEmailAndPassword(auth, data.email, password)
+                .then((userCredential) => {
+                  const user = userCredential.user;
+                  user.getIdToken().then((idToken) => {
+                    // 認証成功メッセージとトークンを表示
+                    authResultElement.textContent = `Authentication successful! ID Token: ${idToken}`;
+                    authResultElement.style.color = "green";
+                    console.log("ID Token:", idToken);
+                  });
+                })
+                .catch((error) => {
+                  // エラーメッセージを表示
+                  authResultElement.textContent = `Authentication failed: ${error.message}`;
+                  authResultElement.style.color = "red";
+                });
+            } else {
+              authResultElement.textContent = "Email not found for the username";
+              authResultElement.style.color = "red";
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching email:", error);
+            authResultElement.textContent = `Failed to fetch email: ${error.message}`;
+            authResultElement.style.color = "red";
+          });
+      });
+    </script>
+
+  </body>
+
+</html>

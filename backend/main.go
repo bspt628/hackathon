@@ -1,46 +1,27 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
-	_ "github.com/go-sql-driver/mysql"
+	"github.com/joho/godotenv"
+	"hackathon/internal/server"
 	"log"
-	"net/http"
-	"os"
+	"hackathon/internal/auth"
 )
 
 func main() {
-	//
-	mysqlUser := os.Getenv("DB_USER")
-	mysqlPwd := os.Getenv("DB_PASSWORD")
-	mysqlHost := os.Getenv("DB_HOST")
-	mysqlDatabase := os.Getenv("DB_NAME")
-
-	// mysqlUser := 
-	// mysqlPwd := "password"
-	// mysqlHost := "tcp(23.251.145.87:3306)"
-	// mysqlDatabase := "hackathon"
-
-	// データベースを初期化します
-	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
-	fmt.Println(connStr)
-	db, err := sql.Open("mysql", connStr)
+	// 環境変数の読み込み
+	err := godotenv.Load()
 	if err != nil {
-		log.Fatalf("データベースの初期化に失敗しました: %v", err)
-	}
-	defer db.Close()
-
-	fmt.Println("データベースの初期化に成功しました！")
-	//fmt.Printf("%s\n", db)
-
-	if err := db.Ping(); err != nil {
-		log.Fatal(err)
+		log.Fatalf(".env ファイルの読み込みに失敗しました: %v", err)
 	}
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-	http.ListenAndServe(":"+port, nil)
+	// Firebaseの初期化
+    err = auth.InitFirebase()
+    if err != nil {
+        log.Fatalf("Firebase initialization failed: %v", err)
+    }
 
+	// サーバーのセットアップと起動
+	if err := server.Start(); err != nil {
+		log.Fatalf("サーバーの起動に失敗しました: %v", err)
+	}
 }

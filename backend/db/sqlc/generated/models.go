@@ -2,11 +2,12 @@
 // versions:
 //   sqlc v1.27.0
 
-package db
+package sqlc
 
 import (
 	"database/sql"
 	"encoding/json"
+	"time"
 )
 
 type Block struct {
@@ -45,6 +46,15 @@ type Notification struct {
 	Message   sql.NullString `json:"message"`
 	Createdat sql.NullTime   `json:"createdat"`
 	Isread    sql.NullBool   `json:"isread"`
+}
+
+type PasswordResetToken struct {
+	ID        uint64       `json:"id"`
+	Email     string       `json:"email"`
+	Token     string       `json:"token"`
+	Expiry    time.Time    `json:"expiry"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
 }
 
 type Post struct {
