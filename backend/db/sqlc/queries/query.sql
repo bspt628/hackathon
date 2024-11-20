@@ -117,23 +117,30 @@ WHERE (senderId = ? AND receiverId = ?)
    OR (senderId = ? AND receiverId = ?)
 ORDER BY createdAt ASC;
 
+-- ここから自作
 -- パスワードリセット用のトークンを保存するクエリ
+
 -- name: SaveResetToken :exec
+-- params: email, token, expiry
 INSERT INTO password_reset_tokens (email, token, expiry)
-VALUES ($1, $2, $3);
+VALUES (?, ?, ?);
+
 
 -- トークンを検証して対応するメールを取得するクエリ
 -- name: ValidateResetToken :one
 SELECT email FROM password_reset_tokens
-WHERE token = $1 AND expiry > NOW();
+WHERE token = ? AND expiry > NOW();
 
 -- パスワードを更新するクエリ
 -- name: UpdatePasswordByEmail :exec
 UPDATE users
-SET password_hash = $2, last_password_change = NOW()
-WHERE email = $1;
+SET password_hash = ?, last_password_change = NOW()
+WHERE email = ?;
 
 -- 使用済みのリセットトークンを削除するクエリ
 -- name: DeleteResetToken :exec
 DELETE FROM password_reset_tokens
-WHERE token = $1;
+WHERE token = ?;
+
+-- name: GetUserByEmail :one
+SELECT id, password_hash FROM users WHERE username = ?

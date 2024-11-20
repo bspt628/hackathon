@@ -11,8 +11,6 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-
-
 // サインイン処理
 func (uc *UserSignInUsecase) SignIn(ctx context.Context, username, password string) (string, error) {
 	// DAOからユーザー情報を取得

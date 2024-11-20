@@ -7,6 +7,7 @@ import (
 	"hackathon/internal/dao/user"
 	"hackathon/internal/usecase/user"
 	"encoding/json"
+	"hackathon/db/sqlc/generated"
 )
 
 type PasswordResetController struct {
@@ -14,7 +15,8 @@ type PasswordResetController struct {
 }
 
 func NewPasswordResetController(dbConn *sql.DB) *PasswordResetController {
-	passwordResetDAO := dao.NewUserPasswordResetDAO(dbConn)
+	queries := sqlc.New(dbConn)
+	passwordResetDAO := dao.NewUserPasswordResetDAO(queries)
 	passwordResetUsecase := usecase.NewUserPasswordResetUsecase(passwordResetDAO)
 	return &PasswordResetController{passwordResetUsecase: passwordResetUsecase}
 }
@@ -65,6 +67,7 @@ func (prc *PasswordResetController) ResetPassword(w http.ResponseWriter, r *http
 		http.Error(w, fmt.Sprintf("リクエスト解析エラー: %v", err), http.StatusBadRequest)
 		return
 	}
+	fmt.Println(req)
 
 	// トークンとパスワードのバリデーション
 	if req.Token == "" || req.Password == "" {

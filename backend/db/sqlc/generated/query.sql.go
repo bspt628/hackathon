@@ -9,6 +9,7 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"time"
 )
 
 const addBlock = `-- name: AddBlock :exec
@@ -145,12 +146,12 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Res
 
 const deleteResetToken = `-- name: DeleteResetToken :exec
 DELETE FROM password_reset_tokens
-WHERE token = $1
+WHERE token = ?
 `
 
 // 使用済みのリセットトークンを削除するクエリ
-func (q *Queries) DeleteResetToken(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, deleteResetToken)
+func (q *Queries) DeleteResetToken(ctx context.Context, token string) error {
+	_, err := q.db.ExecContext(ctx, deleteResetToken, token)
 	return err
 }
 
@@ -344,6 +345,22 @@ func (q *Queries) GetUnreadNotifications(ctx context.Context, userid sql.NullStr
 	return items, nil
 }
 
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, password_hash FROM users WHERE username = ?
+`
+
+type GetUserByEmailRow struct {
+	ID           string `json:"id"`
+	PasswordHash string `json:"password_hash"`
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, username string) (GetUserByEmailRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, username)
+	var i GetUserByEmailRow
+	err := row.Scan(&i.ID, &i.PasswordHash)
+	return i, err
+}
+
 const getUserById = `-- name: GetUserById :one
 SELECT id, email, username, display_name, bio, location, followers_count, following_count, posts_count
 FROM users
@@ -510,13 +527,22 @@ func (q *Queries) GetUserTimeline(ctx context.Context, arg GetUserTimelineParams
 }
 
 const saveResetToken = `-- name: SaveResetToken :exec
+
 INSERT INTO password_reset_tokens (email, token, expiry)
-VALUES ($1, $2, $3)
+VALUES (?, ?, ?)
 `
 
+type SaveResetTokenParams struct {
+	Email  string    `json:"email"`
+	Token  string    `json:"token"`
+	Expiry time.Time `json:"expiry"`
+}
+
+// ここから自作
 // パスワードリセット用のトークンを保存するクエリ
-func (q *Queries) SaveResetToken(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, saveResetToken)
+// params: email, token, expiry
+func (q *Queries) SaveResetToken(ctx context.Context, arg SaveResetTokenParams) error {
+	_, err := q.db.ExecContext(ctx, saveResetToken, arg.Email, arg.Token, arg.Expiry)
 	return err
 }
 
@@ -644,13 +670,18 @@ func (q *Queries) UpdateFollowersCount(ctx context.Context, id string) error {
 
 const updatePasswordByEmail = `-- name: UpdatePasswordByEmail :exec
 UPDATE users
-SET password_hash = $2, last_password_change = NOW()
-WHERE email = $1
+SET password_hash = ?, last_password_change = NOW()
+WHERE email = ?
 `
 
+type UpdatePasswordByEmailParams struct {
+	PasswordHash string `json:"password_hash"`
+	Email        string `json:"email"`
+}
+
 // パスワードを更新するクエリ
-func (q *Queries) UpdatePasswordByEmail(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, updatePasswordByEmail)
+func (q *Queries) UpdatePasswordByEmail(ctx context.Context, arg UpdatePasswordByEmailParams) error {
+	_, err := q.db.ExecContext(ctx, updatePasswordByEmail, arg.PasswordHash, arg.Email)
 	return err
 }
 
@@ -686,12 +717,12 @@ func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) 
 
 const validateResetToken = `-- name: ValidateResetToken :one
 SELECT email FROM password_reset_tokens
-WHERE token = $1 AND expiry > NOW()
+WHERE token = ? AND expiry > NOW()
 `
 
 // トークンを検証して対応するメールを取得するクエリ
-func (q *Queries) ValidateResetToken(ctx context.Context) (string, error) {
-	row := q.db.QueryRowContext(ctx, validateResetToken)
+func (q *Queries) ValidateResetToken(ctx context.Context, token string) (string, error) {
+	row := q.db.QueryRowContext(ctx, validateResetToken, token)
 	var email string
 	err := row.Scan(&email)
 	return email, err

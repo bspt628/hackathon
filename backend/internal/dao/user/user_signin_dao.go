@@ -2,31 +2,25 @@ package dao
 
 import (
 	"context"
-	"database/sql"
-	"errors"
+	"fmt"
+	sqlc "hackathon/db/sqlc/generated"
 )
 
 type UserSignInDAO struct {
-	db *sql.DB
+	db *sqlc.Queries
 }
 
-func NewUserSignInDAO(db *sql.DB) *UserSignInDAO {
+func NewUserSignInDAO(db *sqlc.Queries) *UserSignInDAO {
 	return &UserSignInDAO{db: db}
 }
 
-// メールアドレスからユーザー情報を取得
-func (dao *UserSignInDAO) GetUserByEmail(ctx context.Context, username string) (string, string, error) {
-	var userID string
-	var passwordHash string
-
-	query := "SELECT id, password_hash FROM users WHERE email = ?"
-	err := dao.db.QueryRowContext(ctx, query, username).Scan(&userID, &passwordHash)
-	if err == sql.ErrNoRows {
-		return "", "", errors.New("ユーザーが存在しません")
-	}
+// GetUserByEmail - メールアドレスからユーザー情報を取得
+func (dao *UserSignInDAO) GetUserByEmail(ctx context.Context, email string) (string, string, error) {
+	// GetUserByEmailを実行し、結果を取得
+	user, err := dao.db.GetUserByEmail(ctx, email)
 	if err != nil {
-		return "", "", err
+		return "", "", fmt.Errorf("ユーザー情報取得エラー: %v", err)
 	}
-
-	return userID, passwordHash, nil
+	// userID と passwordHash を返す
+	return user.ID, user.PasswordHash, nil
 }

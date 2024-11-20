@@ -2,11 +2,12 @@ package dao
 
 import (
 	"context"
-	"github.com/oklog/ulid"
-	"hackathon/db/sqlc/generated"
-	"golang.org/x/crypto/bcrypt"
-	"hackathon/internal/auth"  // Firebase用のパッケージをインポート
 	"fmt"
+	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/internal/auth" // Firebase用のパッケージをインポート
+
+	"github.com/oklog/ulid"
+	"golang.org/x/crypto/bcrypt"
 )
 
 func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (*sqlc.User, error) {
@@ -21,11 +22,11 @@ func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (
 
 	// SQLクエリを実行して新しいユーザーを作成
 	_, err = dao.db.CreateUser(ctx, sqlc.CreateUserParams{
-		ID:          myid,
-		Email:       arg.Email,
+		ID:           myid,
+		Email:        arg.Email,
 		PasswordHash: string(hashedPassword),
-		Username:    arg.Username,
-		DisplayName: arg.DisplayName,
+		Username:     arg.Username,
+		DisplayName:  arg.DisplayName,
 	})
 	if err != nil {
 		return nil, err

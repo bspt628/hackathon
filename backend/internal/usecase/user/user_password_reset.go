@@ -26,7 +26,7 @@ func (u *UserPasswordResetUsecase) RequestPasswordReset(ctx context.Context, ema
 	token := base64.URLEncoding.EncodeToString(tokenBytes)
 
 	// トークンの保存
-	expiry := time.Now().Add(1 * time.Hour)
+	expiry := time.Now().Add(10 * time.Hour)
 	if err := u.passwordResetDAO.SaveResetToken(ctx, email, token, expiry); err != nil {
 		return fmt.Errorf("トークン保存エラー: %v", err)
 	}

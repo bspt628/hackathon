@@ -1,9 +1,10 @@
 package authController
 
 import (
+	"database/sql"
 	"hackathon/internal/usecase/user"
 	"hackathon/internal/dao/user"
-	"database/sql"
+	"hackathon/db/sqlc/generated"
 )
 
 type AuthController struct {
@@ -13,7 +14,8 @@ type AuthController struct {
 
 
 func NewAuthController(dbConn *sql.DB) *AuthController {
-	signInDAO := dao.NewUserSignInDAO(dbConn)
+	queries := sqlc.New(dbConn)
+	signInDAO := dao.NewUserSignInDAO(queries)
 	signInUsecase := usecase.NewUserSignInUsecase(signInDAO)
 	return &AuthController{signInUsecase: signInUsecase}
 }
