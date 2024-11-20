@@ -5,9 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"hackathon/internal/auth"
-
 	"time"
-
 	"golang.org/x/crypto/bcrypt"
 )
 

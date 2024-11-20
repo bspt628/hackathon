@@ -5,15 +5,9 @@ import (
 	"crypto/rand"
 	"encoding/base64"
 	"fmt"
-	"time"
 	"net/smtp"
-)
-
-// SMTP設定
-const (
-	SMTPHost = "localhost" // MailHogのSMTPホスト
-	SMTPPort = "1025"      // MailHogのSMTPポート
-	FromEmail = "no-reply@example.com" // 送信元メールアドレス
+	"os"
+	"time"
 )
 
 // パスワードリセットリクエスト
@@ -26,7 +20,7 @@ func (u *UserPasswordResetUsecase) RequestPasswordReset(ctx context.Context, ema
 	token := base64.URLEncoding.EncodeToString(tokenBytes)
 
 	// トークンの保存
-	expiry := time.Now().Add(10 * time.Hour)
+	expiry := time.Now().Add(10 * time.Hour) // 世界標準時だった！
 	if err := u.passwordResetDAO.SaveResetToken(ctx, email, token, expiry); err != nil {
 		return fmt.Errorf("トークン保存エラー: %v", err)
 	}
@@ -67,12 +61,15 @@ func (u *UserPasswordResetUsecase) ResetPassword(ctx context.Context, token, new
 // メール送信
 func sendEmail(to, subject, body string) error {
 	// メールのヘッダーとボディを組み立てる
+	// SMTP設定
+	SMTPHost := os.Getenv("SMTP_HOST")
+	SMTPPort := os.Getenv("SMTP_PORT")
+	FromEmail := os.Getenv("FROM_EMAIL") // 送信元メールアドレス
+
 	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s", FromEmail, to, subject, body)
 
 	// SMTPサーバーに接続してメールを送信
 	addr := fmt.Sprintf("%s:%s", SMTPHost, SMTPPort)
-	// msgをログに出力
-	fmt.Println(msg)
 	err := smtp.SendMail(addr, nil, FromEmail, []string{to}, []byte(msg))
 	if err != nil {
 		return fmt.Errorf("SMTP送信エラー: %v", err)
