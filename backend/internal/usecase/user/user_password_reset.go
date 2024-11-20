@@ -6,9 +6,15 @@ import (
 	"encoding/base64"
 	"fmt"
 	"time"
+	"net/smtp"
 )
 
-
+// SMTP設定
+const (
+	SMTPHost = "localhost" // MailHogのSMTPホスト
+	SMTPPort = "1025"      // MailHogのSMTPポート
+	FromEmail = "no-reply@example.com" // 送信元メールアドレス
+)
 
 // パスワードリセットリクエスト
 func (u *UserPasswordResetUsecase) RequestPasswordReset(ctx context.Context, email string) error {
@@ -26,8 +32,16 @@ func (u *UserPasswordResetUsecase) RequestPasswordReset(ctx context.Context, ema
 	}
 
 	// メール送信
-	// resetLink := fmt.Sprintf("https://example.com/reset-password?token=%s", token)
-	// body := fmt.Sprintf("以下のリンクをクリックしてパスワードをリセットしてください:\n%s", resetLink)
+	resetLink := fmt.Sprintf("http://localhost:8080/reset-password?token=%s", token)
+	body := fmt.Sprintf("以下のリンクをクリックしてパスワードをリセットしてください:\n\n%s", resetLink)
+	subject := "パスワードリセットのお知らせ"
+
+	// メール送信処理
+	err := sendEmail(email, subject, body)
+	if err != nil {
+		return fmt.Errorf("メール送信エラー: %v", err)
+	}
+
 	return nil
 }
 
@@ -47,4 +61,21 @@ func (u *UserPasswordResetUsecase) ResetPassword(ctx context.Context, token, new
 
 	// トークン削除
 	return u.passwordResetDAO.DeleteResetToken(ctx, token)
+}
+
+
+// メール送信
+func sendEmail(to, subject, body string) error {
+	// メールのヘッダーとボディを組み立てる
+	msg := fmt.Sprintf("From: %s\r\nTo: %s\r\nSubject: %s\r\n\r\n%s", FromEmail, to, subject, body)
+
+	// SMTPサーバーに接続してメールを送信
+	addr := fmt.Sprintf("%s:%s", SMTPHost, SMTPPort)
+	// msgをログに出力
+	fmt.Println(msg)
+	err := smtp.SendMail(addr, nil, FromEmail, []string{to}, []byte(msg))
+	if err != nil {
+		return fmt.Errorf("SMTP送信エラー: %v", err)
+	}
+	return nil
 }
