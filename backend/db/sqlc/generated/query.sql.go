@@ -745,6 +745,33 @@ func (q *Queries) UpdateUserProfile(ctx context.Context, arg UpdateUserProfilePa
 	return err
 }
 
+const updateUserSettings = `-- name: UpdateUserSettings :exec
+UPDATE users
+SET 
+    display_name = COALESCE(?, display_name),
+    birth_date = COALESCE(?, birth_date),
+    language = COALESCE(?, language),
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserSettingsParams struct {
+	DisplayName sql.NullString `json:"display_name"`
+	BirthDate   sql.NullTime   `json:"birth_date"`
+	Language    sql.NullString `json:"language"`
+	ID          string         `json:"id"`
+}
+
+func (q *Queries) UpdateUserSettings(ctx context.Context, arg UpdateUserSettingsParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserSettings,
+		arg.DisplayName,
+		arg.BirthDate,
+		arg.Language,
+		arg.ID,
+	)
+	return err
+}
+
 const validateResetToken = `-- name: ValidateResetToken :one
 SELECT email FROM password_reset_tokens
 WHERE token = ? AND expiry > NOW()

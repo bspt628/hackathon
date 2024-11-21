@@ -40,3 +40,13 @@ func NewUserProfileUpdateResult(updatedFields map[string]string) *UserProfileUpd
 		UpdatedFields: updatedFields,
 	}
 }
+
+type UserSettingsUpdateResult struct {
+	UpdatedSettings map[string]string `json:"updated_settings"`
+}
+
+func NewUserSettingsUpdateResult(updatedSettings map[string]string) *UserSettingsUpdateResult {
+	return &UserSettingsUpdateResult{
+		UpdatedSettings: updatedSettings,
+	}
+}

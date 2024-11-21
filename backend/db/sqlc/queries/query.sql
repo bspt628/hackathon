@@ -154,3 +154,12 @@ SET
     website = COALESCE(?, website),
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?;
+
+-- name: UpdateUserSettings :exec
+UPDATE users
+SET 
+    display_name = COALESCE(?, display_name),
+    birth_date = COALESCE(?, birth_date),
+    language = COALESCE(?, language),
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;
