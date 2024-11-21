@@ -318,3 +318,13 @@ func isValidURL(u string) bool {
     return false
 }
 ```
+
+## 1122
+
+### 成果
+- UpdateUserProfileのバリデーションをかけた
+- UpdateUserSettingsを実装した（バリデーションこみ）
+
+### 大変だったところ
+- 誕生日を扱うところ
+    - Time.parse関数で好きなフォーマットになるよう処理しなければいけない（2006-01-02というふうにした）
