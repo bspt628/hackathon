@@ -2,6 +2,10 @@
 
 # ToDo
 
+settingとprofileのusecase層の記法を統一
+
+json.Rawmessageの渡し方について
+
 ## Userテーブル操作のAPIエンドポイントを作成
 
 ある程度、単一エンドポイントで複数のフィールドを変更する必要がありそうなので、まとめたいと思う

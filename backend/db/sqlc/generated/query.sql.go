@@ -698,6 +698,24 @@ func (q *Queries) UpdatePostLikesCount(ctx context.Context, id string) error {
 	return err
 }
 
+const updateUserBanStatus = `-- name: UpdateUserBanStatus :exec
+UPDATE users
+SET
+    is_banned = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserBanStatusParams struct {
+	IsBanned sql.NullBool `json:"is_banned"`
+	ID       string       `json:"id"`
+}
+
+func (q *Queries) UpdateUserBanStatus(ctx context.Context, arg UpdateUserBanStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserBanStatus, arg.IsBanned, arg.ID)
+	return err
+}
+
 const updateUserInfo = `-- name: UpdateUserInfo :exec
 UPDATE users
 SET bio = ?, location = ?
@@ -712,6 +730,42 @@ type UpdateUserInfoParams struct {
 
 func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) error {
 	_, err := q.db.ExecContext(ctx, updateUserInfo, arg.Bio, arg.Location, arg.ID)
+	return err
+}
+
+const updateUserNotifications = `-- name: UpdateUserNotifications :exec
+UPDATE users
+SET
+    notification_settings = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserNotificationsParams struct {
+	NotificationSettings json.RawMessage `json:"notification_settings"`
+	ID                   string          `json:"id"`
+}
+
+func (q *Queries) UpdateUserNotifications(ctx context.Context, arg UpdateUserNotificationsParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserNotifications, arg.NotificationSettings, arg.ID)
+	return err
+}
+
+const updateUserPrivacy = `-- name: UpdateUserPrivacy :exec
+UPDATE users
+SET
+    is_private = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserPrivacyParams struct {
+	IsPrivate sql.NullBool `json:"is_private"`
+	ID        string       `json:"id"`
+}
+
+func (q *Queries) UpdateUserPrivacy(ctx context.Context, arg UpdateUserPrivacyParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserPrivacy, arg.IsPrivate, arg.ID)
 	return err
 }
 

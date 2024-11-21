@@ -163,3 +163,24 @@ SET
     language = COALESCE(?, language),
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?;
+
+-- name: UpdateUserNotifications :exec
+UPDATE users
+SET
+    notification_settings = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;
+
+-- name: UpdateUserPrivacy :exec
+UPDATE users
+SET
+    is_private = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;
+
+-- name: UpdateUserBanStatus :exec
+UPDATE users
+SET
+    is_banned = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;

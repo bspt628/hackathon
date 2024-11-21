@@ -6,12 +6,13 @@ import (
 	"errors"
 	"fmt"
 	"hackathon/db/sqlc/generated"
+	"hackathon/domain"
 	"hackathon/internal/utils"
 	"strings"
 	"time"
 )
 
-func (uc *UserUsecase) UpdateUserSettings(ctx context.Context, displayName string, birthDate string, language, id string) (*UserSettingsUpdateResult, error) {
+func (uc *UserUsecase) UpdateUserSettings(ctx context.Context, displayName string, birthDate string, language, id string) (*domain.UserSettingsUpdateResult, error) {
 
 
 	// 更新結果をまとめる
@@ -60,5 +61,5 @@ func (uc *UserUsecase) UpdateUserSettings(ctx context.Context, displayName strin
 		return nil, err
 	}
 
-	return NewUserSettingsUpdateResult(updatedSettings), nil
+	return domain.NewUserSettingsUpdateResult(updatedSettings), nil
 }

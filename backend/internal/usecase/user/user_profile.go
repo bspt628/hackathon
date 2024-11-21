@@ -4,12 +4,13 @@ import (
 	"context"
 	"database/sql"
 	"hackathon/db/sqlc/generated"
+	"hackathon/domain"
 	"strings"
 	"errors"
 	"hackathon/internal/utils"
 )
 
-func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, profile_image_url, bio, location, website, id string) (*UserProfileUpdateResult, error) {
+func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, profile_image_url, bio, location, website, id string) (*domain.UserProfileUpdateResult, error) {
 	// UpdateUserProfileParams構造体にデータをセット
 	arg := sqlc.UpdateUserProfileParams{
 		ProfileImageUrl: sql.NullString{String: profile_image_url, Valid: profile_image_url != ""},
@@ -64,5 +65,5 @@ func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, profile_image_url,
 		return nil, err
 	}
 
-	return NewUserProfileUpdateResult(updatedFields), nil
+	return domain.NewUserProfileUpdateResult(updatedFields), nil
 }

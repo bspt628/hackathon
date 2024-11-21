@@ -30,23 +30,3 @@ func NewUserPasswordResetUsecase(passwordResetDAO *dao.UserPasswordResetDAO) *Us
 		passwordResetDAO: passwordResetDAO,
 	}
 }
-
-type UserProfileUpdateResult struct {
-	UpdatedFields map[string]string `json:"updated_fields"`
-}
-
-func NewUserProfileUpdateResult(updatedFields map[string]string) *UserProfileUpdateResult {
-	return &UserProfileUpdateResult{
-		UpdatedFields: updatedFields,
-	}
-}
-
-type UserSettingsUpdateResult struct {
-	UpdatedSettings map[string]string `json:"updated_settings"`
-}
-
-func NewUserSettingsUpdateResult(updatedSettings map[string]string) *UserSettingsUpdateResult {
-	return &UserSettingsUpdateResult{
-		UpdatedSettings: updatedSettings,
-	}
-}
