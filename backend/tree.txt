@@ -53,11 +53,18 @@
 │   │   ├── notification
 │   │   ├── post
 │   │   └── user
+│   │       ├── user_banstatus.go
 │   │       ├── user_controller.go
 │   │       ├── user_create.go
 │   │       ├── user_delete.go
+│   │       ├── user_email.go
 │   │       ├── user_getemail.go
-│   │       └── user_getuser.go
+│   │       ├── user_getuser.go
+│   │       ├── user_notification.go
+│   │       ├── user_privacy.go
+│   │       ├── user_profile.go
+│   │       ├── user_setting.go
+│   │       └── user_username.go
 │   ├── dao
 │   │   ├── follow
 │   │   ├── like
@@ -65,13 +72,20 @@
 │   │   ├── notification
 │   │   ├── post
 │   │   └── user
+│   │       ├── user_banstatus_dao.go
 │   │       ├── user_create_dao.go
 │   │       ├── user_dao.go
 │   │       ├── user_delete_dao.go
+│   │       ├── user_email_dao.go
 │   │       ├── user_getemail_dao.go
 │   │       ├── user_getuser_dao.go
+│   │       ├── user_notification_dao.go
 │   │       ├── user_password_reset_dao.go
-│   │       └── user_signin_dao.go
+│   │       ├── user_privacy_dao.go
+│   │       ├── user_profile_dao.go
+│   │       ├── user_setting_dao.go
+│   │       ├── user_signin_dao.go
+│   │       └── user_username_dao.go
 │   ├── email
 │   │   └── email.go
 │   ├── model
@@ -86,14 +100,20 @@
 │       ├── notification
 │       ├── post
 │       └── user
+│           ├── user_banstatus.go
 │           ├── user_create.go
 │           ├── user_delete.go
-│           ├── user_getemail.go
-│           ├── user_getuser.go
+│           ├── user_email.go
+│           ├── user_get.go
+│           ├── user_notification.go
 │           ├── user_password_reset.go
+│           ├── user_privacy.go
+│           ├── user_profile.go
+│           ├── user_setting.go
 │           ├── user_signin.go
-│           └── user_usecase.go
+│           ├── user_usecase.go
+│           └── user_username.go
 ├── main.go
 └── tree.txt
 
-39 directories, 58 files
+39 directories, 78 files
