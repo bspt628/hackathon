@@ -44,6 +44,16 @@ func NewUserPrivacyUpdateResult(isPrivate bool) *UserPrivacyUpdateResult {
 	}
 }
 
+type UserBanStatusUpdateResult struct {
+	IsBanned bool `json:"is_banned"`
+}
+
+func NewUserBanStatusUpdateResult(isBanned bool) *UserBanStatusUpdateResult {
+	return &UserBanStatusUpdateResult{
+		IsBanned: isBanned,
+	}
+}
+
 type NotificationSettings struct {
 	Enabled   bool   `json:"enabled"`
 	Frequency string `json:"frequency"`

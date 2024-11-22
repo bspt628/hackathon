@@ -8,10 +8,6 @@ import (
 )
 
 func (uc *UserUsecase) UpdateUserPrivacy(ctx context.Context, isPrivate bool, id string) (*domain.UserPrivacyUpdateResult, error) {
-
-
-	// 更新結果をまとめる
-
 	// UpdateUserProfileParams構造体にデータをセット
 	arg := sqlc.UpdateUserPrivacyParams{
 		IsPrivate: 		sql.NullBool{Bool: isPrivate, Valid: true},

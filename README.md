@@ -2,6 +2,8 @@
 
 # ToDo
 
+userテーブルのlast_logined_atを更新する用に設定
+
 settingとprofileのusecase層の記法を統一
 
 json.Rawmessageの渡し方について
