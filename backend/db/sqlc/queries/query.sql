@@ -184,3 +184,17 @@ SET
     is_banned = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?;
+
+-- name: UpdateUserName :exec
+UPDATE users
+SET
+    username = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;
+
+-- name: UpdateUserEmail :exec
+UPDATE users
+SET
+    email = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?;

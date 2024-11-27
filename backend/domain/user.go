@@ -58,3 +58,25 @@ type NotificationSettings struct {
 	Enabled   bool   `json:"enabled"`
 	Frequency string `json:"frequency"`
 }
+
+
+type UserUpdateEmailResult struct {
+	Email string `json:"Email"`
+}
+
+func NewUserUpdateEmailResult(email string) *UserUpdateEmailResult{
+	return &UserUpdateEmailResult{
+		Email: email,
+	}
+}
+
+type UserUpdateUsernameResult struct {
+	Username string `json:"username"`
+}
+
+func NewUserUpdateUsernameResult(username string) *UserUpdateUsernameResult{
+	return &UserUpdateUsernameResult{
+		Username: username,
+	}
+}
+

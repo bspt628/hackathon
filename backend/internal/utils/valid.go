@@ -2,6 +2,7 @@ package utils
 
 import (
 	"net/url"
+	"regexp"
 )
 
 func IsValidURL(rawURL string) bool {
@@ -25,4 +26,12 @@ func IsValidURL(rawURL string) bool {
 	}
 
 	return true
+}
+
+// メールアドレスの形式を検証する関数
+func IsValidEmail(email string) bool {
+	// メールアドレス用の正規表現
+	const emailRegex = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	re := regexp.MustCompile(emailRegex)
+	return re.MatchString(email)
 }

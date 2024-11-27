@@ -716,6 +716,24 @@ func (q *Queries) UpdateUserBanStatus(ctx context.Context, arg UpdateUserBanStat
 	return err
 }
 
+const updateUserEmail = `-- name: UpdateUserEmail :exec
+UPDATE users
+SET
+    email = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserEmailParams struct {
+	Email string `json:"email"`
+	ID    string `json:"id"`
+}
+
+func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserEmail, arg.Email, arg.ID)
+	return err
+}
+
 const updateUserInfo = `-- name: UpdateUserInfo :exec
 UPDATE users
 SET bio = ?, location = ?
@@ -730,6 +748,24 @@ type UpdateUserInfoParams struct {
 
 func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) error {
 	_, err := q.db.ExecContext(ctx, updateUserInfo, arg.Bio, arg.Location, arg.ID)
+	return err
+}
+
+const updateUserName = `-- name: UpdateUserName :exec
+UPDATE users
+SET
+    username = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserNameParams struct {
+	Username string `json:"username"`
+	ID       string `json:"id"`
+}
+
+func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserName, arg.Username, arg.ID)
 	return err
 }
 
