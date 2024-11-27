@@ -3,8 +3,9 @@ package server
 import (
 	"database/sql"
 	"hackathon/internal/auth"
-	authController "hackathon/internal/controller/auth"
+	authcontroller "hackathon/internal/controller/auth"
 	controller "hackathon/internal/controller/user"
+	"hackathon/internal/controller/post"
 
 	"github.com/gorilla/mux"
 )
@@ -14,11 +15,11 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 
 	// コントローラーの初期化
 	userController := controller.NewUserController(dbConn)
-	myauthController := authController.NewAuthController(dbConn)
+	myauthController := authcontroller.NewAuthController(dbConn)
 	// パスワードリセットコントローラーの初期化
-	passwordResetController := authController.NewPasswordResetController(dbConn)
+	passwordResetController := authcontroller.NewPasswordResetController(dbConn)
 
-	// postController := controller.NewPostController(dbConn)
+	postController := postcontroller.NewPostController(dbConn)
 	// likeController := controller.NewLikeController(dbConn)
 	// followController := controller.NewFollowController(dbConn)
 	// notificationController := controller.NewNotificationController(dbConn)
@@ -65,7 +66,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 
 
 	// // 投稿関連
-	// router.HandleFunc("/api/posts", postController.CreatePost).Methods("POST")
+	router.HandleFunc("/api/posts", postController.CreatePost).Methods("POST")
 	// router.HandleFunc("/api/posts/recent", postController.GetRecentPosts).Methods("GET")
 	// router.HandleFunc("/api/posts/search", postController.SearchPostsByHashtag).Methods("GET")
 

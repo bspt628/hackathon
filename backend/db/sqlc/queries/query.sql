@@ -15,10 +15,6 @@ SELECT email
 FROM users
 WHERE username = ?;
 
--- name: CreatePost :execresult
-INSERT INTO posts (id, user_id, content)
-VALUES (?, ?, ?);
-
 -- name: GetRecentPosts :many
 SELECT p.*, u.username, u.display_name
 FROM posts p
@@ -198,3 +194,9 @@ SET
     email = ?,
     updated_at = CURRENT_TIMESTAMP
 WHERE id = ?;
+
+-- name: CreatePost :exec
+INSERT INTO posts (
+    id, user_id, content, media_urls, visibility, language, location, device, 
+    original_post_id, reply_to_id, root_post_id, is_repost, is_reply, created_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);

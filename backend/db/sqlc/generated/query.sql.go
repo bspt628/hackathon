@@ -82,19 +82,48 @@ func (q *Queries) CreateNotification(ctx context.Context, arg CreateNotification
 	return err
 }
 
-const createPost = `-- name: CreatePost :execresult
-INSERT INTO posts (id, user_id, content)
-VALUES (?, ?, ?)
+const createPost = `-- name: CreatePost :exec
+INSERT INTO posts (
+    id, user_id, content, media_urls, visibility, language, location, device, 
+    original_post_id, reply_to_id, root_post_id, is_repost, is_reply, created_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
 `
 
 type CreatePostParams struct {
-	ID      string         `json:"id"`
-	UserID  sql.NullString `json:"user_id"`
-	Content sql.NullString `json:"content"`
+	ID             string          `json:"id"`
+	UserID         sql.NullString  `json:"user_id"`
+	Content        sql.NullString  `json:"content"`
+	MediaUrls      json.RawMessage `json:"media_urls"`
+	Visibility     sql.NullString  `json:"visibility"`
+	Language       sql.NullString  `json:"language"`
+	Location       sql.NullString  `json:"location"`
+	Device         sql.NullString  `json:"device"`
+	OriginalPostID sql.NullString  `json:"original_post_id"`
+	ReplyToID      sql.NullString  `json:"reply_to_id"`
+	RootPostID     sql.NullString  `json:"root_post_id"`
+	IsRepost       sql.NullBool    `json:"is_repost"`
+	IsReply        sql.NullBool    `json:"is_reply"`
+	CreatedAt      sql.NullTime    `json:"created_at"`
 }
 
-func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createPost, arg.ID, arg.UserID, arg.Content)
+func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
+	_, err := q.db.ExecContext(ctx, createPost,
+		arg.ID,
+		arg.UserID,
+		arg.Content,
+		arg.MediaUrls,
+		arg.Visibility,
+		arg.Language,
+		arg.Location,
+		arg.Device,
+		arg.OriginalPostID,
+		arg.ReplyToID,
+		arg.RootPostID,
+		arg.IsRepost,
+		arg.IsReply,
+		arg.CreatedAt,
+	)
+	return err
 }
 
 const createRepost = `-- name: CreateRepost :exec
