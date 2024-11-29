@@ -51,9 +51,6 @@ func (uc *PostUsecase) CreatePost(ctx context.Context, request domain.CreatePost
 		Content:        sql.NullString{String: request.Content, Valid: true},
 		MediaUrls:      json.RawMessage(mediaUrlsJSON),
 		Visibility:     sql.NullString{String: request.Visibility, Valid: true},
-		Language:       sql.NullString{String: request.Language, Valid: true},
-		Location:       sql.NullString{String: request.Location, Valid: true},
-		Device:         sql.NullString{String: request.Device, Valid: true},
 		OriginalPostID: originalPostID,
 		ReplyToID:      replyToID,
 		RootPostID:     rootPostID,
@@ -73,8 +70,5 @@ func (uc *PostUsecase) CreatePost(ctx context.Context, request domain.CreatePost
 		Content:    request.Content,
 		MediaURLs:  request.MediaURLs,
 		Visibility: request.Visibility,
-		Language:   request.Language,
-		Location:   request.Location,
-		Device:     request.Device,
 	}, nil
 }

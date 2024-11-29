@@ -1,5 +1,6 @@
 CREATE TABLE users (
     id VARCHAR(36) PRIMARY KEY,
+    firebase_uid VARCHAR(128) UNIQUE NOT NULL,
     email VARCHAR(255) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     username VARCHAR(50) UNIQUE NOT NULL,

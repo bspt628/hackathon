@@ -29,6 +29,9 @@
 │       │   └── query.sql
 │       └── sqlc.yaml
 ├── docker-compose.yaml
+├── domain
+│   ├── post.go
+│   └── user.go
 ├── frontend_test
 │   └── index.html
 ├── go.mod
@@ -48,10 +51,14 @@
 │   │   │   ├── password_reset_controller.go
 │   │   │   └── token_controller.go
 │   │   ├── follow
+│   │   │   ├── add.go
+│   │   │   └── follow_controller.go
 │   │   ├── like
 │   │   ├── message
 │   │   ├── notification
 │   │   ├── post
+│   │   │   ├── post_controller.go
+│   │   │   └── post_create.go
 │   │   └── user
 │   │       ├── user_banstatus.go
 │   │       ├── user_controller.go
@@ -67,25 +74,29 @@
 │   │       └── user_username.go
 │   ├── dao
 │   │   ├── follow
+│   │   │   ├── follow_add.go
+│   │   │   └── follow_dao.go
 │   │   ├── like
 │   │   ├── message
 │   │   ├── notification
 │   │   ├── post
+│   │   │   ├── post_create.go
+│   │   │   └── post_dao.go
 │   │   └── user
-│   │       ├── user_banstatus_dao.go
+│   │       ├── user.go
+│   │       ├── user_banstatus.go
 │   │       ├── user_create_dao.go
-│   │       ├── user_dao.go
-│   │       ├── user_delete_dao.go
-│   │       ├── user_email_dao.go
-│   │       ├── user_getemail_dao.go
-│   │       ├── user_getuser_dao.go
-│   │       ├── user_notification_dao.go
-│   │       ├── user_password_reset_dao.go
-│   │       ├── user_privacy_dao.go
-│   │       ├── user_profile_dao.go
-│   │       ├── user_settings_dao.go
-│   │       ├── user_signin_dao.go
-│   │       └── user_username_dao.go
+│   │       ├── user_delete.go
+│   │       ├── user_email.go
+│   │       ├── user_getemail.go
+│   │       ├── user_getuser.go
+│   │       ├── user_notification.go
+│   │       ├── user_password_reset.go
+│   │       ├── user_privacy.go
+│   │       ├── user_profile.go
+│   │       ├── user_settings.go
+│   │       ├── user_signin.go
+│   │       └── user_username.go
 │   ├── email
 │   │   └── email.go
 │   ├── model
@@ -95,10 +106,14 @@
 │   │   └── server.go
 │   ├── usecase
 │   │   ├── follow
+│   │   │   ├── add.go
+│   │   │   └── follow_usecase.go
 │   │   ├── like
 │   │   ├── message
 │   │   ├── notification
 │   │   ├── post
+│   │   │   ├── post_create.go
+│   │   │   └── post_usecase.go
 │   │   └── user
 │   │       ├── user_banstatus.go
 │   │       ├── user_create.go
@@ -115,8 +130,8 @@
 │   │       └── user_username.go
 │   └── utils
 │       ├── date.go
-│       └── varidurl.go
+│       └── valid.go
 ├── main.go
 └── tree.txt
 
-40 directories, 80 files
+41 directories, 94 files

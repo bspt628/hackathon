@@ -2,6 +2,13 @@
 
 # ToDo
 
+followの実装のために、認証トークンからフォロー元（つまり自分）の情報を入手するようにしたい
+
+そのために、user createの時にFirebase AuthenticationのUIDをdatabaseに登録しておき、アプリケーションのidと結びつけておく
+
+
+_______________________
+
 userテーブルのlast_logined_atを更新する用に設定
 
 settingとprofileのusecase層の記法を統一

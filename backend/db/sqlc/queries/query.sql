@@ -1,6 +1,6 @@
 -- name: CreateUser :execresult
-INSERT INTO users (id, email, password_hash, username, display_name)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO users (id, firebase_uid, email, password_hash, username, display_name)
+VALUES (?, ?, ?, ?, ?, ?);
 
 -- name: UpdateUserInfo :exec
 UPDATE users
@@ -29,40 +29,38 @@ FROM users
 WHERE id = ?;
 
 -- name: AddLike :exec
-INSERT INTO likes (id, userId, postId)
+INSERT INTO likes (id, user_id, post_id)
 VALUES (?, ?, ?);
 
 -- name: CreateRepost :exec
 INSERT INTO reposts (id, user_id, original_post_id, is_quote_repost, additional_comment)
 VALUES (?, ?, ?, ?, ?);
 
--- name: AddFollow :exec
-INSERT INTO follows (id, followerId, followingId)
-VALUES (?, ?, ?);
+
 
 -- name: AddBlock :exec
-INSERT INTO blocks (id, blockedById, blockedUserId)
+INSERT INTO blocks (id, blocked_by_id, blocked_user_id)
 VALUES (?, ?, ?);
 
 -- name: CreateNotification :exec
-INSERT INTO notifications (id, userId, type, message)
+INSERT INTO notifications (id, user_id, type, message)
 VALUES (?, ?, ?, ?);
 
 -- name: SendDM :exec
-INSERT INTO dms (id, senderId, receiverId, content)
+INSERT INTO dms (id, sender_id, receiver_id, content)
 VALUES (?, ?, ?, ?);
 
 -- name: UpdateFollowersCount :exec
 UPDATE users
 SET followers_count = (
-    SELECT COUNT(*) FROM follows WHERE followingId = users.id
+    SELECT COUNT(*) FROM follows WHERE following_id = users.id
 )
 WHERE users.id = ?;
 
 -- name: UpdatePostLikesCount :exec
 UPDATE posts
 SET likes_count = (
-    SELECT COUNT(*) FROM likes WHERE postId = posts.id
+    SELECT COUNT(*) FROM likes WHERE post_id = posts.id
 )
 WHERE posts.id = ?;
 
@@ -71,9 +69,9 @@ SELECT p.*, u.username, u.display_name
 FROM posts p
 JOIN users u ON p.user_id = u.id
 WHERE p.user_id IN (
-    SELECT followingId
+    SELECT following_id
     FROM follows
-    WHERE followerId = ?
+    WHERE follower_id = ?
 ) OR p.user_id = ?
 ORDER BY p.created_at DESC
 LIMIT ?;
@@ -103,14 +101,14 @@ GROUP BY u.id;
 -- name: GetUnreadNotifications :many
 SELECT *
 FROM notifications
-WHERE userId = ? AND isRead = FALSE
-ORDER BY createdAt DESC;
+WHERE user_id = ? AND is_read = FALSE
+ORDER BY created_at DESC;
 
 -- name: GetDMConversation :many
 SELECT *
 FROM dms
-WHERE (senderId = ? AND receiverId = ?)
-   OR (senderId = ? AND receiverId = ?)
+WHERE (sender_id = ? AND receiver_id = ?)
+   OR (sender_id = ? AND receiver_id = ?)
 ORDER BY createdAt ASC;
 
 -- ここから自作
@@ -197,6 +195,27 @@ WHERE id = ?;
 
 -- name: CreatePost :exec
 INSERT INTO posts (
-    id, user_id, content, media_urls, visibility, language, location, device, 
+    id, user_id, content, media_urls, visibility, 
     original_post_id, reply_to_id, root_post_id, is_repost, is_reply, created_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+
+-- name: AddFollow :exec
+INSERT INTO follows (id, follower_id, following_id, created_at)
+VALUES (?, ?, ?, CURRENT_TIMESTAMP);
+
+-- name: RemoveFollow :exec
+DELETE FROM follows
+WHERE follower_id = ? AND following_id = ?;
+
+-- name: GetFollowStatus :one
+SELECT EXISTS(
+    SELECT 1
+    FROM follows
+    WHERE follower_id = ? AND following_id = ?
+) AS following;
+
+
+
+
+-- name: GetIdfromFirebaseUID :one
+SELECT id FROM users WHERE firebase_uid = ?;

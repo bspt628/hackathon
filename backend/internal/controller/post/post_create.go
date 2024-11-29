@@ -12,9 +12,6 @@ func (pc *PostController) CreatePost(w http.ResponseWriter, r *http.Request) {
 		Content        string   `json:"content"`
 		MediaURLs      []string `json:"media_urls"`
 		Visibility     string   `json:"visibility"`
-		Language       string   `json:"language"`
-		Location       string   `json:"location"`
-		Device         string   `json:"device"`
 		OriginalPostID *string  `json:"original_post_id"`
 		ReplyToID      *string  `json:"reply_to_id"`
 		RootPostID     *string  `json:"root_post_id"`

@@ -12,40 +12,40 @@ import (
 
 type Block struct {
 	ID            string         `json:"id"`
-	Blockedbyid   sql.NullString `json:"blockedbyid"`
-	Blockeduserid sql.NullString `json:"blockeduserid"`
-	Createdat     sql.NullTime   `json:"createdat"`
+	BlockedByID   sql.NullString `json:"blocked_by_id"`
+	BlockedUserID sql.NullString `json:"blocked_user_id"`
+	CreatedAt     sql.NullTime   `json:"created_at"`
 }
 
 type Dm struct {
 	ID         string         `json:"id"`
-	Senderid   sql.NullString `json:"senderid"`
-	Receiverid sql.NullString `json:"receiverid"`
+	SenderID   sql.NullString `json:"sender_id"`
+	ReceiverID sql.NullString `json:"receiver_id"`
 	Content    sql.NullString `json:"content"`
-	Createdat  sql.NullTime   `json:"createdat"`
+	CreatedAt  sql.NullTime   `json:"created_at"`
 }
 
 type Follow struct {
 	ID          string         `json:"id"`
-	Followerid  sql.NullString `json:"followerid"`
-	Followingid sql.NullString `json:"followingid"`
-	Createdat   sql.NullTime   `json:"createdat"`
+	FollowerID  sql.NullString `json:"follower_id"`
+	FollowingID sql.NullString `json:"following_id"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
 }
 
 type Like struct {
 	ID        string         `json:"id"`
-	Userid    sql.NullString `json:"userid"`
-	Postid    sql.NullString `json:"postid"`
-	Createdat sql.NullTime   `json:"createdat"`
+	UserID    sql.NullString `json:"user_id"`
+	PostID    sql.NullString `json:"post_id"`
+	CreatedAt sql.NullTime   `json:"created_at"`
 }
 
 type Notification struct {
 	ID        string         `json:"id"`
-	Userid    sql.NullString `json:"userid"`
+	UserID    sql.NullString `json:"user_id"`
 	Type      sql.NullString `json:"type"`
 	Message   sql.NullString `json:"message"`
-	Createdat sql.NullTime   `json:"createdat"`
-	Isread    sql.NullBool   `json:"isread"`
+	CreatedAt sql.NullTime   `json:"created_at"`
+	IsRead    sql.NullBool   `json:"is_read"`
 }
 
 type PasswordResetToken struct {
@@ -74,19 +74,16 @@ type Post struct {
 	RepliesCount   sql.NullInt32   `json:"replies_count"`
 	ViewsCount     sql.NullInt32   `json:"views_count"`
 	Visibility     sql.NullString  `json:"visibility"`
-	Language       sql.NullString  `json:"language"`
-	Location       sql.NullString  `json:"location"`
-	Device         sql.NullString  `json:"device"`
 	IsPinned       sql.NullBool    `json:"is_pinned"`
 	IsDeleted      sql.NullBool    `json:"is_deleted"`
 }
 
 type Reply struct {
 	ID        string         `json:"id"`
-	Userid    sql.NullString `json:"userid"`
-	Postid    sql.NullString `json:"postid"`
+	UserID    sql.NullString `json:"user_id"`
+	PostID    sql.NullString `json:"post_id"`
 	Content   sql.NullString `json:"content"`
-	Createdat sql.NullTime   `json:"createdat"`
+	CreatedAt sql.NullTime   `json:"created_at"`
 }
 
 type Repost struct {
@@ -100,6 +97,7 @@ type Repost struct {
 
 type User struct {
 	ID                   string          `json:"id"`
+	FirebaseUid          string          `json:"firebase_uid"`
 	Email                string          `json:"email"`
 	PasswordHash         string          `json:"password_hash"`
 	Username             string          `json:"username"`

@@ -6,11 +6,11 @@ import (
 	"hackathon/db/sqlc/generated"
 )
 
-func (uc *UserUsecase) CreateUser(ctx context.Context, email, passwordHash, username, displayName string) (*sqlc.User, error) {
+func (uc *UserUsecase) CreateUser(ctx context.Context,email, password, username, displayName string) (*sqlc.User, error) {
 	// CreateUserParams構造体にデータをセット
 	arg := sqlc.CreateUserParams{
 		Email:        email,
-		PasswordHash: passwordHash,
+		PasswordHash: password,
 		Username:     username,
 		DisplayName:  sql.NullString{String: displayName, Valid: true}, // displayNameが空文字の場合も考慮
 	}

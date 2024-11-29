@@ -29,7 +29,7 @@ func InitFirebase() error {
 }
 
 // Firebaseにユーザーを作成
-func CreateFirebaseUser(email, password, username, displayName string) (*auth.UserRecord, error) {
+func CreateFirebaseUser(email, password, username, displayName string) (string, error) {
 	params := (&auth.UserToCreate{}).
 		Email(email).
 		Password(password).
@@ -38,10 +38,19 @@ func CreateFirebaseUser(email, password, username, displayName string) (*auth.Us
 
 	userRecord, err := firebaseAuthClient.CreateUser(context.Background(), params)
 	if err != nil {
-		return nil, fmt.Errorf("error creating user: %v", err)
+		return "", fmt.Errorf("error creating user: %v", err)
 	}
 
-	return userRecord, nil
+	return userRecord.UID, nil
+	// userRecordからuidを取り出す
+}
+
+func DeleteFirebaseUser(uid string) error {
+	err := firebaseAuthClient.DeleteUser(context.Background(), uid)
+	if err != nil {
+		return fmt.Errorf("failed to delete Firebase user: %v", err)
+	}
+	return nil
 }
 
 // Firebase認証を使ってユーザー情報を取得
