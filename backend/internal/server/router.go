@@ -35,9 +35,9 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	router.HandleFunc("/auth/signin", myauthController.SignIn).Methods("POST")
 
 	// ユーザー関連
-	router.HandleFunc("/api/users", userController.CreateUser).Methods("POST")
+	router.HandleFunc("/users/create", userController.CreateUser).Methods("POST")
 	apiRouter.HandleFunc("/users/{id}", userController.GetUser).Methods("GET")
-	router.HandleFunc("/api/users/email/{username}", userController.GetUserEmailByUsername).Methods("GET")
+	apiRouter.HandleFunc("/users/email/{username}", userController.GetUserEmailByUsername).Methods("GET")
 	apiRouter.HandleFunc("/users/{id}", userController.DeleteUser).Methods("DELETE")
 	apiRouter.HandleFunc("/users/{id}/profile", userController.UpdateUserProfile).Methods("PUT")
 	apiRouter.HandleFunc("/users/{id}/settings", userController.UpdateUserSettings).Methods("PUT")
@@ -48,7 +48,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.HandleFunc("/users/{id}/email", userController.UpdateUserEmail).Methods("PUT")
 
 	// // 投稿関連
-	router.HandleFunc("/api/posts", postController.CreatePost).Methods("POST")
+	apiRouter.HandleFunc("/posts", postController.CreatePost).Methods("POST")
 	// router.HandleFunc("/api/posts/recent", postController.GetRecentPosts).Methods("GET")
 	// router.HandleFunc("/api/posts/search", postController.SearchPostsByHashtag).Methods("GET")
 	// router.HandleFunc("/api/timeline", postController.GetUserTimeline).Methods("GET")

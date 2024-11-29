@@ -1,6 +1,6 @@
 services:
-  curricurum_db:
-    container_name: practice_mysql
+  hackathon_db:
+    container_name: hackathon_mysql
     build:
       context: .
       dockerfile: Dockerfile
@@ -14,10 +14,10 @@ services:
       - TZ=Asia/Tokyo
     volumes:
       - type: volume
-        source: curriculum_mysql
+        source: hackathon_mysql_volume
         target: /var/lib/mysql
       - type: bind
-        source: ./init
+        source: ./db/sqlc/migrations/
         target: /docker-entrypoint-initdb.d
 
   mail:
@@ -33,6 +33,6 @@ services:
       - maildir:/tmp
 
 volumes:
-  curriculum_mysql:
-    name: practice_mysql
+  hackathon_mysql_volume:
+    name: hackathon_mysql
   maildir: {}

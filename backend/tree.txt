@@ -14,6 +14,7 @@
 │       │   ├── models.go
 │       │   └── query.sql.go
 │       ├── migrations
+│       │   ├── *
 │       │   ├── 01_create_database.sql
 │       │   ├── 02_create_users_table.sql
 │       │   ├── 03_create_posts_table.sql
@@ -52,7 +53,8 @@
 │   │   │   └── token_controller.go
 │   │   ├── follow
 │   │   │   ├── add.go
-│   │   │   └── follow_controller.go
+│   │   │   ├── follow_controller.go
+│   │   │   └── remove.go
 │   │   ├── like
 │   │   ├── message
 │   │   ├── notification
@@ -65,6 +67,7 @@
 │   │       ├── user_create.go
 │   │       ├── user_delete.go
 │   │       ├── user_email.go
+│   │       ├── user_firebase2database.go
 │   │       ├── user_getemail.go
 │   │       ├── user_getuser.go
 │   │       ├── user_notification.go
@@ -88,6 +91,7 @@
 │   │       ├── user_create_dao.go
 │   │       ├── user_delete.go
 │   │       ├── user_email.go
+│   │       ├── user_firebase2database.go
 │   │       ├── user_getemail.go
 │   │       ├── user_getuser.go
 │   │       ├── user_notification.go
@@ -119,6 +123,7 @@
 │   │       ├── user_create.go
 │   │       ├── user_delete.go
 │   │       ├── user_email.go
+│   │       ├── user_firebase2database.go
 │   │       ├── user_get.go
 │   │       ├── user_notification.go
 │   │       ├── user_password_reset.go
@@ -134,4 +139,4 @@
 ├── main.go
 └── tree.txt
 
-41 directories, 94 files
+42 directories, 98 files
