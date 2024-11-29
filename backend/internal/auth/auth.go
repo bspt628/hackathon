@@ -63,11 +63,11 @@ func GetUserInfo(uid string) (*auth.UserRecord, error) {
 }
 
 // FirebaseのIDトークンを検証し、UIDを取得する
-func VerifyIDToken(idToken string) (string, error) {
+func VerifyIDToken(idToken string) (*auth.Token, error) {
 	token, err := firebaseAuthClient.VerifyIDToken(context.Background(), idToken)
 	if err != nil {
-		return "", fmt.Errorf("error verifying ID token: %v", err)
+		return nil, fmt.Errorf("error verifying ID token: %v", err)
 	}
 	fmt.Println("Verified ID token: ", token.UID)
-	return token.UID, nil
+	return token, nil
 }

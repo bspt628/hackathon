@@ -6,8 +6,6 @@ import (
 	"net/http"
 	"os"
 	"github.com/rs/cors"
-	"strings"
-	"hackathon/internal/auth"
 )
 
 // サーバーのセットアップと起動
@@ -41,34 +39,7 @@ func Start() error {
 
 	log.Printf("サーバーをポート%sで起動します...", port)
 
-	// verifyTokenHandler を追加
-	http.HandleFunc("/verify-token", verifyTokenHandler)
-
 	return http.ListenAndServe(":"+port, handler)
 }
 
 
-// verifyTokenHandlerは、Firebase認証のIDトークンを検証するためのハンドラーです。
-func verifyTokenHandler(w http.ResponseWriter, r *http.Request) {
-	// AuthorizationヘッダーからIDトークンを取得
-	authHeader := r.Header.Get("Authorization")
-	if authHeader == "" {
-		http.Error(w, "Authorization header missing", http.StatusUnauthorized)
-		return
-	}
-
-	// "Bearer "を取り除いてトークン部分を取得
-	token := strings.TrimPrefix(authHeader, "Bearer ")
-
-	// FirebaseのIDトークンを検証し、UIDを取得
-	uid, err := auth.VerifyIDToken(token)
-	if err != nil {
-		http.Error(w, "Firebase authentication failed: "+err.Error(), http.StatusUnauthorized)
-		return
-	}
-
-	// UIDが正常に取得できた場合、成功メッセージを返す
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusOK)
-	w.Write([]byte(`{"message": "Token is valid", "uid": "` + uid + `"}`))
-}
