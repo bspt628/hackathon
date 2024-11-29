@@ -1,4 +1,4 @@
-package dao
+package userdao
 
 import (
 	"context"
@@ -42,8 +42,6 @@ func (dao *UserPasswordResetDAO) ValidateResetToken(ctx context.Context, token s
 	return email, nil
 }
 
-
-
 // トークンの削除
 func (dao *UserPasswordResetDAO) DeleteResetToken(ctx context.Context, token string) error {
 	if err := dao.db.DeleteResetToken(ctx, token); err != nil {
@@ -61,7 +59,7 @@ func (dao *UserPasswordResetDAO) UpdatePasswordByEmail(ctx context.Context, emai
 	}
 	params := sqlc.UpdatePasswordByEmailParams{
 		PasswordHash: string(hashedPassword),
-		Email: email,
+		Email:        email,
 	}
 
 	if err := dao.db.UpdatePasswordByEmail(ctx, params); err != nil {

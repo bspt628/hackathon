@@ -1,4 +1,4 @@
-package usecase
+package userusecase
 
 import (
 	"context"
@@ -10,8 +10,8 @@ import (
 func (uc *UserUsecase) UpdateUserBanStatus(ctx context.Context, isBanned bool, id string) (*domain.UserBanStatusUpdateResult, error) {
 	// UpdateUserProfileParams構造体にデータをセット
 	arg := sqlc.UpdateUserBanStatusParams{
-		IsBanned: 		sql.NullBool{Bool: isBanned, Valid: true},
-		ID: 			id,
+		IsBanned: sql.NullBool{Bool: isBanned, Valid: true},
+		ID:       id,
 	}
 
 	// ユーザー情報を更新

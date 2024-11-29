@@ -1,27 +1,25 @@
-package usecase
+package userusecase
 
 import (
 	"context"
 	"fmt"
-	"strings"
-	"hackathon/db/sqlc/generated"
-	"hackathon/internal/utils"
+	sqlc "hackathon/db/sqlc/generated"
 	"hackathon/domain"
+	"hackathon/internal/utils"
+	"strings"
 )
 
-
-func (uc *UserUsecase) UpdateUserEmail(ctx context.Context, email string, id string)  (*domain.UserUpdateEmailResult, error) {
+func (uc *UserUsecase) UpdateUserEmail(ctx context.Context, email string, id string) (*domain.UserUpdateEmailResult, error) {
 	// 入力検証
-	if !utils.IsValidEmail(email){
+	if !utils.IsValidEmail(email) {
 		return nil, fmt.Errorf("有効なメールアドレスを入力してください")
 	}
 
 	// todo 現在と同じメールアドレスの場合はエラーを返す
-		
 
 	arg := sqlc.UpdateUserEmailParams{
 		Email: email,
-		ID:			  id,
+		ID:    id,
 	}
 
 	// DAO層の関数を呼び出す

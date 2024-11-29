@@ -3,8 +3,8 @@ package server
 import (
 	"database/sql"
 	"hackathon/internal/auth"
-	authcontroller "hackathon/internal/controller/auth"
-	controller "hackathon/internal/controller/user"
+	"hackathon/internal/controller/auth"
+	"hackathon/internal/controller/user"
 	"hackathon/internal/controller/follow"
 	"hackathon/internal/controller/post"
 
@@ -15,7 +15,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	router := mux.NewRouter()
 
 	// コントローラーの初期化
-	userController := controller.NewUserController(dbConn)
+	userController := usercontroller.NewUserController(dbConn)
 	myauthController := authcontroller.NewAuthController(dbConn)
 	// パスワードリセットコントローラーの初期化
 	passwordResetController := authcontroller.NewPasswordResetController(dbConn)

@@ -1,9 +1,10 @@
-package dao
+package userdao
 
 import (
 	"context"
-	"hackathon/db/sqlc/generated"
 	"fmt"
+	sqlc "hackathon/db/sqlc/generated"
+
 	"github.com/go-sql-driver/mysql"
 )
 

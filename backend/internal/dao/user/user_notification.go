@@ -1,8 +1,8 @@
-package dao
+package userdao
 
 import (
 	"context"
-	"hackathon/db/sqlc/generated"
+	sqlc "hackathon/db/sqlc/generated"
 )
 
 func (dao *UserDAO) UpdateUserNotifications(ctx context.Context, params sqlc.UpdateUserNotificationsParams) error {

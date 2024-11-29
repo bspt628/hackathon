@@ -1,4 +1,4 @@
-package usecase
+package userusecase
 
 import (
 	"context"
@@ -56,7 +56,6 @@ func (u *UserPasswordResetUsecase) ResetPassword(ctx context.Context, token, new
 	// トークン削除
 	return u.passwordResetDAO.DeleteResetToken(ctx, token)
 }
-
 
 // メール送信
 func sendEmail(to, subject, body string) error {

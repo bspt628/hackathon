@@ -1,4 +1,4 @@
-package authController
+package authcontroller
 
 import (
 	"fmt"
@@ -11,13 +11,13 @@ import (
 )
 
 type PasswordResetController struct {
-	passwordResetUsecase *usecase.UserPasswordResetUsecase
+	passwordResetUsecase *userusecase.UserPasswordResetUsecase
 }
 
 func NewPasswordResetController(dbConn *sql.DB) *PasswordResetController {
 	queries := sqlc.New(dbConn)
-	passwordResetDAO := dao.NewUserPasswordResetDAO(queries)
-	passwordResetUsecase := usecase.NewUserPasswordResetUsecase(passwordResetDAO)
+	passwordResetDAO := userdao.NewUserPasswordResetDAO(queries)
+	passwordResetUsecase := userusecase.NewUserPasswordResetUsecase(passwordResetDAO)
 	return &PasswordResetController{passwordResetUsecase: passwordResetUsecase}
 }
 

@@ -1,8 +1,8 @@
-package dao
+package userdao
 
 import (
 	"context"
-	"hackathon/db/sqlc/generated"
+	sqlc "hackathon/db/sqlc/generated"
 )
 
 func (dao *UserDAO) GetUser(ctx context.Context, id string) (*sqlc.User, error) {
@@ -14,15 +14,15 @@ func (dao *UserDAO) GetUser(ctx context.Context, id string) (*sqlc.User, error) 
 
 	// GetUserByIdRowからdb.Userに変換
 	user := &sqlc.User{
-		ID:            row.ID,
-		Email:         row.Email,
-		Username:      row.Username,
-		DisplayName:   row.DisplayName,
-		Bio:           row.Bio,
-		Location:      row.Location,
+		ID:             row.ID,
+		Email:          row.Email,
+		Username:       row.Username,
+		DisplayName:    row.DisplayName,
+		Bio:            row.Bio,
+		Location:       row.Location,
 		FollowersCount: row.FollowersCount,
 		FollowingCount: row.FollowingCount,
-		PostsCount:    row.PostsCount,
+		PostsCount:     row.PostsCount,
 	}
 
 	return user, nil

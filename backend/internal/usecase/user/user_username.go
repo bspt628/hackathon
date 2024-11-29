@@ -1,27 +1,24 @@
-package usecase
+package userusecase
 
 import (
 	"context"
 	"fmt"
-	"strings"
-	"hackathon/db/sqlc/generated"
-	
+	sqlc "hackathon/db/sqlc/generated"
 	"hackathon/domain"
+	"strings"
 )
 
-
-func (uc *UserUsecase) UpdateUserName(ctx context.Context, username string, id string)  (*domain.UserUpdateUsernameResult, error) {
+func (uc *UserUsecase) UpdateUserName(ctx context.Context, username string, id string) (*domain.UserUpdateUsernameResult, error) {
 	// 入力検証
 	if username == "" {
 		return nil, fmt.Errorf("ユーザー名を入力してください")
 	}
 
 	// todo 現在と同じメールアドレスの場合はエラーを返す
-		
 
 	arg := sqlc.UpdateUserNameParams{
 		Username: username,
-		ID:			  id,
+		ID:       id,
 	}
 
 	// DAO層の関数を呼び出す

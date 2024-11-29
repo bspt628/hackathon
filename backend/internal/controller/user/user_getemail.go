@@ -1,6 +1,4 @@
-// user_email_handler.go
-
-package controller
+package usercontroller
 
 import (
 	"encoding/json"

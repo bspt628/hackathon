@@ -1,4 +1,4 @@
-package usecase
+package userusecase
 
 import (
 	"context"
@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"hackathon/internal/auth"
 	"time"
+
 	"golang.org/x/crypto/bcrypt"
 )
 

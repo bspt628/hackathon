@@ -1,8 +1,6 @@
-package dao
+package userdao
 
-import (
-	"hackathon/db/sqlc/generated"
-)
+import sqlc "hackathon/db/sqlc/generated"
 
 type UserDAO struct {
 	db *sqlc.Queries
@@ -11,4 +9,3 @@ type UserDAO struct {
 func NewUserDAO(db *sqlc.Queries) *UserDAO {
 	return &UserDAO{db: db}
 }
-

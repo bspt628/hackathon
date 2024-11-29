@@ -1,16 +1,12 @@
-package usecase
+package userusecase
 
 import (
 	"context"
-	"hackathon/db/sqlc/generated"
-	"hackathon/domain"
 	"encoding/json"
 	"fmt"
-
+	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/domain"
 )
-
-
-
 
 func (uc *UserUsecase) UpdateUserNotifications(ctx context.Context, notificationSettings domain.NotificationSettings, id string) (*domain.UserNotificationsUpdateResult, error) {
 	// notificationSettings を JSON にエンコード

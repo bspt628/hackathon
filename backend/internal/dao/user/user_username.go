@@ -1,12 +1,12 @@
-package dao
+package userdao
 
 import (
 	"context"
-	"github.com/go-sql-driver/mysql"
 	"fmt"
-	"hackathon/db/sqlc/generated"
-)
+	sqlc "hackathon/db/sqlc/generated"
 
+	"github.com/go-sql-driver/mysql"
+)
 
 // ユーザーのメールアドレスを更新
 func (dao *UserDAO) UpdateUserName(ctx context.Context, params sqlc.UpdateUserNameParams) error {

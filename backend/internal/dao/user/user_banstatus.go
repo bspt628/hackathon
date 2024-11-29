@@ -1,8 +1,8 @@
-package dao
+package userdao
 
 import (
 	"context"
-	"hackathon/db/sqlc/generated"
+	sqlc "hackathon/db/sqlc/generated"
 )
 
 // プライバシー設定を更新

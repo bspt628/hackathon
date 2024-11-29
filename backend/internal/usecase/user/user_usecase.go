@@ -1,7 +1,7 @@
-package usecase
+package userusecase
 
 import (
-	"hackathon/internal/dao/user"
+	dao "hackathon/internal/dao/user"
 )
 
 type UserUsecase struct {
@@ -19,7 +19,6 @@ type UserSignInUsecase struct {
 func NewUserSignInUsecase(dao *dao.UserSignInDAO) *UserSignInUsecase {
 	return &UserSignInUsecase{dao: dao}
 }
-
 
 type UserPasswordResetUsecase struct {
 	passwordResetDAO *dao.UserPasswordResetDAO

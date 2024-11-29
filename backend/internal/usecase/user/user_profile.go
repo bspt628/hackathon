@@ -1,13 +1,13 @@
-package usecase
+package userusecase
 
 import (
 	"context"
 	"database/sql"
-	"hackathon/db/sqlc/generated"
-	"hackathon/domain"
-	"strings"
 	"errors"
+	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/domain"
 	"hackathon/internal/utils"
+	"strings"
 )
 
 func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, profile_image_url, bio, location, website, id string) (*domain.UserProfileUpdateResult, error) {
@@ -17,7 +17,7 @@ func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, profile_image_url,
 		Bio:             sql.NullString{String: bio, Valid: bio != ""},
 		Location:        sql.NullString{String: location, Valid: location != ""},
 		Website:         sql.NullString{String: website, Valid: website != ""},
-		ID:			  id,
+		ID:              id,
 	}
 
 	// 更新結果をまとめる

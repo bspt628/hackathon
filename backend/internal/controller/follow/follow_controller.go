@@ -16,11 +16,11 @@ type FollowController struct {
 func NewFollowController(dbConn *sql.DB) *FollowController {
 	// UserDAOとFollowDAOを作成
 	queries := sqlc.New(dbConn)
-	userDAO := dao.NewUserDAO(queries)
+	userDAO := userdao.NewUserDAO(queries)
 	followDAO := followdao.NewFollowDAO(queries)
 
 	// UserUsecaseを初期化
-	userUsecase := usecase.NewUserUsecase(userDAO)
+	userUsecase := userusecase.NewUserUsecase(userDAO)
 
 	// FollowUsecaseを初期化
 	followUsecase := followusecase.NewFollowUsecase(followDAO, userUsecase)

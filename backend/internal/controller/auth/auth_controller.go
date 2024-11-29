@@ -1,4 +1,4 @@
-package authController
+package authcontroller
 
 import (
 	"database/sql"
@@ -8,14 +8,12 @@ import (
 )
 
 type AuthController struct {
-	signInUsecase *usecase.UserSignInUsecase
+	signInUsecase *userusecase.UserSignInUsecase
 }
-
-
 
 func NewAuthController(dbConn *sql.DB) *AuthController {
 	queries := sqlc.New(dbConn)
-	signInDAO := dao.NewUserSignInDAO(queries)
-	signInUsecase := usecase.NewUserSignInUsecase(signInDAO)
+	signInDAO := userdao.NewUserSignInDAO(queries)
+	signInUsecase := userusecase.NewUserSignInUsecase(signInDAO)
 	return &AuthController{signInUsecase: signInUsecase}
 }

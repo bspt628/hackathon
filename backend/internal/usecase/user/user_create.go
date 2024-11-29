@@ -1,12 +1,12 @@
-package usecase
+package userusecase
 
 import (
 	"context"
 	"database/sql"
-	"hackathon/db/sqlc/generated"
+	sqlc "hackathon/db/sqlc/generated"
 )
 
-func (uc *UserUsecase) CreateUser(ctx context.Context,email, password, username, displayName string) (*sqlc.User, error) {
+func (uc *UserUsecase) CreateUser(ctx context.Context, email, password, username, displayName string) (*sqlc.User, error) {
 	// CreateUserParams構造体にデータをセット
 	arg := sqlc.CreateUserParams{
 		Email:        email,

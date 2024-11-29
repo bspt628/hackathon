@@ -1,11 +1,11 @@
-package usecase
+package userusecase
 
 import (
 	"context"
 	"database/sql"
 	"errors"
 	"fmt"
-	"hackathon/db/sqlc/generated"
+	sqlc "hackathon/db/sqlc/generated"
 	"hackathon/domain"
 	"hackathon/internal/utils"
 	"strings"
@@ -13,7 +13,6 @@ import (
 )
 
 func (uc *UserUsecase) UpdateUserSettings(ctx context.Context, displayName string, birthDate string, language, id string) (*domain.UserSettingsUpdateResult, error) {
-
 
 	// 更新結果をまとめる
 	updatedSettings := map[string]string{}
@@ -47,13 +46,13 @@ func (uc *UserUsecase) UpdateUserSettings(ctx context.Context, displayName strin
 		updatedSettings["language"] = language
 	}
 
-		// UpdateUserProfileParams構造体にデータをセット
-		arg := sqlc.UpdateUserSettingsParams{
-			DisplayName:    sql.NullString{String: displayName, Valid: displayName != ""},
-			BirthDate: 		birthDateObj,
-			Language: 		sql.NullString{String: language, Valid: language != ""},
-			ID: 			id,
-		}
+	// UpdateUserProfileParams構造体にデータをセット
+	arg := sqlc.UpdateUserSettingsParams{
+		DisplayName: sql.NullString{String: displayName, Valid: displayName != ""},
+		BirthDate:   birthDateObj,
+		Language:    sql.NullString{String: language, Valid: language != ""},
+		ID:          id,
+	}
 
 	// ユーザー情報を更新
 	err := uc.dao.UpdateUserSettings(ctx, arg)

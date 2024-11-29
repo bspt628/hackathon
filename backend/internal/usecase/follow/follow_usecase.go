@@ -7,9 +7,9 @@ import (
 
 type FollowUsecase struct {
 	followDAO   *followdao.FollowDAO
-	userUsecase *usecase.UserUsecase
+	userUsecase *userusecase.UserUsecase
 }
 
-func NewFollowUsecase(followDAO *followdao.FollowDAO, userUsecase *usecase.UserUsecase) *FollowUsecase {
+func NewFollowUsecase(followDAO *followdao.FollowDAO, userUsecase *userusecase.UserUsecase) *FollowUsecase {
 	return &FollowUsecase{followDAO: followDAO, userUsecase: userUsecase}
 }
