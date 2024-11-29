@@ -36,7 +36,7 @@ func (uc *UserController) UpdateUserSettings(w http.ResponseWriter, r *http.Requ
 
 	user, err := uc.userUsecase.UpdateUserSettings(context.Background(), request.DisplayName, request.BirthDate, request.Language, ID)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("ユーザープロフィール更新に失敗しました: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("ユーザー設定更新に失敗しました: %v", err), http.StatusInternalServerError)
 		return
 	}
 

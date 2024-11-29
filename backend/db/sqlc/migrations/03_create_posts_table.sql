@@ -17,8 +17,8 @@ CREATE TABLE posts (
     visibility VARCHAR(20),
     is_pinned BOOLEAN DEFAULT FALSE,
     is_deleted BOOLEAN DEFAULT FALSE,
-    FOREIGN KEY (user_id) REFERENCES users(id),
-    FOREIGN KEY (original_post_id) REFERENCES posts(id),
-    FOREIGN KEY (reply_to_id) REFERENCES posts(id),
-    FOREIGN KEY (root_post_id) REFERENCES posts(id)
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (original_post_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (reply_to_id) REFERENCES posts(id) ON DELETE CASCADE,
+    FOREIGN KEY (root_post_id) REFERENCES posts(id) ON DELETE CASCADE
 );

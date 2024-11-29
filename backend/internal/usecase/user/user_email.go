@@ -12,7 +12,7 @@ import (
 func (uc *UserUsecase) UpdateUserEmail(ctx context.Context, email string, id string) (*domain.UserUpdateEmailResult, error) {
 	// 入力検証
 	if !utils.IsValidEmail(email) {
-		return nil, fmt.Errorf("有効なメールアドレスを入力してください")
+		return nil, fmt.Errorf("有効なメールアドレスを入力してください。")
 	}
 
 	// todo 現在と同じメールアドレスの場合はエラーを返す
@@ -27,7 +27,7 @@ func (uc *UserUsecase) UpdateUserEmail(ctx context.Context, email string, id str
 	if err != nil {
 		// 重複エラーの場合
 		if strings.Contains(err.Error(), "is already taken") {
-			return nil, fmt.Errorf("このユーザー名は既に使用されています")
+			return nil, fmt.Errorf("このメールアドレスは既に使用されています。")
 		}
 		// その他のエラー
 		return nil, fmt.Errorf("ユーザー名の更新に失敗しました: %v", err)

@@ -26,7 +26,7 @@ func (uc *UserUsecase) UpdateUserName(ctx context.Context, username string, id s
 	if err != nil {
 		// 重複エラーの場合
 		if strings.Contains(err.Error(), "is already taken") {
-			return nil, fmt.Errorf("このユーザー名は既に使用されています")
+			return nil, fmt.Errorf("このユーザー名は既に使用されています。")
 		}
 		// その他のエラー
 		return nil, fmt.Errorf("ユーザー名の更新に失敗しました: %v", err)
