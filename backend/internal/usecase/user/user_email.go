@@ -3,15 +3,15 @@ package userusecase
 import (
 	"context"
 	"fmt"
-	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/db/sqlc/generated"
 	"hackathon/domain"
-	"hackathon/internal/utils"
 	"strings"
+	"regexp"
 )
 
 func (uc *UserUsecase) UpdateUserEmail(ctx context.Context, email string, id string) (*domain.UserUpdateEmailResult, error) {
 	// 入力検証
-	if !utils.IsValidEmail(email) {
+	if !IsValidEmail(email) {
 		return nil, fmt.Errorf("有効なメールアドレスを入力してください。")
 	}
 
@@ -34,4 +34,12 @@ func (uc *UserUsecase) UpdateUserEmail(ctx context.Context, email string, id str
 	}
 
 	return domain.NewUserUpdateEmailResult(email), nil
+}
+
+// メールアドレスの形式を検証する関数
+func IsValidEmail(email string) bool {
+	// メールアドレス用の正規表現
+	const emailRegex = `^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$`
+	re := regexp.MustCompile(emailRegex)
+	return re.MatchString(email)
 }

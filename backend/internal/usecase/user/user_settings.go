@@ -7,7 +7,6 @@ import (
 	"fmt"
 	sqlc "hackathon/db/sqlc/generated"
 	"hackathon/domain"
-	"hackathon/internal/utils"
 	"strings"
 	"time"
 )
@@ -28,7 +27,7 @@ func (uc *UserUsecase) UpdateUserSettings(ctx context.Context, displayName strin
 	// 生年月日のバリデーション
 	var birthDateObj sql.NullTime
 	if birthDate != "" {
-		parsedTime, err := utils.NewDate(birthDate)
+		parsedTime, err := NewDate(birthDate)
 		if err != nil {
 			return nil, fmt.Errorf("生年月日が無効です: %v", err)
 		}
@@ -61,4 +60,18 @@ func (uc *UserUsecase) UpdateUserSettings(ctx context.Context, displayName strin
 	}
 
 	return domain.NewUserSettingsUpdateResult(updatedSettings), nil
+}
+
+type Date struct {
+	sql.NullTime
+}
+
+// Date型のコンストラクタメソッド
+func NewDate(birthDate string) (time.Time, error) {
+	// birthDateが空文字でない場合のみ、time.TimeをセットしてValidをtrueにする
+	if birthDate == "" {
+		return time.Time{}, fmt.Errorf("誕生日が設定されていません") // 空文字の場合はNullTimeを無効にする
+	}
+	// 日付文字列をtime.Timeに変換
+	return  time.Parse("2006-01-02", birthDate)
 }

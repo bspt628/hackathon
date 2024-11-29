@@ -5,20 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/gorilla/mux"
-
 )
 
 func (uc *UserController) UpdateUserPrivacy(w http.ResponseWriter, r *http.Request) {
 	var request struct {
 		IsPrivate bool `json:"is_private"`
 	}
-	vars := mux.Vars(r)
-	ID := vars["id"]
-
-	if ID == "" {
-		http.Error(w, "IDパラメータが指定されていません", http.StatusBadRequest)
+	ID, _, err := uc.userUsecase.GetUserIDFromFirebaseUID(context.Background(), r)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("ユーザーIDの取得に失敗しました: %v", err), http.StatusInternalServerError)
 		return
 	}
 

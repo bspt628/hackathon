@@ -5,9 +5,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/gorilla/mux"
-
 )
 
 func (uc *UserController) UpdateUserSettings(w http.ResponseWriter, r *http.Request) {
@@ -16,11 +13,9 @@ func (uc *UserController) UpdateUserSettings(w http.ResponseWriter, r *http.Requ
 		BirthDate       string `json:"birth_date"`
 		Language        string `json:"language"`
 	}
-	vars := mux.Vars(r)
-	ID := vars["id"]
-
-	if ID == "" {
-		http.Error(w, "IDパラメータが指定されていません", http.StatusBadRequest)
+	ID, _, err := uc.userUsecase.GetUserIDFromFirebaseUID(context.Background(), r)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("ユーザーIDの取得に失敗しました: %v", err), http.StatusInternalServerError)
 		return
 	}
 

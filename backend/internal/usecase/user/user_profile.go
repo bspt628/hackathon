@@ -6,8 +6,8 @@ import (
 	"errors"
 	sqlc "hackathon/db/sqlc/generated"
 	"hackathon/domain"
-	"hackathon/internal/utils"
 	"strings"
+	"net/url"
 )
 
 func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, profile_image_url, bio, location, website, id string) (*domain.UserProfileUpdateResult, error) {
@@ -24,7 +24,7 @@ func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, profile_image_url,
 	updatedFields := map[string]string{}
 	if arg.ProfileImageUrl.Valid {
 		updatedFields["profile_image_url"] = arg.ProfileImageUrl.String
-		if !utils.IsValidURL(profile_image_url) {
+		if !IsValidURL(profile_image_url) {
 			return nil, errors.New("プロフィール画像のURLが無効です")
 		}
 		if !strings.HasPrefix(profile_image_url, "http://") && !strings.HasPrefix(profile_image_url, "https://") {
@@ -51,7 +51,7 @@ func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, profile_image_url,
 		if len(website) > 255 {
 			return nil, errors.New("ウェブサイトのURLは255文字以内で入力してください")
 		}
-		if !utils.IsValidURL(website) {
+		if !IsValidURL(website) {
 			return nil, errors.New("ウェブサイトのURLが無効です")
 		}
 		if !strings.HasPrefix(website, "http://") && !strings.HasPrefix(website, "https://") {
@@ -67,3 +67,27 @@ func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, profile_image_url,
 
 	return domain.NewUserProfileUpdateResult(updatedFields), nil
 }
+
+func IsValidURL(rawURL string) bool {
+	// 文字列が空の場合は無効
+	if rawURL == "" {
+		return false
+	}
+
+	// URLを解析
+	parsedURL, err := url.Parse(rawURL)
+	if err != nil {
+		return false
+	}
+
+	// スキーム（httpまたはhttps）とホスト名が存在するかを確認
+	if parsedURL.Scheme != "http" && parsedURL.Scheme != "https" {
+		return false
+	}
+	if parsedURL.Host == "" {
+		return false
+	}
+
+	return true
+}
+
