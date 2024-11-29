@@ -4,7 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"hackathon/internal/auth"
+	"hackathon/internal/auth/jwt_unused"
 	"time"
 
 	"golang.org/x/crypto/bcrypt"
@@ -28,7 +28,7 @@ func (uc *UserUsecase) SignIn(ctx context.Context, username, password string) (s
 	}
 
 	// トークンを生成
-	token, err := auth.GenerateToken(userID, time.Hour*24)
+	token, err := jwtunused.GenerateToken(userID, time.Hour*24)
 	if err != nil {
 		return "", err
 	}

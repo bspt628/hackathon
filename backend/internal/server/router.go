@@ -38,7 +38,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.HandleFunc("/users/{id}/ban-status", userController.UpdateUserBanStatus).Methods("PUT")
 	apiRouter.HandleFunc("/users/{id}/username", userController.UpdateUserName).Methods("PUT")
 	apiRouter.HandleFunc("/users/{id}/email", userController.UpdateUserEmail).Methods("PUT")
-	apiRouter.HandleFunc("/users/email/{username}", userController.GetUserEmailByUsername).Methods("GET")
+	router.HandleFunc("/api/users/email/{username}", userController.GetUserEmailByUsername).Methods("GET")
 	apiRouter.HandleFunc("/users/password-reset/request", userController.HandlePasswordResetRequest).Methods("POST") 
 	apiRouter.HandleFunc("/users/password-reset/reset", userController.ResetPassword).Methods("POST")                
 
