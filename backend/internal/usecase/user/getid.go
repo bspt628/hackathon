@@ -21,6 +21,7 @@ func (uc *UserUsecase)GetUserIDFromFirebaseUID(ctx context.Context, r *http.Requ
 	if err != nil {
 		return "", "", fmt.Errorf("ユーザーIDの取得に失敗しました: %v", err)
 	}
+	fmt.Println("id[", id,"]でログイン中")
 
 	return id, firebaseUID, nil
 }

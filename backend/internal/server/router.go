@@ -30,6 +30,18 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 
 	apiRouter.HandleFunc("/users/get/{id}", userController.GetUser).Methods("GET")
 	apiRouter.HandleFunc("/users/delete", userController.DeleteUser).Methods("DELETE")
+	apiRouter.HandleFunc("/users/email/{username}", userController.GetUserEmailByUsername).Methods("GET")
+	
+	apiRouter.HandleFunc("/users/password-reset/request", userController.HandlePasswordResetRequest).Methods("POST") 
+	apiRouter.HandleFunc("/users/password-reset/reset", userController.ResetPassword).Methods("POST")  
+
+	// apiRouter.HandleFunc("/users/profile/{id}", userController.GetUserProfile).Methods("GET")
+	// apiRouter.HandleFunc("/users/settings/{id}", userController.GetUserSettings).Methods("GET")
+	// apiRouter.HandleFunc("/users/notification-settings/{id}", userController.GetUserNotifications).Methods("GET")
+	// apiRouter.HandleFunc("/users/privacy/{id}", userController.GetUserPrivacy).Methods("GET")
+	// apiRouter.HandleFunc("/users/ban-status/{id}", userController.GetUserBanStatus).Methods("GET")
+	// apiRouter.HandleFunc("/users/username/{id}", userController.GetUserName).Methods("GET")
+	// apiRouter.HandleFunc("/users/email/{id}", userController.GetUserEmail).Methods("GET")
 
 	apiRouter.HandleFunc("/users/profile", userController.UpdateUserProfile).Methods("PUT")
 	apiRouter.HandleFunc("/users/settings", userController.UpdateUserSettings).Methods("PUT")
@@ -38,9 +50,6 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.HandleFunc("/users/ban-status", userController.UpdateUserBanStatus).Methods("PUT")
 	apiRouter.HandleFunc("/users/username", userController.UpdateUserName).Methods("PUT")
 	apiRouter.HandleFunc("/users/email", userController.UpdateUserEmail).Methods("PUT")
-	router.HandleFunc("/api/users/email/{username}", userController.GetUserEmailByUsername).Methods("GET")
-	apiRouter.HandleFunc("/users/password-reset/request", userController.HandlePasswordResetRequest).Methods("POST") 
-	apiRouter.HandleFunc("/users/password-reset/reset", userController.ResetPassword).Methods("POST")                
 
 	// 投稿関連
 	apiRouter.HandleFunc("/posts", postController.CreatePost).Methods("POST")

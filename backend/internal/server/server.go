@@ -37,7 +37,7 @@ func Start() error {
 		port = "8080"
 	}
 
-	log.Printf("サーバーをポート%sで起動します...", port)
+	log.Printf("サーバーをポート%sで起動...", port)
 
 	return http.ListenAndServe(":"+port, handler)
 }

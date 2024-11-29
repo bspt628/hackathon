@@ -19,18 +19,17 @@ func InitDB() (*sql.DB, error) {
 	// 接続文字列を作成
 	connStr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", 
 		mysqlUser, mysqlPwd, mysqlHost, mysqlPort, mysqlDatabase)
-	fmt.Println(connStr)
 	// データベース接続を開く
 	db, err := sql.Open("mysql", connStr)
 	if err != nil {
-		return nil, fmt.Errorf("データベースの初期化に失敗しました: %v", err)
+		return nil, fmt.Errorf("データベースの初期化に失敗: %v", err)
 	}
 
 	// 接続の確認
 	if err := db.Ping(); err != nil {
-		return nil, fmt.Errorf("データベースへの接続に失敗しました: %v", err)
+		return nil, fmt.Errorf("データベースへの接続に失敗: %v", err)
 	}
 
-	fmt.Println("データベースの初期化に成功しました！")
+	fmt.Println("データベースの初期化に成功")
 	return db, nil
 }

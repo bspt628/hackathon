@@ -3,7 +3,6 @@ package userusecase
 import (
 	"context"
 	"errors"
-	"fmt"
 	"hackathon/internal/auth/jwt_unused"
 	"time"
 
@@ -14,12 +13,10 @@ import (
 func (uc *UserUsecase) SignIn(ctx context.Context, username, password string) (string, error) {
 	// DAOからユーザー情報を取得
 	// emailを出力
-	fmt.Printf("username: %s\n", username)
 	userID, passwordHash, err := uc.dao.GetUserByEmail(ctx, username)
 	if err != nil {
 		return "", err
 	}
-	fmt.Printf("userID: %s, passwordHash: [%s] [%s]\n", userID, passwordHash, password)
 
 	// パスワードの検証
 	err = bcrypt.CompareHashAndPassword([]byte(passwordHash), []byte(password))

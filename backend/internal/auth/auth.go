@@ -68,6 +68,5 @@ func VerifyIDToken(idToken string) (*auth.Token, error) {
 	if err != nil {
 		return nil, fmt.Errorf("error verifying ID token: %v", err)
 	}
-	fmt.Println("Verified ID token: ", token.UID)
 	return token, nil
 }
