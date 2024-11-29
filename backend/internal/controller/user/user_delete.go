@@ -21,7 +21,7 @@ func (uc *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("DB id from token",id)
 
 	// Usecase層を通してユーザーを削除
-	if err := uc.userUsecase.DeleteUser(context.Background(), id); err != nil {
+	if err := uc.userUsecase.DeleteUser(context.Background(), id, firebaseUID); err != nil {
 		http.Error(w, fmt.Sprintf("ユーザー削除に失敗しました: %v", err), http.StatusInternalServerError)
 		return
 	}

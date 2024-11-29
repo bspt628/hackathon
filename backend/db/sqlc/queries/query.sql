@@ -217,5 +217,8 @@ SELECT EXISTS(
 
 
 
--- name: GetIdfromFirebaseUID :one
+-- name: GetIDfromFirebaseUID :one
 SELECT id FROM users WHERE firebase_uid = ?;
+
+-- name: GetFirebaseUIDfromUserID :one
+SELECT firebase_uid FROM users WHERE id = ?;

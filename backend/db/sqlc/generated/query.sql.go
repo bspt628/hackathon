@@ -250,6 +250,17 @@ func (q *Queries) GetEmailFromUsername(ctx context.Context, username string) (st
 	return email, err
 }
 
+const getFirebaseUIDfromUserID = `-- name: GetFirebaseUIDfromUserID :one
+SELECT firebase_uid FROM users WHERE id = ?
+`
+
+func (q *Queries) GetFirebaseUIDfromUserID(ctx context.Context, id string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getFirebaseUIDfromUserID, id)
+	var firebase_uid string
+	err := row.Scan(&firebase_uid)
+	return firebase_uid, err
+}
+
 const getFollowStatus = `-- name: GetFollowStatus :one
 SELECT EXISTS(
     SELECT 1
@@ -270,12 +281,12 @@ func (q *Queries) GetFollowStatus(ctx context.Context, arg GetFollowStatusParams
 	return following, err
 }
 
-const getIdfromFirebaseUID = `-- name: GetIdfromFirebaseUID :one
+const getIDfromFirebaseUID = `-- name: GetIDfromFirebaseUID :one
 SELECT id FROM users WHERE firebase_uid = ?
 `
 
-func (q *Queries) GetIdfromFirebaseUID(ctx context.Context, firebaseUid string) (string, error) {
-	row := q.db.QueryRowContext(ctx, getIdfromFirebaseUID, firebaseUid)
+func (q *Queries) GetIDfromFirebaseUID(ctx context.Context, firebaseUid string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getIDfromFirebaseUID, firebaseUid)
 	var id string
 	err := row.Scan(&id)
 	return id, err

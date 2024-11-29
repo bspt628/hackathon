@@ -2,7 +2,6 @@ package followcontroller
 
 import(
 	"database/sql"
-	"hackathon/db/sqlc/generated"
 	"hackathon/internal/dao/follow"
 	"hackathon/internal/dao/user"
 	"hackathon/internal/usecase/follow"
@@ -15,10 +14,8 @@ type FollowController struct {
 }
 
 func NewFollowController(dbConn *sql.DB) *FollowController {
-	// UserDAOとFollowDAOを作成
-	queries := sqlc.New(dbConn)
-	userDAO := userdao.NewUserDAO(queries)
-	followDAO := followdao.NewFollowDAO(queries)
+	userDAO := userdao.NewUserDAO(dbConn)
+	followDAO := followdao.NewFollowDAO(dbConn)
 
 	userUsecase := userusecase.NewUserUsecase(userDAO)
 	followUsecase := followusecase.NewFollowUsecase(followDAO)

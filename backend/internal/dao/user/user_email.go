@@ -9,7 +9,7 @@ import (
 )
 
 func (dao *UserDAO) UpdateUserEmail(ctx context.Context, params sqlc.UpdateUserEmailParams) error {
-	err := dao.db.UpdateUserEmail(ctx, params)
+	err := dao.queries.UpdateUserEmail(ctx, params)
 
 	if err != nil {
 		if mysqlErr, ok := err.(*mysql.MySQLError); ok {

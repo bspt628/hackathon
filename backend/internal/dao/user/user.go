@@ -1,11 +1,19 @@
 package userdao
 
-import sqlc "hackathon/db/sqlc/generated"
+import (
+	"hackathon/db/sqlc/generated"
+	"database/sql"
+)
 
 type UserDAO struct {
-	db *sqlc.Queries
+	db      *sql.DB       // データベース接続
+	queries *sqlc.Queries // クエリ生成
 }
 
-func NewUserDAO(db *sqlc.Queries) *UserDAO {
-	return &UserDAO{db: db}
+// コンストラクタ
+func NewUserDAO(db *sql.DB) *UserDAO {
+	return &UserDAO{
+		db:      db,
+		queries: sqlc.New(db),
+	}
 }

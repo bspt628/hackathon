@@ -6,5 +6,5 @@ import (
 )
 
 func (dao *UserDAO) UpdateUserNotifications(ctx context.Context, params sqlc.UpdateUserNotificationsParams) error {
-	return dao.db.UpdateUserNotifications(ctx, params)
+	return dao.queries.UpdateUserNotifications(ctx, params)
 }

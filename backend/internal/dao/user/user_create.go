@@ -35,7 +35,7 @@ func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (
 	}
 
 	// SQLクエリを実行して新しいユーザーを作成
-	_, err = dao.db.CreateUser(ctx, sqlc.CreateUserParams{
+	_, err = dao.queries.CreateUser(ctx, sqlc.CreateUserParams{
 		ID:           myid,
 		FirebaseUid:  uid,
 		Email:        arg.Email,

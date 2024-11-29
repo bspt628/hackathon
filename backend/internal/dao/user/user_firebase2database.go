@@ -7,7 +7,7 @@ import (
 )
 
 func (dao *UserDAO) GetUserIDByFirebaseUID(ctx context.Context, firebaseUID string) (string, error) {
-	id, err := dao.db.GetIdfromFirebaseUID(ctx, firebaseUID)
+	id, err := dao.queries.GetIDfromFirebaseUID(ctx, firebaseUID)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
 			return "", errors.New("user not found")
