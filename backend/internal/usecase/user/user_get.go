@@ -2,7 +2,7 @@ package userusecase
 
 import (
 	"context"
-	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/db/sqlc/generated"
 )
 
 // ユースケース: usernameからemailを取得

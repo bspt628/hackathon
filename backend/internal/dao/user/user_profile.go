@@ -2,7 +2,7 @@ package userdao
 
 import (
 	"context"
-	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/db/sqlc/generated"
 )
 
 // プロフィール情報を更新

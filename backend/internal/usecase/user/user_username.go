@@ -3,7 +3,7 @@ package userusecase
 import (
 	"context"
 	"fmt"
-	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/db/sqlc/generated"
 	"hackathon/domain"
 	"strings"
 )

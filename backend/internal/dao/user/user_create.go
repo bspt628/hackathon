@@ -3,23 +3,11 @@ package userdao
 import (
 	"context"
 	"fmt"
-	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/db/sqlc/generated"
 	"hackathon/internal/auth"
-
-	"github.com/oklog/ulid"
-	"golang.org/x/crypto/bcrypt"
 )
 
 func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (*sqlc.User, error) {
-	// IDをulidで自動生成する
-	myid := ulid.MustNew(ulid.Now(), nil).String()
-
-	// bcyptでパスワードをハッシュ化
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(arg.PasswordHash), bcrypt.DefaultCost)
-	if err != nil {
-		return nil, err
-	}
-
 	// arg.Displatnameをstring型に変換
 	var displayNameStr string
 	if arg.DisplayName.Valid {
@@ -35,14 +23,7 @@ func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (
 	}
 
 	// SQLクエリを実行して新しいユーザーを作成
-	_, err = dao.queries.CreateUser(ctx, sqlc.CreateUserParams{
-		ID:           myid,
-		FirebaseUid:  uid,
-		Email:        arg.Email,
-		PasswordHash: string(hashedPassword),
-		Username:     arg.Username,
-		DisplayName:  arg.DisplayName,
-	})
+	_, err = dao.queries.CreateUser(ctx, arg)
 
 	if err != nil {
 		// DBへの登録に失敗した場合、Firebase登録を削除
@@ -55,7 +36,7 @@ func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (
 	}
 
 	// 新しく作成されたユーザーの ID で情報を再取得
-	user, err := dao.GetUser(ctx, myid)
+	user, err := dao.GetUser(ctx, arg.ID)
 	if err != nil {
 		return nil, err
 	}

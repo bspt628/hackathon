@@ -4,10 +4,10 @@ import (
 	"context"
 	"database/sql"
 	"errors"
-	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/db/sqlc/generated"
 	"hackathon/domain"
-	"strings"
 	"net/url"
+	"strings"
 )
 
 func (uc *UserUsecase) UpdateUserProfile(ctx context.Context, profile_image_url, bio, location, website, id string) (*domain.UserProfileUpdateResult, error) {
@@ -90,4 +90,3 @@ func IsValidURL(rawURL string) bool {
 
 	return true
 }
-
