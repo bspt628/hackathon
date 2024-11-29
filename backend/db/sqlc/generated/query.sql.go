@@ -412,13 +412,14 @@ func (q *Queries) GetUserByEmail(ctx context.Context, username string) (GetUserB
 }
 
 const getUserById = `-- name: GetUserById :one
-SELECT id, email, username, display_name, bio, location, followers_count, following_count, posts_count
+SELECT id, firebase_uid, email, username, display_name, bio, location, followers_count, following_count, posts_count
 FROM users
 WHERE id = ?
 `
 
 type GetUserByIdRow struct {
 	ID             string         `json:"id"`
+	FirebaseUid    string         `json:"firebase_uid"`
 	Email          string         `json:"email"`
 	Username       string         `json:"username"`
 	DisplayName    sql.NullString `json:"display_name"`
@@ -434,6 +435,7 @@ func (q *Queries) GetUserById(ctx context.Context, id string) (GetUserByIdRow, e
 	var i GetUserByIdRow
 	err := row.Scan(
 		&i.ID,
+		&i.FirebaseUid,
 		&i.Email,
 		&i.Username,
 		&i.DisplayName,

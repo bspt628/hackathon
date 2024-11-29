@@ -24,7 +24,7 @@ ORDER BY p.created_at DESC
 LIMIT ?;
 
 -- name: GetUserById :one
-SELECT id, email, username, display_name, bio, location, followers_count, following_count, posts_count
+SELECT id, firebase_uid, email, username, display_name, bio, location, followers_count, following_count, posts_count
 FROM users
 WHERE id = ?;
 

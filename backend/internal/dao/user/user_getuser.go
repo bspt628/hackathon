@@ -15,6 +15,7 @@ func (dao *UserDAO) GetUser(ctx context.Context, id string) (*sqlc.User, error) 
 	// GetUserByIdRowからdb.Userに変換
 	user := &sqlc.User{
 		ID:             row.ID,
+		FirebaseUid:    row.FirebaseUid,
 		Email:          row.Email,
 		Username:       row.Username,
 		DisplayName:    row.DisplayName,
