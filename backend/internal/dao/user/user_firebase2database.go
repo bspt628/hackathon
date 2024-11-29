@@ -6,7 +6,6 @@ import (
 	"errors"
 )
 
-// GetUserIDByFirebaseUID は Firebase UID に対応するユーザー ID を取得します
 func (dao *UserDAO) GetUserIDByFirebaseUID(ctx context.Context, firebaseUID string) (string, error) {
 	id, err := dao.db.GetIdfromFirebaseUID(ctx, firebaseUID)
 	if err != nil {

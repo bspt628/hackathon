@@ -7,15 +7,11 @@ import (
 	"github.com/google/uuid"
 )
 
-func (fc *FollowUsecase) AddFollow(ctx context.Context, firebaseUID, followingID string) error {
+func (fc *FollowUsecase) AddFollow(ctx context.Context, firebaseUID, followingID, followerID string) error {
 	if fc == nil || fc.followDAO == nil {
         return errors.New("UserUseCase or UserDAO is nil")
     }
 
-	followerID, err := fc.userUsecase.GetUserIDByFirebaseUID(ctx, firebaseUID)
-	if err != nil {
-		return err
-	}
 	// フォローのビジネスロジックを処理（例えば、自己フォローの禁止など）
 	fmt.Println(followingID,followerID)
 	if followerID == followingID {

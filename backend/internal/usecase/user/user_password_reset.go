@@ -11,7 +11,7 @@ import (
 )
 
 // パスワードリセットリクエスト
-func (u *UserPasswordResetUsecase) RequestPasswordReset(ctx context.Context, email string) error {
+func (uc *UserUsecase) RequestPasswordReset(ctx context.Context, email string) error {
 	// トークン生成
 	tokenBytes := make([]byte, 32)
 	if _, err := rand.Read(tokenBytes); err != nil {
@@ -21,7 +21,7 @@ func (u *UserPasswordResetUsecase) RequestPasswordReset(ctx context.Context, ema
 
 	// トークンの保存
 	expiry := time.Now().Add(10 * time.Hour) // 世界標準時だった！
-	if err := u.passwordResetDAO.SaveResetToken(ctx, email, token, expiry); err != nil {
+	if err := uc.dao.SaveResetToken(ctx, email, token, expiry); err != nil {
 		return fmt.Errorf("トークン保存エラー: %v", err)
 	}
 
@@ -40,21 +40,21 @@ func (u *UserPasswordResetUsecase) RequestPasswordReset(ctx context.Context, ema
 }
 
 // パスワードリセット処理
-func (u *UserPasswordResetUsecase) ResetPassword(ctx context.Context, token, newPassword string) error {
+func (uc *UserUsecase) ResetPassword(ctx context.Context, token, newPassword string) error {
 	// トークン検証
-	email, err := u.passwordResetDAO.ValidateResetToken(ctx, token)
+	email, err := uc.dao.ValidateResetToken(ctx, token)
 	if err != nil {
 		return fmt.Errorf("トークン検証エラー: %v", err)
 	}
 
 	// パスワードの更新
 	// ここでは仮にパスワードを更新する関数 UpdatePasswordByEmail を使用します。
-	if err := u.passwordResetDAO.UpdatePasswordByEmail(ctx, email, newPassword); err != nil {
+	if err := uc.dao.UpdatePasswordByEmail(ctx, email, newPassword); err != nil {
 		return fmt.Errorf("パスワード更新エラー: %v", err)
 	}
 
 	// トークン削除
-	return u.passwordResetDAO.DeleteResetToken(ctx, token)
+	return uc.dao.DeleteResetToken(ctx, token)
 }
 
 // メール送信

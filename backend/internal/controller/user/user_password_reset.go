@@ -1,28 +1,13 @@
-package authcontroller
+package usercontroller
 
 import (
 	"fmt"
 	"net/http"
-	"database/sql"
-	"hackathon/internal/dao/user"
-	"hackathon/internal/usecase/user"
 	"encoding/json"
-	"hackathon/db/sqlc/generated"
 )
 
-type PasswordResetController struct {
-	passwordResetUsecase *userusecase.UserPasswordResetUsecase
-}
-
-func NewPasswordResetController(dbConn *sql.DB) *PasswordResetController {
-	queries := sqlc.New(dbConn)
-	passwordResetDAO := userdao.NewUserPasswordResetDAO(queries)
-	passwordResetUsecase := userusecase.NewUserPasswordResetUsecase(passwordResetDAO)
-	return &PasswordResetController{passwordResetUsecase: passwordResetUsecase}
-}
-
 // パスワードリセットリクエスト (トークン送信)
-func (prc *PasswordResetController) HandlePasswordResetRequest(w http.ResponseWriter, r *http.Request) {
+func (uc *UserController) HandlePasswordResetRequest(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Email string `json:"email"`
 	}
@@ -41,7 +26,7 @@ func (prc *PasswordResetController) HandlePasswordResetRequest(w http.ResponseWr
 	}
 
 	// パスワードリセット処理
-	err := prc.passwordResetUsecase.RequestPasswordReset(r.Context(), req.Email)
+	err := uc.userUsecase.RequestPasswordReset(r.Context(), req.Email)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("パスワードリセットに失敗しました: %v", err), http.StatusInternalServerError)
 		return
@@ -55,7 +40,7 @@ func (prc *PasswordResetController) HandlePasswordResetRequest(w http.ResponseWr
 }
 
 // パスワード変更 (トークン検証とパスワード更新)
-func (prc *PasswordResetController) ResetPassword(w http.ResponseWriter, r *http.Request) {
+func (prc *UserController) ResetPassword(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		Token    string `json:"token"`
 		Password string `json:"password"`
@@ -76,7 +61,7 @@ func (prc *PasswordResetController) ResetPassword(w http.ResponseWriter, r *http
 	}
 
 	// パスワード更新処理
-	err := prc.passwordResetUsecase.ResetPassword(r.Context(), req.Token, req.Password)
+	err := prc.userUsecase.ResetPassword(r.Context(), req.Token, req.Password)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("パスワード更新失敗: %v", err), http.StatusInternalServerError)
 		return

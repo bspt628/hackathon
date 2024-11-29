@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/db/sqlc/generated"
 	"hackathon/domain"
 )
 

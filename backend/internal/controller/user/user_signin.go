@@ -1,4 +1,4 @@
-package authcontroller
+package usercontroller
 
 import (
 	"encoding/json"
@@ -7,7 +7,7 @@ import (
 )
 
 // サインインエンドポイント
-func (ac *AuthController) SignIn(w http.ResponseWriter, r *http.Request) {
+func (uc *UserController) SignIn(w http.ResponseWriter, r *http.Request) {
 	var request struct {
 		Username string `json:"username"`
 		Password string `json:"password"`
@@ -26,7 +26,7 @@ func (ac *AuthController) SignIn(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// サインイン処理
-	token, err := ac.signInUsecase.SignIn(r.Context(), request.Username, request.Password)
+	token, err := uc.userUsecase.SignIn(r.Context(), request.Username, request.Password)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("サインイン失敗: %v", err), http.StatusUnauthorized)
 		return

@@ -3,19 +3,10 @@ package userdao
 import (
 	"context"
 	"fmt"
-	sqlc "hackathon/db/sqlc/generated"
 )
 
-type UserSignInDAO struct {
-	db *sqlc.Queries
-}
-
-func NewUserSignInDAO(db *sqlc.Queries) *UserSignInDAO {
-	return &UserSignInDAO{db: db}
-}
-
 // GetUserByEmail - メールアドレスからユーザー情報を取得
-func (dao *UserSignInDAO) GetUserByEmail(ctx context.Context, email string) (string, string, error) {
+func (dao *UserDAO) GetUserByEmail(ctx context.Context, email string) (string, string, error) {
 	// GetUserByEmailを実行し、結果を取得
 	user, err := dao.db.GetUserByEmail(ctx, email)
 	if err != nil {

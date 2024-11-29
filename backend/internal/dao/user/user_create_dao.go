@@ -23,10 +23,8 @@ func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (
 	// arg.Displatnameをstring型に変換
 	var displayNameStr string
 	if arg.DisplayName.Valid {
-		// displayNameが有効な場合
 		displayNameStr = arg.DisplayName.String
 	} else {
-		// displayNameがNULLの場合
 		displayNameStr = ""
 	}
 

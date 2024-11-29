@@ -11,6 +11,7 @@ import(
 
 type FollowController struct {
 	followUsecase *followusecase.FollowUsecase
+	userUsecase *userusecase.UserUsecase
 }
 
 func NewFollowController(dbConn *sql.DB) *FollowController {
@@ -19,10 +20,10 @@ func NewFollowController(dbConn *sql.DB) *FollowController {
 	userDAO := userdao.NewUserDAO(queries)
 	followDAO := followdao.NewFollowDAO(queries)
 
-	// UserUsecaseを初期化
 	userUsecase := userusecase.NewUserUsecase(userDAO)
-
-	// FollowUsecaseを初期化
-	followUsecase := followusecase.NewFollowUsecase(followDAO, userUsecase)
-	return &FollowController{followUsecase: followUsecase}
+	followUsecase := followusecase.NewFollowUsecase(followDAO)
+	return &FollowController{
+		followUsecase: followUsecase,
+		userUsecase: userUsecase,
+	}
 }

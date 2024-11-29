@@ -11,7 +11,7 @@ import (
 )
 
 // サインイン処理
-func (uc *UserSignInUsecase) SignIn(ctx context.Context, username, password string) (string, error) {
+func (uc *UserUsecase) SignIn(ctx context.Context, username, password string) (string, error) {
 	// DAOからユーザー情報を取得
 	// emailを出力
 	fmt.Printf("username: %s\n", username)

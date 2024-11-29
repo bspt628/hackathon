@@ -2,7 +2,7 @@ package userdao
 
 import (
 	"context"
-	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/db/sqlc/generated"
 )
 
 func (dao *UserDAO) GetUser(ctx context.Context, id string) (*sqlc.User, error) {
