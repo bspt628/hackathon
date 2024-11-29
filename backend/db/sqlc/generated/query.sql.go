@@ -180,13 +180,12 @@ func (q *Queries) DeleteResetToken(ctx context.Context, token string) error {
 	return err
 }
 
-const deleteUser = `-- name: DeleteUser :exec
+const deleteUser = `-- name: DeleteUser :execresult
 DELETE FROM users WHERE id = ?
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, deleteUser, id)
-	return err
+func (q *Queries) DeleteUser(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteUser, id)
 }
 
 const getDMConversation = `-- name: GetDMConversation :many

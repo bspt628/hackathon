@@ -28,8 +28,8 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	router.HandleFunc("/users/signup", userController.CreateUser).Methods("POST")
 	router.HandleFunc("/users/signin", userController.SignIn).Methods("POST")
 
-	apiRouter.HandleFunc("/users/{id}", userController.GetUser).Methods("GET")
-	apiRouter.HandleFunc("/users/{id}", userController.DeleteUser).Methods("DELETE")
+	apiRouter.HandleFunc("/users/get/{id}", userController.GetUser).Methods("GET")
+	apiRouter.HandleFunc("/users/delete", userController.DeleteUser).Methods("DELETE")
 
 	apiRouter.HandleFunc("/users/{id}/profile", userController.UpdateUserProfile).Methods("PUT")
 	apiRouter.HandleFunc("/users/{id}/settings", userController.UpdateUserSettings).Methods("PUT")

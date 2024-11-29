@@ -7,7 +7,7 @@ UPDATE users
 SET bio = ?, location = ?
 WHERE id = ?;
 
--- name: DeleteUser :exec
+-- name: DeleteUser :execresult
 DELETE FROM users WHERE id = ?;
 
 -- name: GetEmailFromUsername :one
