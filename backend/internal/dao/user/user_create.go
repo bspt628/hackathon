@@ -7,7 +7,7 @@ import (
 	"hackathon/internal/auth"
 )
 
-func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (*sqlc.User, error) {
+func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams, password string) (*sqlc.User, error) {
 	// arg.Displatnameをstring型に変換
 	var displayNameStr string
 	if arg.DisplayName.Valid {
@@ -17,10 +17,12 @@ func (dao *UserDAO) CreateUser(ctx context.Context, arg sqlc.CreateUserParams) (
 	}
 
 	// Firebaseに新規ユーザーを登録
-	uid, err := auth.CreateFirebaseUser(arg.Email, arg.PasswordHash, arg.Username, displayNameStr)
+	uid, err := auth.CreateFirebaseUser(arg.Email, password, arg.Username, displayNameStr)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user in Firebase: %v", err)
 	}
+	arg.FirebaseUid = uid
+	// fmt.Println(arg)
 
 	// SQLクエリを実行して新しいユーザーを作成
 	_, err = dao.queries.CreateUser(ctx, arg)
