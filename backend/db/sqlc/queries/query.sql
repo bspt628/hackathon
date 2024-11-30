@@ -198,7 +198,7 @@ INSERT INTO posts (
 INSERT INTO follows (id, follower_id, following_id, created_at)
 VALUES (?, ?, ?, CURRENT_TIMESTAMP);
 
--- name: RemoveFollow :exec
+-- name: RemoveFollow :execresult
 DELETE FROM follows
 WHERE follower_id = ? AND following_id = ?;
 
@@ -227,9 +227,12 @@ WHERE users.id = ?;
 -- name: GetFollowersCount :one
 SELECT followers_count FROM users WHERE id = ?;
 
--- name: UpdateFollowingCount :execresult
+-- name: UpdateFollowingsCount :execresult
 UPDATE users
 SET following_count = (
-    SELECT COUNT(*) FROM follows WHERE follower_id = users.id
+    SELECT COUNT(*) FROM follows WHERE following_id = users.id
 )
 WHERE users.id = ?;
+
+-- name: GetFollowingsCount :one
+SELECT following_count FROM users WHERE id = ?;

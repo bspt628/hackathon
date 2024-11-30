@@ -34,7 +34,7 @@ func (fc *FollowController) AddFollow(w http.ResponseWriter, r *http.Request) {
 
 
 	// フォローを実行
-	err = fc.followUsecase.AddFollow(context.Background(), firebaseUID, followingid, followerID)
+	err = fc.followUsecase.AddFollow(context.Background(), followingid, followerID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to follow user: %v", err), http.StatusInternalServerError)
 		return

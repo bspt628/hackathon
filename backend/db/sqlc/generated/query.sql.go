@@ -292,6 +292,17 @@ func (q *Queries) GetFollowersCount(ctx context.Context, id string) (sql.NullInt
 	return followers_count, err
 }
 
+const getFollowingsCount = `-- name: GetFollowingsCount :one
+SELECT following_count FROM users WHERE id = ?
+`
+
+func (q *Queries) GetFollowingsCount(ctx context.Context, id string) (sql.NullInt32, error) {
+	row := q.db.QueryRowContext(ctx, getFollowingsCount, id)
+	var following_count sql.NullInt32
+	err := row.Scan(&following_count)
+	return following_count, err
+}
+
 const getIDfromFirebaseUID = `-- name: GetIDfromFirebaseUID :one
 SELECT id FROM users WHERE firebase_uid = ?
 `
@@ -593,7 +604,7 @@ func (q *Queries) GetUserTimeline(ctx context.Context, arg GetUserTimelineParams
 	return items, nil
 }
 
-const removeFollow = `-- name: RemoveFollow :exec
+const removeFollow = `-- name: RemoveFollow :execresult
 DELETE FROM follows
 WHERE follower_id = ? AND following_id = ?
 `
@@ -603,9 +614,8 @@ type RemoveFollowParams struct {
 	FollowingID sql.NullString `json:"following_id"`
 }
 
-func (q *Queries) RemoveFollow(ctx context.Context, arg RemoveFollowParams) error {
-	_, err := q.db.ExecContext(ctx, removeFollow, arg.FollowerID, arg.FollowingID)
-	return err
+func (q *Queries) RemoveFollow(ctx context.Context, arg RemoveFollowParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, removeFollow, arg.FollowerID, arg.FollowingID)
 }
 
 const saveResetToken = `-- name: SaveResetToken :exec
@@ -743,16 +753,16 @@ func (q *Queries) UpdateFollowersCount(ctx context.Context, id string) (sql.Resu
 	return q.db.ExecContext(ctx, updateFollowersCount, id)
 }
 
-const updateFollowingCount = `-- name: UpdateFollowingCount :execresult
+const updateFollowingsCount = `-- name: UpdateFollowingsCount :execresult
 UPDATE users
 SET following_count = (
-    SELECT COUNT(*) FROM follows WHERE follower_id = users.id
+    SELECT COUNT(*) FROM follows WHERE following_id = users.id
 )
 WHERE users.id = ?
 `
 
-func (q *Queries) UpdateFollowingCount(ctx context.Context, id string) (sql.Result, error) {
-	return q.db.ExecContext(ctx, updateFollowingCount, id)
+func (q *Queries) UpdateFollowingsCount(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateFollowingsCount, id)
 }
 
 const updatePasswordByEmail = `-- name: UpdatePasswordByEmail :exec
