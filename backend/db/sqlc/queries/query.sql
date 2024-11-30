@@ -217,14 +217,17 @@ SELECT id FROM users WHERE firebase_uid = ?;
 SELECT firebase_uid FROM users WHERE id = ?;
 
 
--- name: UpdateFollowersCount :exec
+-- name: UpdateFollowersCount :execresult
 UPDATE users
 SET followers_count = (
     SELECT COUNT(*) FROM follows WHERE following_id = users.id
 )
 WHERE users.id = ?;
 
--- name: UpdateFollowingCount :exec
+-- name: GetFollowersCount :one
+SELECT followers_count FROM users WHERE id = ?;
+
+-- name: UpdateFollowingCount :execresult
 UPDATE users
 SET following_count = (
     SELECT COUNT(*) FROM follows WHERE follower_id = users.id

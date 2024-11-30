@@ -281,6 +281,17 @@ func (q *Queries) GetFollowStatus(ctx context.Context, arg GetFollowStatusParams
 	return following, err
 }
 
+const getFollowersCount = `-- name: GetFollowersCount :one
+SELECT followers_count FROM users WHERE id = ?
+`
+
+func (q *Queries) GetFollowersCount(ctx context.Context, id string) (sql.NullInt32, error) {
+	row := q.db.QueryRowContext(ctx, getFollowersCount, id)
+	var followers_count sql.NullInt32
+	err := row.Scan(&followers_count)
+	return followers_count, err
+}
+
 const getIDfromFirebaseUID = `-- name: GetIDfromFirebaseUID :one
 SELECT id FROM users WHERE firebase_uid = ?
 `
@@ -720,7 +731,7 @@ func (q *Queries) SendDM(ctx context.Context, arg SendDMParams) error {
 	return err
 }
 
-const updateFollowersCount = `-- name: UpdateFollowersCount :exec
+const updateFollowersCount = `-- name: UpdateFollowersCount :execresult
 UPDATE users
 SET followers_count = (
     SELECT COUNT(*) FROM follows WHERE following_id = users.id
@@ -728,9 +739,20 @@ SET followers_count = (
 WHERE users.id = ?
 `
 
-func (q *Queries) UpdateFollowersCount(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, updateFollowersCount, id)
-	return err
+func (q *Queries) UpdateFollowersCount(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateFollowersCount, id)
+}
+
+const updateFollowingCount = `-- name: UpdateFollowingCount :execresult
+UPDATE users
+SET following_count = (
+    SELECT COUNT(*) FROM follows WHERE follower_id = users.id
+)
+WHERE users.id = ?
+`
+
+func (q *Queries) UpdateFollowingCount(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateFollowingCount, id)
 }
 
 const updatePasswordByEmail = `-- name: UpdatePasswordByEmail :exec
