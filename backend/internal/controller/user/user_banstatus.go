@@ -11,7 +11,7 @@ func (uc *UserController) UpdateUserBanStatus(w http.ResponseWriter, r *http.Req
 	var request struct {
 		IsBanned bool `json:"is_banned"`
 	}
-	ID, _, err := uc.userUsecase.GetUserIDFromFirebaseUID(context.Background(), r)
+	ID, _, err := uc.GetUserIDFromFirebaseUID(context.Background(), r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("ユーザーIDの取得に失敗しました: %v", err), http.StatusInternalServerError)
 		return
@@ -32,6 +32,5 @@ func (uc *UserController) UpdateUserBanStatus(w http.ResponseWriter, r *http.Req
 	if err := json.NewEncoder(w).Encode(user); err != nil {
 		http.Error(w, fmt.Sprintf("レスポンスのエンコードに失敗しました: %v", err), http.StatusInternalServerError)
 	}
-
 
 }

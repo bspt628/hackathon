@@ -10,10 +10,10 @@ import (
 func (uc *UserController) UpdateUserSettings(w http.ResponseWriter, r *http.Request) {
 	var request struct {
 		DisplayName string `json:"display_name"`
-		BirthDate       string `json:"birth_date"`
-		Language        string `json:"language"`
+		BirthDate   string `json:"birth_date"`
+		Language    string `json:"language"`
 	}
-	ID, _, err := uc.userUsecase.GetUserIDFromFirebaseUID(context.Background(), r)
+	ID, _, err := uc.GetUserIDFromFirebaseUID(context.Background(), r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("ユーザーIDの取得に失敗しました: %v", err), http.StatusInternalServerError)
 		return
@@ -24,7 +24,7 @@ func (uc *UserController) UpdateUserSettings(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	if request.DisplayName == "" && request.BirthDate == "" && request.Language == ""  {
+	if request.DisplayName == "" && request.BirthDate == "" && request.Language == "" {
 		http.Error(w, "何か変更をしてください", http.StatusBadRequest)
 		return
 	}
@@ -39,6 +39,5 @@ func (uc *UserController) UpdateUserSettings(w http.ResponseWriter, r *http.Requ
 	if err := json.NewEncoder(w).Encode(user); err != nil {
 		http.Error(w, fmt.Sprintf("レスポンスのエンコードに失敗しました: %v", err), http.StatusInternalServerError)
 	}
-
 
 }

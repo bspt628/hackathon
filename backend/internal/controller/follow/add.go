@@ -15,6 +15,12 @@ func (fc *FollowController) AddFollow(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	followerID, err := fc.userUsecase.GetUserIDFromFirebaseUID(context.Background(), firebaseUID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("フォローするユーザーIDの取得に失敗しました: %v", err), http.StatusInternalServerError)
+		return
+	}
+	
 	// URLパスからパラメータ「username」を取得
 	vars := mux.Vars(r)
 	followingid := vars["id"]
@@ -23,13 +29,9 @@ func (fc *FollowController) AddFollow(w http.ResponseWriter, r *http.Request) {
 	// 必須パラメータをチェック
 	if followingid == "" {
 		http.Error(w, "followingid is required", http.StatusBadRequest)
-		return
-	}
-
-	followerID, err := fc.userUsecase.GetUserIDByFirebaseUID(context.Background(), firebaseUID)
-	if err != nil {
 		return 
 	}
+
 
 	// フォローを実行
 	err = fc.followUsecase.AddFollow(context.Background(), firebaseUID, followingid, followerID)

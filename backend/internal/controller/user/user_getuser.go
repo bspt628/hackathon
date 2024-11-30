@@ -15,7 +15,6 @@ func (uc *UserController) GetUser(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	userID := vars["id"]
 	// ユーザーIDを出力
-	fmt.Println("UserID: ", userID)
 	// クエリパラメータからユーザーIDを取得
 	// userID := r.URL.Query().Get("id")
 	if userID == "" {

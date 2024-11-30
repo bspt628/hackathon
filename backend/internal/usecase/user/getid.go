@@ -2,26 +2,14 @@ package userusecase
 
 import (
 	"context"
-	"fmt"
-	"net/http"
+	"errors"
 )
 
-// GetUserIDFromFirebaseUID は、リクエストヘッダから Firebase UID を取得し、
-// Firebase UID に基づいてユーザーIDを取得します。
-// 失敗した場合はエラーメッセージを返します。
-func (uc *UserUsecase)GetUserIDFromFirebaseUID(ctx context.Context, r *http.Request) (string, string, error) {
-	// リクエストヘッダから UserID を取得
-	firebaseUID := r.Header.Get("UserID")
-	if firebaseUID == "" {
-		return "", "", fmt.Errorf("UserID missing in request context")
-	}
-
-	// Firebase UID に基づいてユーザーIDを取得
-	id, err := uc.GetUserIDByFirebaseUID(ctx, firebaseUID)
+// GetUserIDByFirebaseUID は Firebase UID からユーザー ID を取得します
+func (uc *UserUsecase) GetUserIDFromFirebaseUID(ctx context.Context, firebaseUID string) (string, error) {
+	userID, err := uc.dao.GetUserIDByFirebaseUID(ctx, firebaseUID)
 	if err != nil {
-		return "", "", fmt.Errorf("ユーザーIDの取得に失敗しました: %v", err)
+		return "", errors.New("failed to fetch user ID: " + err.Error())
 	}
-	fmt.Println("id[", id,"]でログイン中")
-
-	return id, firebaseUID, nil
+	return userID, nil
 }

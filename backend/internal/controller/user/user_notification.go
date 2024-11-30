@@ -4,15 +4,15 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"net/http"
 	"hackathon/domain"
+	"net/http"
 )
 
 func (uc *UserController) UpdateUserNotifications(w http.ResponseWriter, r *http.Request) {
 	var request struct {
 		NotificationSettings domain.NotificationSettings `json:"notification_settings"`
 	}
-	ID, _, err := uc.userUsecase.GetUserIDFromFirebaseUID(context.Background(), r)
+	ID, _, err := uc.GetUserIDFromFirebaseUID(context.Background(), r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("ユーザーIDの取得に失敗しました: %v", err), http.StatusInternalServerError)
 		return

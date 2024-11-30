@@ -14,12 +14,11 @@ func (uc *UserController) UpdateUserProfile(w http.ResponseWriter, r *http.Reque
 		Location        string `json:"location"`
 		Website         string `json:"website"`
 	}
-	ID, _, err := uc.userUsecase.GetUserIDFromFirebaseUID(context.Background(), r)
+	ID, _, err := uc.GetUserIDFromFirebaseUID(context.Background(), r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("ユーザーIDの取得に失敗しました: %v", err), http.StatusInternalServerError)
 		return
 	}
-	
 
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
 		http.Error(w, fmt.Sprintf("リクエストの解析に失敗しました: %v", err), http.StatusBadRequest)
@@ -41,6 +40,5 @@ func (uc *UserController) UpdateUserProfile(w http.ResponseWriter, r *http.Reque
 	if err := json.NewEncoder(w).Encode(user); err != nil {
 		http.Error(w, fmt.Sprintf("レスポンスのエンコードに失敗しました: %v", err), http.StatusInternalServerError)
 	}
-
 
 }

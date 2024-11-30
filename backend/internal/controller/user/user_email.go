@@ -2,16 +2,16 @@ package usercontroller
 
 import (
 	"context"
-	"net/http"
 	"encoding/json"
 	"fmt"
+	"net/http"
 )
 
-func (uc *UserController) UpdateUserEmail(w http.ResponseWriter, r *http.Request){
+func (uc *UserController) UpdateUserEmail(w http.ResponseWriter, r *http.Request) {
 	var request struct {
 		Email string `json:"email"`
 	}
-	ID, _, err := uc.userUsecase.GetUserIDFromFirebaseUID(context.Background(), r)
+	ID, _, err := uc.GetUserIDFromFirebaseUID(context.Background(), r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("ユーザーIDの取得に失敗しました: %v", err), http.StatusInternalServerError)
 		return

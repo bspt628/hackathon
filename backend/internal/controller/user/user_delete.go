@@ -8,7 +8,7 @@ import (
 
 func (uc *UserController) DeleteUser(w http.ResponseWriter, r *http.Request) {
 	// FirebaseAuthMiddleware で設定された UserID を取得
-	id, firebaseUID, err := uc.userUsecase.GetUserIDFromFirebaseUID(context.Background(), r)
+	id, firebaseUID, err := uc.GetUserIDFromFirebaseUID(context.Background(), r)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("ユーザーIDの取得に失敗しました: %v", err), http.StatusInternalServerError)
 		return

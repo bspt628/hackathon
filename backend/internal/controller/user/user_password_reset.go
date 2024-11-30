@@ -52,7 +52,6 @@ func (prc *UserController) ResetPassword(w http.ResponseWriter, r *http.Request)
 		http.Error(w, fmt.Sprintf("リクエスト解析エラー: %v", err), http.StatusBadRequest)
 		return
 	}
-	fmt.Println(req)
 
 	// トークンとパスワードのバリデーション
 	if req.Token == "" || req.Password == "" {

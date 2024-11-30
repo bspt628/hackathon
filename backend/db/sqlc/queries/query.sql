@@ -50,12 +50,7 @@ VALUES (?, ?, ?, ?);
 INSERT INTO dms (id, sender_id, receiver_id, content)
 VALUES (?, ?, ?, ?);
 
--- name: UpdateFollowersCount :exec
-UPDATE users
-SET followers_count = (
-    SELECT COUNT(*) FROM follows WHERE following_id = users.id
-)
-WHERE users.id = ?;
+
 
 -- name: UpdatePostLikesCount :exec
 UPDATE posts
@@ -215,10 +210,23 @@ SELECT EXISTS(
 ) AS following;
 
 
-
-
 -- name: GetIDfromFirebaseUID :one
 SELECT id FROM users WHERE firebase_uid = ?;
 
 -- name: GetFirebaseUIDfromUserID :one
 SELECT firebase_uid FROM users WHERE id = ?;
+
+
+-- name: UpdateFollowersCount :exec
+UPDATE users
+SET followers_count = (
+    SELECT COUNT(*) FROM follows WHERE following_id = users.id
+)
+WHERE users.id = ?;
+
+-- name: UpdateFollowingCount :exec
+UPDATE users
+SET following_count = (
+    SELECT COUNT(*) FROM follows WHERE follower_id = users.id
+)
+WHERE users.id = ?;

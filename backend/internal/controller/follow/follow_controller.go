@@ -16,7 +16,6 @@ type FollowController struct {
 func NewFollowController(dbConn *sql.DB) *FollowController {
 	userDAO := userdao.NewUserDAO(dbConn)
 	followDAO := followdao.NewFollowDAO(dbConn)
-
 	userUsecase := userusecase.NewUserUsecase(userDAO)
 	followUsecase := followusecase.NewFollowUsecase(followDAO)
 	return &FollowController{
