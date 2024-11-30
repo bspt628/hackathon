@@ -13,7 +13,7 @@ func (fc *FollowUsecase) AddFollow(ctx context.Context, followingID, followerID 
     }
 
 	// フォローのビジネスロジックを処理（例えば、自己フォローの禁止など）
-	fmt.Println("follow to", followingID, "from",followerID)
+	fmt.Println("[add] follow to", followingID, "from",followerID)
 	if followerID == followingID {
 		return fmt.Errorf("cannot follow yourself")
 	}
