@@ -68,6 +68,9 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.HandleFunc("/follow/followers/count", followController.UpdateAndGetFollowersCount).Methods("GET")
 	apiRouter.HandleFunc("/follow/followings/count", followController.UpdateAndGetFollowingsCount).Methods("GET")
 
+	apiRouter.HandleFunc("/follow/followers/all", followController.GetFollowers).Methods("GET")
+	apiRouter.HandleFunc("/follow/followings/all", followController.GetFollowings).Methods("GET")
+
 	// // リポスト機能
 	// router.HandleFunc("/api/posts/{id}/repost", postController.CreateRepost).Methods("POST")
 

@@ -281,6 +281,91 @@ func (q *Queries) GetFollowStatus(ctx context.Context, arg GetFollowStatusParams
 	return following, err
 }
 
+const getFollowers = `-- name: GetFollowers :many
+SELECT u.id, u.username, u.display_name
+FROM follows f
+JOIN users u ON f.follower_id = u.id
+WHERE f.following_id = ?
+`
+
+type GetFollowersRow struct {
+	ID          string         `json:"id"`
+	Username    string         `json:"username"`
+	DisplayName sql.NullString `json:"display_name"`
+}
+
+func (q *Queries) GetFollowers(ctx context.Context, followingID sql.NullString) ([]GetFollowersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFollowers, followingID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFollowersRow
+	for rows.Next() {
+		var i GetFollowersRow
+		if err := rows.Scan(&i.ID, &i.Username, &i.DisplayName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFollowersAndFollowings = `-- name: GetFollowersAndFollowings :many
+SELECT u.id, u.username, u.display_name, f.follower_id, f.following_id
+FROM follows f
+JOIN users u ON f.follower_id = u.id
+WHERE f.following_id = ? OR f.follower_id = ?
+`
+
+type GetFollowersAndFollowingsParams struct {
+	FollowingID sql.NullString `json:"following_id"`
+	FollowerID  sql.NullString `json:"follower_id"`
+}
+
+type GetFollowersAndFollowingsRow struct {
+	ID          string         `json:"id"`
+	Username    string         `json:"username"`
+	DisplayName sql.NullString `json:"display_name"`
+	FollowerID  sql.NullString `json:"follower_id"`
+	FollowingID sql.NullString `json:"following_id"`
+}
+
+func (q *Queries) GetFollowersAndFollowings(ctx context.Context, arg GetFollowersAndFollowingsParams) ([]GetFollowersAndFollowingsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFollowersAndFollowings, arg.FollowingID, arg.FollowerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFollowersAndFollowingsRow
+	for rows.Next() {
+		var i GetFollowersAndFollowingsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.DisplayName,
+			&i.FollowerID,
+			&i.FollowingID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getFollowersCount = `-- name: GetFollowersCount :one
 SELECT followers_count FROM users WHERE id = ?
 `
@@ -290,6 +375,42 @@ func (q *Queries) GetFollowersCount(ctx context.Context, id string) (sql.NullInt
 	var followers_count sql.NullInt32
 	err := row.Scan(&followers_count)
 	return followers_count, err
+}
+
+const getFollowings = `-- name: GetFollowings :many
+SELECT u.id, u.username, u.display_name
+FROM follows f
+JOIN users u ON f.following_id = u.id
+WHERE f.follower_id = ?
+`
+
+type GetFollowingsRow struct {
+	ID          string         `json:"id"`
+	Username    string         `json:"username"`
+	DisplayName sql.NullString `json:"display_name"`
+}
+
+func (q *Queries) GetFollowings(ctx context.Context, followerID sql.NullString) ([]GetFollowingsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFollowings, followerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFollowingsRow
+	for rows.Next() {
+		var i GetFollowingsRow
+		if err := rows.Scan(&i.ID, &i.Username, &i.DisplayName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getFollowingsCount = `-- name: GetFollowingsCount :one
