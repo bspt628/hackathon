@@ -197,7 +197,9 @@ INSERT INTO posts (
 
 -- name: DeletePost :exec
 UPDATE posts
-SET is_deleted = TRUE
+SET 
+    is_deleted = TRUE,
+    updated_at = CURRENT_TIMESTAMP
 WHERE id = ?;
 
 
@@ -314,4 +316,13 @@ UPDATE posts
 SET replies_count = replies_count + 1
 WHERE id = ?;
 
+-- name: DecrementReplyCount :exec
+UPDATE posts
+SET replies_count = replies_count - 1
+WHERE (id = ? AND replies_count > 0);
+
+-- name: GetReplyToID :one
+SELECT reply_to_id
+FROM posts
+WHERE id = ?;
 

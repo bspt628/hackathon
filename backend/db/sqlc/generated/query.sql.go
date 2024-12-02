@@ -208,9 +208,22 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Res
 	)
 }
 
+const decrementReplyCount = `-- name: DecrementReplyCount :exec
+UPDATE posts
+SET replies_count = replies_count - 1
+WHERE (id = ? AND replies_count > 0)
+`
+
+func (q *Queries) DecrementReplyCount(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, decrementReplyCount, id)
+	return err
+}
+
 const deletePost = `-- name: DeletePost :exec
 UPDATE posts
-SET is_deleted = TRUE
+SET 
+    is_deleted = TRUE,
+    updated_at = CURRENT_TIMESTAMP
 WHERE id = ?
 `
 
@@ -785,6 +798,19 @@ func (q *Queries) GetRecentPosts(ctx context.Context, limit int32) ([]GetRecentP
 		return nil, err
 	}
 	return items, nil
+}
+
+const getReplyToID = `-- name: GetReplyToID :one
+SELECT reply_to_id
+FROM posts
+WHERE id = ?
+`
+
+func (q *Queries) GetReplyToID(ctx context.Context, id string) (sql.NullString, error) {
+	row := q.db.QueryRowContext(ctx, getReplyToID, id)
+	var reply_to_id sql.NullString
+	err := row.Scan(&reply_to_id)
+	return reply_to_id, err
 }
 
 const getUnreadNotifications = `-- name: GetUnreadNotifications :many

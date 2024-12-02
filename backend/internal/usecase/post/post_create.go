@@ -22,64 +22,16 @@ func (uc *PostUsecase) CreatePost(ctx context.Context, request domain.CreatePost
 		return nil, fmt.Errorf("メディアURLのエンコードに失敗しました: %v", err)
 	}
 
-	var originalPostID sql.NullString
-	var replyToID sql.NullString
-	var rootPostID sql.NullString
-
-	// リポストの検証
-	if request.IsRepost {
-		if request.OriginalPostID == nil || *request.OriginalPostID == "" {
-			return nil, fmt.Errorf("original_post_id が空です")
-		}
-
-		// original_post_id が存在するか確認
-		exists, err := uc.dao.CheckPostExists(ctx, *request.OriginalPostID)
-		if err != nil {
-			return nil, fmt.Errorf("投稿の存在確認に失敗しました: %v", err)
-		}
-		if !exists {
-			return nil, fmt.Errorf("指定された original_post_id は存在しません")
-		}
-
-		originalPostID = sql.NullString{String: *request.OriginalPostID, Valid: true}
-	} else {
-		originalPostID = sql.NullString{String: "", Valid: false}
+	// リポストのバリデーション
+	originalPostID, err := uc.validateRepost(ctx, request)
+	if err != nil {
+		return nil, err
 	}
 
-	// リプライの検証
-	if request.IsReply {
-		if request.ReplyToID == nil || *request.ReplyToID == "" {
-			return nil, fmt.Errorf("reply_to_id が空です")
-		}
-
-		// reply_to_id が存在するか確認
-		exists, err := uc.dao.CheckPostExists(ctx, *request.ReplyToID)
-		if err != nil {
-			return nil, fmt.Errorf("返信元投稿の存在確認に失敗しました: %v", err)
-		}
-		if !exists {
-			return nil, fmt.Errorf("指定された reply_to_id は存在しません")
-		}
-
-		replyToID = sql.NullString{String: *request.ReplyToID, Valid: true}
-
-		// root_post_id の検証
-		if request.RootPostID == nil || *request.RootPostID == "" {
-			return nil, fmt.Errorf("root_post_id が空です")
-		}
-
-		validRoot, err := uc.dao.CheckRootPostValidity(ctx, *request.RootPostID)
-		if err != nil {
-			return nil, fmt.Errorf("root_post_id の妥当性確認に失敗しました: %v", err)
-		}
-		if !validRoot {
-			return nil, fmt.Errorf("指定された root_post_id は無効です（既に他の投稿に紐づけられています）")
-		}
-
-		rootPostID = sql.NullString{String: *request.RootPostID, Valid: true}
-	} else {
-		replyToID = sql.NullString{String: "", Valid: false}
-		rootPostID = sql.NullString{String: "", Valid: false}
+	// リプライのバリデーション
+	replyToID, rootPostID, err := uc.validateReply(ctx, request)
+	if err != nil {
+		return nil, err
 	}
 
 	// ID生成
@@ -119,4 +71,59 @@ func (uc *PostUsecase) CreatePost(ctx context.Context, request domain.CreatePost
 		MediaURLs:  request.MediaURLs,
 		Visibility: request.Visibility,
 	}, nil
+}
+
+func (uc *PostUsecase) validateRepost(ctx context.Context, request domain.CreatePostRequest) (sql.NullString, error) {
+	if request.IsRepost {
+		if request.OriginalPostID == nil || *request.OriginalPostID == "" {
+			return sql.NullString{}, fmt.Errorf("original_post_id が空です")
+		}
+
+		// original_post_id が存在するか確認
+		exists, err := uc.dao.CheckPostExists(ctx, *request.OriginalPostID)
+		if err != nil {
+			return sql.NullString{}, fmt.Errorf("投稿の存在確認に失敗しました: %v", err)
+		}
+		if !exists {
+			return sql.NullString{}, fmt.Errorf("指定された original_post_id は存在しません")
+		}
+
+		return sql.NullString{String: *request.OriginalPostID, Valid: true}, nil
+	}
+
+	return sql.NullString{String: "", Valid: false}, nil
+}
+
+func (uc *PostUsecase) validateReply(ctx context.Context, request domain.CreatePostRequest) (sql.NullString, sql.NullString, error) {
+	if request.IsReply {
+		if request.ReplyToID == nil || *request.ReplyToID == "" {
+			return sql.NullString{}, sql.NullString{}, fmt.Errorf("reply_to_id が空です")
+		}
+
+		// reply_to_id が存在するか確認
+		exists, err := uc.dao.CheckPostExists(ctx, *request.ReplyToID)
+		if err != nil {
+			return sql.NullString{}, sql.NullString{}, fmt.Errorf("返信元投稿の存在確認に失敗しました: %v", err)
+		}
+		if !exists {
+			return sql.NullString{}, sql.NullString{}, fmt.Errorf("指定された reply_to_id は存在しません")
+		}
+
+		// root_post_id の検証
+		if request.RootPostID == nil || *request.RootPostID == "" {
+			return sql.NullString{}, sql.NullString{}, fmt.Errorf("root_post_id が空です")
+		}
+
+		validRoot, err := uc.dao.CheckRootPostValidity(ctx, *request.RootPostID)
+		if err != nil {
+			return sql.NullString{}, sql.NullString{}, fmt.Errorf("root_post_id の妥当性確認に失敗しました: %v", err)
+		}
+		if !validRoot {
+			return sql.NullString{}, sql.NullString{}, fmt.Errorf("指定された root_post_id は無効です（既に他の投稿に紐づけられています）")
+		}
+
+		return sql.NullString{String: *request.ReplyToID, Valid: true}, sql.NullString{String: *request.RootPostID, Valid: true}, nil
+	}
+
+	return sql.NullString{String: "", Valid: false}, sql.NullString{String: "", Valid: false}, nil
 }
