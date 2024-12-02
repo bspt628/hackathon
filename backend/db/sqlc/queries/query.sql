@@ -192,7 +192,8 @@ WHERE id = ?;
 INSERT INTO posts (
     id, user_id, content, media_urls, visibility, 
     original_post_id, reply_to_id, root_post_id, is_repost, is_reply, created_at
-) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);
+
 
 -- name: DeletePost :exec
 UPDATE posts
@@ -260,3 +261,57 @@ SELECT u.id, u.username, u.display_name, f.follower_id, f.following_id
 FROM follows f
 JOIN users u ON f.follower_id = u.id
 WHERE f.following_id = ? OR f.follower_id = ?;
+
+-- name: CheckPostExists :one
+SELECT EXISTS (
+    SELECT 1 
+    FROM posts 
+    WHERE id = ?
+);
+
+-- name: CheckRootPostValidity :one
+SELECT root_post_id IS NULL AS is_valid
+FROM posts
+WHERE id = ?;
+
+-- name: CountReplyPosts :one
+SELECT COUNT(*) AS reply_count
+FROM posts
+WHERE root_post_id = ?;
+
+-- name: GetPost :one
+SELECT p.*, u.username, u.display_name
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE p.id = ?;
+
+-- name: GetPostLikes :many
+SELECT u.id, u.username, u.display_name
+FROM likes l
+JOIN users u ON l.user_id = u.id
+WHERE l.post_id = ?;
+
+-- name: GetPostReposts :many
+SELECT u.id, u.username, u.display_name, r.is_quote_repost, r.additional_comment
+FROM reposts r
+JOIN users u ON r.user_id = u.id
+WHERE r.original_post_id = ?;
+
+-- name: GetPostReplies :many
+SELECT p.*, u.username, u.display_name
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE p.root_post_id = ?
+ORDER BY p.created_at ASC;
+
+-- name: GetPostRepliesCount :one
+SELECT COUNT(*) AS reply_count
+FROM posts
+WHERE root_post_id = ?;
+
+-- name: IncrementReplyCount :exec
+UPDATE posts
+SET replies_count = replies_count + 1
+WHERE id = ?;
+
+
