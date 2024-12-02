@@ -194,6 +194,12 @@ INSERT INTO posts (
     original_post_id, reply_to_id, root_post_id, is_repost, is_reply, created_at
 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);
 
+-- name: DeletePost :exec
+UPDATE posts
+SET is_deleted = TRUE
+WHERE id = ?;
+
+
 -- name: AddFollow :exec
 INSERT INTO follows (id, follower_id, following_id, created_at)
 VALUES (?, ?, ?, CURRENT_TIMESTAMP);

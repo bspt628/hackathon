@@ -4,9 +4,22 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"context"
 )
 
 func (pc *PostController) CreatePost(w http.ResponseWriter, r *http.Request) {
+	// FirebaseAuthMiddleware で設定された UserID を取得
+	firebaseUID := r.Header.Get("UserID")
+	if firebaseUID == "" {
+		http.Error(w, "UserID missing in request context", http.StatusUnauthorized)
+		return
+	}
+
+	userID, err := pc.userUsecase.GetUserIDFromFirebaseUID(context.Background(), firebaseUID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("フォローするユーザーIDの取得に失敗しました: %v", err), http.StatusInternalServerError)
+		return
+	}
 	var request struct {
 		UserID         string   `json:"user_id"`
 		Content        string   `json:"content"`
@@ -23,6 +36,8 @@ func (pc *PostController) CreatePost(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("リクエストの解析に失敗しました: %v", err), http.StatusBadRequest)
 		return
 	}
+
+	request.UserID = userID
 
 	post, err := pc.postUsecase.CreatePost(r.Context(), request)
 	if err != nil {
