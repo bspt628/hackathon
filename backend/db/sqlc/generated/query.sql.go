@@ -1052,6 +1052,16 @@ func (q *Queries) RemoveFollow(ctx context.Context, arg RemoveFollowParams) (sql
 	return q.db.ExecContext(ctx, removeFollow, arg.FollowerID, arg.FollowingID)
 }
 
+const restorePost = `-- name: RestorePost :execresult
+UPDATE posts
+SET is_deleted = false
+WHERE id = ? AND is_deleted = true AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) <= 20
+`
+
+func (q *Queries) RestorePost(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, restorePost, id)
+}
+
 const saveResetToken = `-- name: SaveResetToken :exec
 
 INSERT INTO password_reset_tokens (email, token, expiry)

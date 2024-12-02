@@ -326,3 +326,7 @@ SELECT reply_to_id
 FROM posts
 WHERE id = ?;
 
+-- name: RestorePost :execresult
+UPDATE posts
+SET is_deleted = false
+WHERE id = ? AND is_deleted = true AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) <= 20;
