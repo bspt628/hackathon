@@ -62,7 +62,8 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// router.HandleFunc("/api/timeline", postController.GetUserTimeline).Methods("GET")
 
 	// // いいね機能
-	apiRouter.HandleFunc("/likes/create", likeController.CreateLike).Methods("POST")
+	apiRouter.HandleFunc("/likes", likeController.CreateLike).Methods("POST")
+	apiRouter.HandleFunc("/likes", likeController.DeleteLike).Methods("DELETE")
 	// router.HandleFunc("/api/likes/{id}/count", likeController.UpdatePostLikesCount).Methods("PUT")
 
 	// // フォロー機能

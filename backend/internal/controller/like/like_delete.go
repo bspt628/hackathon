@@ -3,8 +3,9 @@ package likecontroller
 import (
 	"context"
 	"database/sql"
-	"net/http"
 	"encoding/json"
+	"fmt"
+	"net/http"
 )
 
 func (lc *LikeController) DeleteLike(w http.ResponseWriter, r *http.Request) {
@@ -40,7 +41,8 @@ func (lc *LikeController) DeleteLike(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, "Like not found", http.StatusNotFound)
 			return
 		}
-		http.Error(w, "Failed to delete like", http.StatusInternalServerError)
+		// errを返す
+		http.Error(w, fmt.Sprintf("いいねの削除に失敗しました: %v", err), http.StatusInternalServerError)
 		return
 	}
 

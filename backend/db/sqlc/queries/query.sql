@@ -322,7 +322,7 @@ UPDATE posts
 SET is_deleted = false
 WHERE id = ? AND is_deleted = true AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) <= 20;
 
--- name: AddLike :exec
+-- name: AddLike :execresult
 INSERT INTO likes (id, user_id, post_id, created_at)
 VALUES (?, ?, ?, CURRENT_TIMESTAMP);
 
@@ -334,6 +334,13 @@ WHERE id = ?;
 -- name: RemoveLike :exec
 DELETE FROM likes
 WHERE user_id = ? AND post_id = ?;
+
+-- name: CheckLikeExists :one
+SELECT EXISTS (
+    SELECT 1
+    FROM likes
+    WHERE user_id = ? AND post_id = ?
+) AS liked;
 
 -- name: DecrementLikesCount :exec
 UPDATE posts
