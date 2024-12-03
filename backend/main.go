@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/joho/godotenv"
+	// "github.com/joho/godotenv"
 	"hackathon/internal/server"
 	"log"
 	"hackathon/internal/auth"
