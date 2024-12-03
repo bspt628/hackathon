@@ -21,14 +21,14 @@ func FirebaseAuthMiddleware(next http.Handler) http.Handler {
 		token := strings.TrimPrefix(authHeader, "Bearer ")
 
 		// FirebaseのIDトークンを検証してUIDを取得
-		uid, err := VerifyIDToken(token)
+		firebasetoken, err := VerifyIDToken(token)
 		if err != nil {
 			http.Error(w, fmt.Sprintf("Firebase authentication failed: %v", err), http.StatusUnauthorized)
 			return
 		}
 
 		// ユーザーIDをリクエストにセット
-		r.Header.Set("UserID", uid)
+		r.Header.Set("UserID", firebasetoken.UID)
 
 		// 次のハンドラーを呼び出す
 		next.ServeHTTP(w, r)

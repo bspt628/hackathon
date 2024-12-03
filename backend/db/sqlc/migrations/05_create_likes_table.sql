@@ -1,8 +1,8 @@
 CREATE TABLE likes (
     id VARCHAR(36) PRIMARY KEY,
-    userId VARCHAR(36),
-    postId VARCHAR(36),
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (userId) REFERENCES users(id),
-    FOREIGN KEY (postId) REFERENCES posts(id)
+    user_id VARCHAR(36),
+    post_id VARCHAR(36),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (post_id) REFERENCES posts(id) ON DELETE CASCADE
 );

@@ -1,11 +1,12 @@
 .
 ├── Dockerfile
 ├── Term6_Hiroto_Uchida_Firebase_Admin_SDK.json
+├── backend
+│   └── FirebaseAdminSDK.json
 ├── config
 │   └── init.sql
 ├── db
 │   ├── connection.go
-│   ├── schema.sql
 │   └── sqlc
 │       ├── generated
 │       │   ├── db.go
@@ -21,70 +22,143 @@
 │       │   ├── 07_create_follows_table.sql
 │       │   ├── 08_create_blocks_table.sql
 │       │   ├── 09_create_notifications_table.sql
-│       │   └── 10_create_dms_table.sql
+│       │   ├── 10_create_dms_table.sql
+│       │   └── 11_create_password_reset_tokens.sql
 │       ├── queries
 │       │   └── query.sql
 │       └── sqlc.yaml
 ├── docker-compose.yaml
+├── domain
+│   ├── post.go
+│   └── user.go
 ├── frontend_test
 │   └── index.html
 ├── go.mod
 ├── go.sum
+├── init
 ├── internal
 │   ├── auth
 │   │   ├── auth.go
 │   │   ├── auth_middleware.go
-│   │   ├── jwt_unused
-│   │   │   └── middleware.go
-│   │   └── token.go
+│   │   └── jwt_unused
+│   │       ├── middleware.go
+│   │       └── token.go
 │   ├── controller
-│   │   ├── auth
-│   │   │   ├── auth_controller.go
-│   │   │   ├── auth_signin.go
-│   │   │   └── token_controller.go
 │   │   ├── follow
+│   │   │   ├── add.go
+│   │   │   ├── follow_controller.go
+│   │   │   ├── followerscount.go
+│   │   │   ├── followingscount.go
+│   │   │   ├── followstatus.go
+│   │   │   ├── get_follower_following.go
+│   │   │   ├── getfollowers.go
+│   │   │   ├── getfollowings.go
+│   │   │   ├── remove.go
+│   │   │   └── status.go
 │   │   ├── like
 │   │   ├── message
 │   │   ├── notification
 │   │   ├── post
+│   │   │   ├── post_controller.go
+│   │   │   ├── post_create.go
+│   │   │   ├── post_delete.go
+│   │   │   └── post_restore.go
 │   │   └── user
+│   │       ├── getid.go
+│   │       ├── user_banstatus.go
 │   │       ├── user_controller.go
 │   │       ├── user_create.go
 │   │       ├── user_delete.go
+│   │       ├── user_email.go
 │   │       ├── user_getemail.go
-│   │       └── user_getuser.go
+│   │       ├── user_getuser.go
+│   │       ├── user_notification.go
+│   │       ├── user_password_reset.go
+│   │       ├── user_privacy.go
+│   │       ├── user_profile.go
+│   │       ├── user_settings.go
+│   │       ├── user_signin_unused.go
+│   │       └── user_username.go
 │   ├── dao
 │   │   ├── follow
+│   │   │   ├── follow_add.go
+│   │   │   ├── follow_dao.go
+│   │   │   ├── followerscount.go
+│   │   │   ├── followingscount.go
+│   │   │   ├── get_follower_following.go
+│   │   │   ├── getfollowers.go
+│   │   │   ├── getfollowings.go
+│   │   │   ├── remove.go
+│   │   │   └── status.go
 │   │   ├── like
 │   │   ├── message
 │   │   ├── notification
 │   │   ├── post
+│   │   │   ├── post_create.go
+│   │   │   ├── post_dao.go
+│   │   │   ├── post_delete.go
+│   │   │   └── post_restore.go
 │   │   └── user
-│   │       ├── user_create_dao.go
-│   │       ├── user_dao.go
-│   │       ├── user_delete_dao.go
-│   │       ├── user_getemail_dao.go
-│   │       ├── user_getuser_dao.go
-│   │       └── user_signin_dao.go
+│   │       ├── user.go
+│   │       ├── user_banstatus.go
+│   │       ├── user_create.go
+│   │       ├── user_delete.go
+│   │       ├── user_email.go
+│   │       ├── user_firebase2database.go
+│   │       ├── user_getemail.go
+│   │       ├── user_getuser.go
+│   │       ├── user_notification.go
+│   │       ├── user_password_reset.go
+│   │       ├── user_privacy.go
+│   │       ├── user_profile.go
+│   │       ├── user_settings.go
+│   │       ├── user_signin_unused.go
+│   │       └── user_username.go
+│   ├── email
+│   │   └── email.go
 │   ├── model
 │   │   └── user_model.go
 │   ├── server
 │   │   ├── router.go
 │   │   └── server.go
-│   └── usecase
-│       ├── follow
-│       ├── like
-│       ├── message
-│       ├── notification
-│       ├── post
-│       └── user
-│           ├── user_create.go
-│           ├── user_delete.go
-│           ├── user_getemail.go
-│           ├── user_getuser.go
-│           ├── user_signin.go
-│           └── user_usecase.go
+│   ├── usecase
+│   │   ├── follow
+│   │   │   ├── add.go
+│   │   │   ├── follow_usecase.go
+│   │   │   ├── followerscount.go
+│   │   │   ├── followingscount.go
+│   │   │   ├── get_follower_following.go
+│   │   │   ├── getfollowers.go
+│   │   │   ├── getfollowings.go
+│   │   │   ├── remove.go
+│   │   │   └── status.go
+│   │   ├── like
+│   │   ├── message
+│   │   ├── notification
+│   │   ├── post
+│   │   │   ├── post_create.go
+│   │   │   ├── post_delete.go
+│   │   │   ├── post_restore.go
+│   │   │   └── post_usecase.go
+│   │   └── user
+│   │       ├── getid.go
+│   │       ├── user_banstatus.go
+│   │       ├── user_create.go
+│   │       ├── user_delete.go
+│   │       ├── user_email.go
+│   │       ├── user_get.go
+│   │       ├── user_notification.go
+│   │       ├── user_password_reset.go
+│   │       ├── user_privacy.go
+│   │       ├── user_profile.go
+│   │       ├── user_settings.go
+│   │       ├── user_signin_unused.go
+│   │       ├── user_usecase.go
+│   │       └── user_username.go
+│   ├── utils_controller
+│   └── utils_usecase
+│       └── getid.go
 ├── main.go
 └── tree.txt
 
-35 directories, 53 files
+41 directories, 121 files

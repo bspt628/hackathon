@@ -1,10 +1,7 @@
-// user_email_handler.go
-
-package controller
+package usercontroller
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/http"
 	"github.com/gorilla/mux"
 )
@@ -20,9 +17,6 @@ func (uc *UserController) GetUserEmailByUsername(w http.ResponseWriter, r *http.
 		http.Error(w, "usernameパラメータが指定されていません", http.StatusBadRequest)
 		return
 	}
-
-	// usernameをログに出力
-	fmt.Println("username: ", username)
 
 	// ユースケース層のロジックを呼び出す
 	ctx := r.Context()

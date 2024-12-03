@@ -1,8 +1,9 @@
 CREATE TABLE follows (
     id VARCHAR(36) PRIMARY KEY,
-    followerId VARCHAR(36),
-    followingId VARCHAR(36),
-    createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (followerId) REFERENCES users(id),
-    FOREIGN KEY (followingId) REFERENCES users(id)
+    follower_id VARCHAR(36),
+    following_id VARCHAR(36),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (follower_id, following_id),
+    FOREIGN KEY (follower_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (following_id) REFERENCES users(id) ON DELETE CASCADE
 );

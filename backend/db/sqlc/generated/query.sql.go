@@ -9,64 +9,106 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
+	"time"
 )
 
 const addBlock = `-- name: AddBlock :exec
-INSERT INTO blocks (id, blockedById, blockedUserId)
+INSERT INTO blocks (id, blocked_by_id, blocked_user_id)
 VALUES (?, ?, ?)
 `
 
 type AddBlockParams struct {
 	ID            string         `json:"id"`
-	Blockedbyid   sql.NullString `json:"blockedbyid"`
-	Blockeduserid sql.NullString `json:"blockeduserid"`
+	BlockedByID   sql.NullString `json:"blocked_by_id"`
+	BlockedUserID sql.NullString `json:"blocked_user_id"`
 }
 
 func (q *Queries) AddBlock(ctx context.Context, arg AddBlockParams) error {
-	_, err := q.db.ExecContext(ctx, addBlock, arg.ID, arg.Blockedbyid, arg.Blockeduserid)
+	_, err := q.db.ExecContext(ctx, addBlock, arg.ID, arg.BlockedByID, arg.BlockedUserID)
 	return err
 }
 
 const addFollow = `-- name: AddFollow :exec
-INSERT INTO follows (id, followerId, followingId)
-VALUES (?, ?, ?)
+INSERT INTO follows (id, follower_id, following_id, created_at)
+VALUES (?, ?, ?, CURRENT_TIMESTAMP)
 `
 
 type AddFollowParams struct {
 	ID          string         `json:"id"`
-	Followerid  sql.NullString `json:"followerid"`
-	Followingid sql.NullString `json:"followingid"`
+	FollowerID  sql.NullString `json:"follower_id"`
+	FollowingID sql.NullString `json:"following_id"`
 }
 
 func (q *Queries) AddFollow(ctx context.Context, arg AddFollowParams) error {
-	_, err := q.db.ExecContext(ctx, addFollow, arg.ID, arg.Followerid, arg.Followingid)
+	_, err := q.db.ExecContext(ctx, addFollow, arg.ID, arg.FollowerID, arg.FollowingID)
 	return err
 }
 
 const addLike = `-- name: AddLike :exec
-INSERT INTO likes (id, userId, postId)
+INSERT INTO likes (id, user_id, post_id)
 VALUES (?, ?, ?)
 `
 
 type AddLikeParams struct {
 	ID     string         `json:"id"`
-	Userid sql.NullString `json:"userid"`
-	Postid sql.NullString `json:"postid"`
+	UserID sql.NullString `json:"user_id"`
+	PostID sql.NullString `json:"post_id"`
 }
 
 func (q *Queries) AddLike(ctx context.Context, arg AddLikeParams) error {
-	_, err := q.db.ExecContext(ctx, addLike, arg.ID, arg.Userid, arg.Postid)
+	_, err := q.db.ExecContext(ctx, addLike, arg.ID, arg.UserID, arg.PostID)
 	return err
 }
 
+const checkPostExists = `-- name: CheckPostExists :one
+SELECT EXISTS (
+    SELECT 1 
+    FROM posts 
+    WHERE id = ?
+)
+`
+
+func (q *Queries) CheckPostExists(ctx context.Context, id string) (bool, error) {
+	row := q.db.QueryRowContext(ctx, checkPostExists, id)
+	var exists bool
+	err := row.Scan(&exists)
+	return exists, err
+}
+
+const checkRootPostValidity = `-- name: CheckRootPostValidity :one
+SELECT root_post_id IS NULL AS is_valid
+FROM posts
+WHERE id = ?
+`
+
+func (q *Queries) CheckRootPostValidity(ctx context.Context, id string) (bool, error) {
+	row := q.db.QueryRowContext(ctx, checkRootPostValidity, id)
+	var is_valid bool
+	err := row.Scan(&is_valid)
+	return is_valid, err
+}
+
+const countReplyPosts = `-- name: CountReplyPosts :one
+SELECT COUNT(*) AS reply_count
+FROM posts
+WHERE root_post_id = ?
+`
+
+func (q *Queries) CountReplyPosts(ctx context.Context, rootPostID sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countReplyPosts, rootPostID)
+	var reply_count int64
+	err := row.Scan(&reply_count)
+	return reply_count, err
+}
+
 const createNotification = `-- name: CreateNotification :exec
-INSERT INTO notifications (id, userId, type, message)
+INSERT INTO notifications (id, user_id, type, message)
 VALUES (?, ?, ?, ?)
 `
 
 type CreateNotificationParams struct {
 	ID      string         `json:"id"`
-	Userid  sql.NullString `json:"userid"`
+	UserID  sql.NullString `json:"user_id"`
 	Type    sql.NullString `json:"type"`
 	Message sql.NullString `json:"message"`
 }
@@ -74,26 +116,47 @@ type CreateNotificationParams struct {
 func (q *Queries) CreateNotification(ctx context.Context, arg CreateNotificationParams) error {
 	_, err := q.db.ExecContext(ctx, createNotification,
 		arg.ID,
-		arg.Userid,
+		arg.UserID,
 		arg.Type,
 		arg.Message,
 	)
 	return err
 }
 
-const createPost = `-- name: CreatePost :execresult
-INSERT INTO posts (id, user_id, content)
-VALUES (?, ?, ?)
+const createPost = `-- name: CreatePost :exec
+INSERT INTO posts (
+    id, user_id, content, media_urls, visibility, 
+    original_post_id, reply_to_id, root_post_id, is_repost, is_reply, created_at
+) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 `
 
 type CreatePostParams struct {
-	ID      string         `json:"id"`
-	UserID  sql.NullString `json:"user_id"`
-	Content sql.NullString `json:"content"`
+	ID             string          `json:"id"`
+	UserID         sql.NullString  `json:"user_id"`
+	Content        sql.NullString  `json:"content"`
+	MediaUrls      json.RawMessage `json:"media_urls"`
+	Visibility     sql.NullString  `json:"visibility"`
+	OriginalPostID sql.NullString  `json:"original_post_id"`
+	ReplyToID      sql.NullString  `json:"reply_to_id"`
+	RootPostID     sql.NullString  `json:"root_post_id"`
+	IsRepost       sql.NullBool    `json:"is_repost"`
+	IsReply        sql.NullBool    `json:"is_reply"`
 }
 
-func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createPost, arg.ID, arg.UserID, arg.Content)
+func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
+	_, err := q.db.ExecContext(ctx, createPost,
+		arg.ID,
+		arg.UserID,
+		arg.Content,
+		arg.MediaUrls,
+		arg.Visibility,
+		arg.OriginalPostID,
+		arg.ReplyToID,
+		arg.RootPostID,
+		arg.IsRepost,
+		arg.IsReply,
+	)
+	return err
 }
 
 const createRepost = `-- name: CreateRepost :exec
@@ -121,12 +184,13 @@ func (q *Queries) CreateRepost(ctx context.Context, arg CreateRepostParams) erro
 }
 
 const createUser = `-- name: CreateUser :execresult
-INSERT INTO users (id, email, password_hash, username, display_name)
-VALUES (?, ?, ?, ?, ?)
+INSERT INTO users (id, firebase_uid, email, password_hash, username, display_name)
+VALUES (?, ?, ?, ?, ?, ?)
 `
 
 type CreateUserParams struct {
 	ID           string         `json:"id"`
+	FirebaseUid  string         `json:"firebase_uid"`
 	Email        string         `json:"email"`
 	PasswordHash string         `json:"password_hash"`
 	Username     string         `json:"username"`
@@ -136,6 +200,7 @@ type CreateUserParams struct {
 func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, createUser,
 		arg.ID,
+		arg.FirebaseUid,
 		arg.Email,
 		arg.PasswordHash,
 		arg.Username,
@@ -143,47 +208,70 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Res
 	)
 }
 
+const decrementReplyCount = `-- name: DecrementReplyCount :exec
+UPDATE posts
+SET replies_count = replies_count - 1
+WHERE (id = ? AND replies_count > 0)
+`
+
+func (q *Queries) DecrementReplyCount(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, decrementReplyCount, id)
+	return err
+}
+
+const deletePost = `-- name: DeletePost :exec
+UPDATE posts
+SET 
+    is_deleted = TRUE,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+func (q *Queries) DeletePost(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, deletePost, id)
+	return err
+}
+
 const deleteResetToken = `-- name: DeleteResetToken :exec
 DELETE FROM password_reset_tokens
-WHERE token = $1
+WHERE token = ?
 `
 
 // 使用済みのリセットトークンを削除するクエリ
-func (q *Queries) DeleteResetToken(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, deleteResetToken)
+func (q *Queries) DeleteResetToken(ctx context.Context, token string) error {
+	_, err := q.db.ExecContext(ctx, deleteResetToken, token)
 	return err
 }
 
-const deleteUser = `-- name: DeleteUser :exec
+const deleteUser = `-- name: DeleteUser :execresult
 DELETE FROM users WHERE id = ?
 `
 
-func (q *Queries) DeleteUser(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, deleteUser, id)
-	return err
+func (q *Queries) DeleteUser(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteUser, id)
 }
 
 const getDMConversation = `-- name: GetDMConversation :many
-SELECT id, senderid, receiverid, content, createdat
+SELECT id, sender_id, receiver_id, content, created_at
 FROM dms
-WHERE (senderId = ? AND receiverId = ?)
-   OR (senderId = ? AND receiverId = ?)
+WHERE (sender_id = ? AND receiver_id = ?)
+   OR (sender_id = ? AND receiver_id = ?)
 ORDER BY createdAt ASC
 `
 
 type GetDMConversationParams struct {
-	Senderid     sql.NullString `json:"senderid"`
-	Receiverid   sql.NullString `json:"receiverid"`
-	Senderid_2   sql.NullString `json:"senderid_2"`
-	Receiverid_2 sql.NullString `json:"receiverid_2"`
+	SenderID     sql.NullString `json:"sender_id"`
+	ReceiverID   sql.NullString `json:"receiver_id"`
+	SenderID_2   sql.NullString `json:"sender_id_2"`
+	ReceiverID_2 sql.NullString `json:"receiver_id_2"`
 }
 
 func (q *Queries) GetDMConversation(ctx context.Context, arg GetDMConversationParams) ([]Dm, error) {
 	rows, err := q.db.QueryContext(ctx, getDMConversation,
-		arg.Senderid,
-		arg.Receiverid,
-		arg.Senderid_2,
-		arg.Receiverid_2,
+		arg.SenderID,
+		arg.ReceiverID,
+		arg.SenderID_2,
+		arg.ReceiverID_2,
 	)
 	if err != nil {
 		return nil, err
@@ -194,10 +282,10 @@ func (q *Queries) GetDMConversation(ctx context.Context, arg GetDMConversationPa
 		var i Dm
 		if err := rows.Scan(
 			&i.ID,
-			&i.Senderid,
-			&i.Receiverid,
+			&i.SenderID,
+			&i.ReceiverID,
 			&i.Content,
-			&i.Createdat,
+			&i.CreatedAt,
 		); err != nil {
 			return nil, err
 		}
@@ -225,8 +313,419 @@ func (q *Queries) GetEmailFromUsername(ctx context.Context, username string) (st
 	return email, err
 }
 
+const getFirebaseUIDfromUserID = `-- name: GetFirebaseUIDfromUserID :one
+SELECT firebase_uid FROM users WHERE id = ?
+`
+
+func (q *Queries) GetFirebaseUIDfromUserID(ctx context.Context, id string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getFirebaseUIDfromUserID, id)
+	var firebase_uid string
+	err := row.Scan(&firebase_uid)
+	return firebase_uid, err
+}
+
+const getFollowStatus = `-- name: GetFollowStatus :one
+SELECT EXISTS(
+    SELECT 1
+    FROM follows
+    WHERE follower_id = ? AND following_id = ?
+) AS following
+`
+
+type GetFollowStatusParams struct {
+	FollowerID  sql.NullString `json:"follower_id"`
+	FollowingID sql.NullString `json:"following_id"`
+}
+
+func (q *Queries) GetFollowStatus(ctx context.Context, arg GetFollowStatusParams) (bool, error) {
+	row := q.db.QueryRowContext(ctx, getFollowStatus, arg.FollowerID, arg.FollowingID)
+	var following bool
+	err := row.Scan(&following)
+	return following, err
+}
+
+const getFollowers = `-- name: GetFollowers :many
+SELECT u.id, u.username, u.display_name
+FROM follows f
+JOIN users u ON f.follower_id = u.id
+WHERE f.following_id = ?
+`
+
+type GetFollowersRow struct {
+	ID          string         `json:"id"`
+	Username    string         `json:"username"`
+	DisplayName sql.NullString `json:"display_name"`
+}
+
+func (q *Queries) GetFollowers(ctx context.Context, followingID sql.NullString) ([]GetFollowersRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFollowers, followingID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFollowersRow
+	for rows.Next() {
+		var i GetFollowersRow
+		if err := rows.Scan(&i.ID, &i.Username, &i.DisplayName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFollowersAndFollowings = `-- name: GetFollowersAndFollowings :many
+SELECT u.id, u.username, u.display_name, f.follower_id, f.following_id
+FROM follows f
+JOIN users u ON f.follower_id = u.id
+WHERE f.following_id = ? OR f.follower_id = ?
+`
+
+type GetFollowersAndFollowingsParams struct {
+	FollowingID sql.NullString `json:"following_id"`
+	FollowerID  sql.NullString `json:"follower_id"`
+}
+
+type GetFollowersAndFollowingsRow struct {
+	ID          string         `json:"id"`
+	Username    string         `json:"username"`
+	DisplayName sql.NullString `json:"display_name"`
+	FollowerID  sql.NullString `json:"follower_id"`
+	FollowingID sql.NullString `json:"following_id"`
+}
+
+func (q *Queries) GetFollowersAndFollowings(ctx context.Context, arg GetFollowersAndFollowingsParams) ([]GetFollowersAndFollowingsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFollowersAndFollowings, arg.FollowingID, arg.FollowerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFollowersAndFollowingsRow
+	for rows.Next() {
+		var i GetFollowersAndFollowingsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.DisplayName,
+			&i.FollowerID,
+			&i.FollowingID,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFollowersCount = `-- name: GetFollowersCount :one
+SELECT followers_count FROM users WHERE id = ?
+`
+
+func (q *Queries) GetFollowersCount(ctx context.Context, id string) (sql.NullInt32, error) {
+	row := q.db.QueryRowContext(ctx, getFollowersCount, id)
+	var followers_count sql.NullInt32
+	err := row.Scan(&followers_count)
+	return followers_count, err
+}
+
+const getFollowings = `-- name: GetFollowings :many
+SELECT u.id, u.username, u.display_name
+FROM follows f
+JOIN users u ON f.following_id = u.id
+WHERE f.follower_id = ?
+`
+
+type GetFollowingsRow struct {
+	ID          string         `json:"id"`
+	Username    string         `json:"username"`
+	DisplayName sql.NullString `json:"display_name"`
+}
+
+func (q *Queries) GetFollowings(ctx context.Context, followerID sql.NullString) ([]GetFollowingsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFollowings, followerID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFollowingsRow
+	for rows.Next() {
+		var i GetFollowingsRow
+		if err := rows.Scan(&i.ID, &i.Username, &i.DisplayName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getFollowingsCount = `-- name: GetFollowingsCount :one
+SELECT following_count FROM users WHERE id = ?
+`
+
+func (q *Queries) GetFollowingsCount(ctx context.Context, id string) (sql.NullInt32, error) {
+	row := q.db.QueryRowContext(ctx, getFollowingsCount, id)
+	var following_count sql.NullInt32
+	err := row.Scan(&following_count)
+	return following_count, err
+}
+
+const getIDfromFirebaseUID = `-- name: GetIDfromFirebaseUID :one
+SELECT id FROM users WHERE firebase_uid = ?
+`
+
+func (q *Queries) GetIDfromFirebaseUID(ctx context.Context, firebaseUid string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getIDfromFirebaseUID, firebaseUid)
+	var id string
+	err := row.Scan(&id)
+	return id, err
+}
+
+const getPost = `-- name: GetPost :one
+SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE p.id = ?
+`
+
+type GetPostRow struct {
+	ID             string          `json:"id"`
+	UserID         sql.NullString  `json:"user_id"`
+	Content        sql.NullString  `json:"content"`
+	CreatedAt      sql.NullTime    `json:"created_at"`
+	UpdatedAt      sql.NullTime    `json:"updated_at"`
+	IsRepost       sql.NullBool    `json:"is_repost"`
+	OriginalPostID sql.NullString  `json:"original_post_id"`
+	ReplyToID      sql.NullString  `json:"reply_to_id"`
+	RootPostID     sql.NullString  `json:"root_post_id"`
+	IsReply        sql.NullBool    `json:"is_reply"`
+	MediaUrls      json.RawMessage `json:"media_urls"`
+	LikesCount     sql.NullInt32   `json:"likes_count"`
+	RepostsCount   sql.NullInt32   `json:"reposts_count"`
+	RepliesCount   sql.NullInt32   `json:"replies_count"`
+	ViewsCount     sql.NullInt32   `json:"views_count"`
+	Visibility     sql.NullString  `json:"visibility"`
+	IsPinned       sql.NullBool    `json:"is_pinned"`
+	IsDeleted      sql.NullBool    `json:"is_deleted"`
+	Username       string          `json:"username"`
+	DisplayName    sql.NullString  `json:"display_name"`
+}
+
+func (q *Queries) GetPost(ctx context.Context, id string) (GetPostRow, error) {
+	row := q.db.QueryRowContext(ctx, getPost, id)
+	var i GetPostRow
+	err := row.Scan(
+		&i.ID,
+		&i.UserID,
+		&i.Content,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+		&i.IsRepost,
+		&i.OriginalPostID,
+		&i.ReplyToID,
+		&i.RootPostID,
+		&i.IsReply,
+		&i.MediaUrls,
+		&i.LikesCount,
+		&i.RepostsCount,
+		&i.RepliesCount,
+		&i.ViewsCount,
+		&i.Visibility,
+		&i.IsPinned,
+		&i.IsDeleted,
+		&i.Username,
+		&i.DisplayName,
+	)
+	return i, err
+}
+
+const getPostLikes = `-- name: GetPostLikes :many
+SELECT u.id, u.username, u.display_name
+FROM likes l
+JOIN users u ON l.user_id = u.id
+WHERE l.post_id = ?
+`
+
+type GetPostLikesRow struct {
+	ID          string         `json:"id"`
+	Username    string         `json:"username"`
+	DisplayName sql.NullString `json:"display_name"`
+}
+
+func (q *Queries) GetPostLikes(ctx context.Context, postID sql.NullString) ([]GetPostLikesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPostLikes, postID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPostLikesRow
+	for rows.Next() {
+		var i GetPostLikesRow
+		if err := rows.Scan(&i.ID, &i.Username, &i.DisplayName); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPostReplies = `-- name: GetPostReplies :many
+SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE p.root_post_id = ?
+ORDER BY p.created_at ASC
+`
+
+type GetPostRepliesRow struct {
+	ID             string          `json:"id"`
+	UserID         sql.NullString  `json:"user_id"`
+	Content        sql.NullString  `json:"content"`
+	CreatedAt      sql.NullTime    `json:"created_at"`
+	UpdatedAt      sql.NullTime    `json:"updated_at"`
+	IsRepost       sql.NullBool    `json:"is_repost"`
+	OriginalPostID sql.NullString  `json:"original_post_id"`
+	ReplyToID      sql.NullString  `json:"reply_to_id"`
+	RootPostID     sql.NullString  `json:"root_post_id"`
+	IsReply        sql.NullBool    `json:"is_reply"`
+	MediaUrls      json.RawMessage `json:"media_urls"`
+	LikesCount     sql.NullInt32   `json:"likes_count"`
+	RepostsCount   sql.NullInt32   `json:"reposts_count"`
+	RepliesCount   sql.NullInt32   `json:"replies_count"`
+	ViewsCount     sql.NullInt32   `json:"views_count"`
+	Visibility     sql.NullString  `json:"visibility"`
+	IsPinned       sql.NullBool    `json:"is_pinned"`
+	IsDeleted      sql.NullBool    `json:"is_deleted"`
+	Username       string          `json:"username"`
+	DisplayName    sql.NullString  `json:"display_name"`
+}
+
+func (q *Queries) GetPostReplies(ctx context.Context, rootPostID sql.NullString) ([]GetPostRepliesRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPostReplies, rootPostID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPostRepliesRow
+	for rows.Next() {
+		var i GetPostRepliesRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Content,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.IsRepost,
+			&i.OriginalPostID,
+			&i.ReplyToID,
+			&i.RootPostID,
+			&i.IsReply,
+			&i.MediaUrls,
+			&i.LikesCount,
+			&i.RepostsCount,
+			&i.RepliesCount,
+			&i.ViewsCount,
+			&i.Visibility,
+			&i.IsPinned,
+			&i.IsDeleted,
+			&i.Username,
+			&i.DisplayName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getPostRepliesCount = `-- name: GetPostRepliesCount :one
+SELECT COUNT(*) AS reply_count
+FROM posts
+WHERE root_post_id = ?
+`
+
+func (q *Queries) GetPostRepliesCount(ctx context.Context, rootPostID sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, getPostRepliesCount, rootPostID)
+	var reply_count int64
+	err := row.Scan(&reply_count)
+	return reply_count, err
+}
+
+const getPostReposts = `-- name: GetPostReposts :many
+SELECT u.id, u.username, u.display_name, r.is_quote_repost, r.additional_comment
+FROM reposts r
+JOIN users u ON r.user_id = u.id
+WHERE r.original_post_id = ?
+`
+
+type GetPostRepostsRow struct {
+	ID                string         `json:"id"`
+	Username          string         `json:"username"`
+	DisplayName       sql.NullString `json:"display_name"`
+	IsQuoteRepost     sql.NullBool   `json:"is_quote_repost"`
+	AdditionalComment sql.NullString `json:"additional_comment"`
+}
+
+func (q *Queries) GetPostReposts(ctx context.Context, originalPostID sql.NullString) ([]GetPostRepostsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPostReposts, originalPostID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPostRepostsRow
+	for rows.Next() {
+		var i GetPostRepostsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.Username,
+			&i.DisplayName,
+			&i.IsQuoteRepost,
+			&i.AdditionalComment,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getRecentPosts = `-- name: GetRecentPosts :many
-SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.language, p.location, p.device, p.is_pinned, p.is_deleted, u.username, u.display_name
+SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
 FROM posts p
 JOIN users u ON p.user_id = u.id
 WHERE p.is_deleted = FALSE
@@ -251,9 +750,6 @@ type GetRecentPostsRow struct {
 	RepliesCount   sql.NullInt32   `json:"replies_count"`
 	ViewsCount     sql.NullInt32   `json:"views_count"`
 	Visibility     sql.NullString  `json:"visibility"`
-	Language       sql.NullString  `json:"language"`
-	Location       sql.NullString  `json:"location"`
-	Device         sql.NullString  `json:"device"`
 	IsPinned       sql.NullBool    `json:"is_pinned"`
 	IsDeleted      sql.NullBool    `json:"is_deleted"`
 	Username       string          `json:"username"`
@@ -286,9 +782,6 @@ func (q *Queries) GetRecentPosts(ctx context.Context, limit int32) ([]GetRecentP
 			&i.RepliesCount,
 			&i.ViewsCount,
 			&i.Visibility,
-			&i.Language,
-			&i.Location,
-			&i.Device,
 			&i.IsPinned,
 			&i.IsDeleted,
 			&i.Username,
@@ -307,15 +800,28 @@ func (q *Queries) GetRecentPosts(ctx context.Context, limit int32) ([]GetRecentP
 	return items, nil
 }
 
-const getUnreadNotifications = `-- name: GetUnreadNotifications :many
-SELECT id, userid, type, message, createdat, isread
-FROM notifications
-WHERE userId = ? AND isRead = FALSE
-ORDER BY createdAt DESC
+const getReplyToID = `-- name: GetReplyToID :one
+SELECT reply_to_id
+FROM posts
+WHERE id = ?
 `
 
-func (q *Queries) GetUnreadNotifications(ctx context.Context, userid sql.NullString) ([]Notification, error) {
-	rows, err := q.db.QueryContext(ctx, getUnreadNotifications, userid)
+func (q *Queries) GetReplyToID(ctx context.Context, id string) (sql.NullString, error) {
+	row := q.db.QueryRowContext(ctx, getReplyToID, id)
+	var reply_to_id sql.NullString
+	err := row.Scan(&reply_to_id)
+	return reply_to_id, err
+}
+
+const getUnreadNotifications = `-- name: GetUnreadNotifications :many
+SELECT id, user_id, type, message, created_at, is_read
+FROM notifications
+WHERE user_id = ? AND is_read = FALSE
+ORDER BY created_at DESC
+`
+
+func (q *Queries) GetUnreadNotifications(ctx context.Context, userID sql.NullString) ([]Notification, error) {
+	rows, err := q.db.QueryContext(ctx, getUnreadNotifications, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -325,11 +831,11 @@ func (q *Queries) GetUnreadNotifications(ctx context.Context, userid sql.NullStr
 		var i Notification
 		if err := rows.Scan(
 			&i.ID,
-			&i.Userid,
+			&i.UserID,
 			&i.Type,
 			&i.Message,
-			&i.Createdat,
-			&i.Isread,
+			&i.CreatedAt,
+			&i.IsRead,
 		); err != nil {
 			return nil, err
 		}
@@ -344,14 +850,31 @@ func (q *Queries) GetUnreadNotifications(ctx context.Context, userid sql.NullStr
 	return items, nil
 }
 
+const getUserByEmail = `-- name: GetUserByEmail :one
+SELECT id, password_hash FROM users WHERE username = ?
+`
+
+type GetUserByEmailRow struct {
+	ID           string `json:"id"`
+	PasswordHash string `json:"password_hash"`
+}
+
+func (q *Queries) GetUserByEmail(ctx context.Context, username string) (GetUserByEmailRow, error) {
+	row := q.db.QueryRowContext(ctx, getUserByEmail, username)
+	var i GetUserByEmailRow
+	err := row.Scan(&i.ID, &i.PasswordHash)
+	return i, err
+}
+
 const getUserById = `-- name: GetUserById :one
-SELECT id, email, username, display_name, bio, location, followers_count, following_count, posts_count
+SELECT id, firebase_uid, email, username, display_name, bio, location, followers_count, following_count, posts_count
 FROM users
 WHERE id = ?
 `
 
 type GetUserByIdRow struct {
 	ID             string         `json:"id"`
+	FirebaseUid    string         `json:"firebase_uid"`
 	Email          string         `json:"email"`
 	Username       string         `json:"username"`
 	DisplayName    sql.NullString `json:"display_name"`
@@ -367,6 +890,7 @@ func (q *Queries) GetUserById(ctx context.Context, id string) (GetUserByIdRow, e
 	var i GetUserByIdRow
 	err := row.Scan(
 		&i.ID,
+		&i.FirebaseUid,
 		&i.Email,
 		&i.Username,
 		&i.DisplayName,
@@ -418,20 +942,20 @@ func (q *Queries) GetUserStats(ctx context.Context, id string) (GetUserStatsRow,
 }
 
 const getUserTimeline = `-- name: GetUserTimeline :many
-SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.language, p.location, p.device, p.is_pinned, p.is_deleted, u.username, u.display_name
+SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
 FROM posts p
 JOIN users u ON p.user_id = u.id
 WHERE p.user_id IN (
-    SELECT followingId
+    SELECT following_id
     FROM follows
-    WHERE followerId = ?
+    WHERE follower_id = ?
 ) OR p.user_id = ?
 ORDER BY p.created_at DESC
 LIMIT ?
 `
 
 type GetUserTimelineParams struct {
-	Followerid sql.NullString `json:"followerid"`
+	FollowerID sql.NullString `json:"follower_id"`
 	UserID     sql.NullString `json:"user_id"`
 	Limit      int32          `json:"limit"`
 }
@@ -453,9 +977,6 @@ type GetUserTimelineRow struct {
 	RepliesCount   sql.NullInt32   `json:"replies_count"`
 	ViewsCount     sql.NullInt32   `json:"views_count"`
 	Visibility     sql.NullString  `json:"visibility"`
-	Language       sql.NullString  `json:"language"`
-	Location       sql.NullString  `json:"location"`
-	Device         sql.NullString  `json:"device"`
 	IsPinned       sql.NullBool    `json:"is_pinned"`
 	IsDeleted      sql.NullBool    `json:"is_deleted"`
 	Username       string          `json:"username"`
@@ -463,7 +984,7 @@ type GetUserTimelineRow struct {
 }
 
 func (q *Queries) GetUserTimeline(ctx context.Context, arg GetUserTimelineParams) ([]GetUserTimelineRow, error) {
-	rows, err := q.db.QueryContext(ctx, getUserTimeline, arg.Followerid, arg.UserID, arg.Limit)
+	rows, err := q.db.QueryContext(ctx, getUserTimeline, arg.FollowerID, arg.UserID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
@@ -488,9 +1009,6 @@ func (q *Queries) GetUserTimeline(ctx context.Context, arg GetUserTimelineParams
 			&i.RepliesCount,
 			&i.ViewsCount,
 			&i.Visibility,
-			&i.Language,
-			&i.Location,
-			&i.Device,
 			&i.IsPinned,
 			&i.IsDeleted,
 			&i.Username,
@@ -509,19 +1027,63 @@ func (q *Queries) GetUserTimeline(ctx context.Context, arg GetUserTimelineParams
 	return items, nil
 }
 
-const saveResetToken = `-- name: SaveResetToken :exec
-INSERT INTO password_reset_tokens (email, token, expiry)
-VALUES ($1, $2, $3)
+const incrementReplyCount = `-- name: IncrementReplyCount :exec
+UPDATE posts
+SET replies_count = replies_count + 1
+WHERE id = ?
 `
 
+func (q *Queries) IncrementReplyCount(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, incrementReplyCount, id)
+	return err
+}
+
+const removeFollow = `-- name: RemoveFollow :execresult
+DELETE FROM follows
+WHERE follower_id = ? AND following_id = ?
+`
+
+type RemoveFollowParams struct {
+	FollowerID  sql.NullString `json:"follower_id"`
+	FollowingID sql.NullString `json:"following_id"`
+}
+
+func (q *Queries) RemoveFollow(ctx context.Context, arg RemoveFollowParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, removeFollow, arg.FollowerID, arg.FollowingID)
+}
+
+const restorePost = `-- name: RestorePost :execresult
+UPDATE posts
+SET is_deleted = false
+WHERE id = ? AND is_deleted = true AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) <= 20
+`
+
+func (q *Queries) RestorePost(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, restorePost, id)
+}
+
+const saveResetToken = `-- name: SaveResetToken :exec
+
+INSERT INTO password_reset_tokens (email, token, expiry)
+VALUES (?, ?, ?)
+`
+
+type SaveResetTokenParams struct {
+	Email  string    `json:"email"`
+	Token  string    `json:"token"`
+	Expiry time.Time `json:"expiry"`
+}
+
+// ここから自作
 // パスワードリセット用のトークンを保存するクエリ
-func (q *Queries) SaveResetToken(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, saveResetToken)
+// params: email, token, expiry
+func (q *Queries) SaveResetToken(ctx context.Context, arg SaveResetTokenParams) error {
+	_, err := q.db.ExecContext(ctx, saveResetToken, arg.Email, arg.Token, arg.Expiry)
 	return err
 }
 
 const searchPostsByHashtag = `-- name: SearchPostsByHashtag :many
-SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.language, p.location, p.device, p.is_pinned, p.is_deleted, u.username, u.display_name
+SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
 FROM posts p
 JOIN users u ON p.user_id = u.id
 WHERE p.content LIKE ?
@@ -551,9 +1113,6 @@ type SearchPostsByHashtagRow struct {
 	RepliesCount   sql.NullInt32   `json:"replies_count"`
 	ViewsCount     sql.NullInt32   `json:"views_count"`
 	Visibility     sql.NullString  `json:"visibility"`
-	Language       sql.NullString  `json:"language"`
-	Location       sql.NullString  `json:"location"`
-	Device         sql.NullString  `json:"device"`
 	IsPinned       sql.NullBool    `json:"is_pinned"`
 	IsDeleted      sql.NullBool    `json:"is_deleted"`
 	Username       string          `json:"username"`
@@ -586,9 +1145,6 @@ func (q *Queries) SearchPostsByHashtag(ctx context.Context, arg SearchPostsByHas
 			&i.RepliesCount,
 			&i.ViewsCount,
 			&i.Visibility,
-			&i.Language,
-			&i.Location,
-			&i.Device,
 			&i.IsPinned,
 			&i.IsDeleted,
 			&i.Username,
@@ -608,56 +1164,72 @@ func (q *Queries) SearchPostsByHashtag(ctx context.Context, arg SearchPostsByHas
 }
 
 const sendDM = `-- name: SendDM :exec
-INSERT INTO dms (id, senderId, receiverId, content)
+INSERT INTO dms (id, sender_id, receiver_id, content)
 VALUES (?, ?, ?, ?)
 `
 
 type SendDMParams struct {
 	ID         string         `json:"id"`
-	Senderid   sql.NullString `json:"senderid"`
-	Receiverid sql.NullString `json:"receiverid"`
+	SenderID   sql.NullString `json:"sender_id"`
+	ReceiverID sql.NullString `json:"receiver_id"`
 	Content    sql.NullString `json:"content"`
 }
 
 func (q *Queries) SendDM(ctx context.Context, arg SendDMParams) error {
 	_, err := q.db.ExecContext(ctx, sendDM,
 		arg.ID,
-		arg.Senderid,
-		arg.Receiverid,
+		arg.SenderID,
+		arg.ReceiverID,
 		arg.Content,
 	)
 	return err
 }
 
-const updateFollowersCount = `-- name: UpdateFollowersCount :exec
+const updateFollowersCount = `-- name: UpdateFollowersCount :execresult
 UPDATE users
 SET followers_count = (
-    SELECT COUNT(*) FROM follows WHERE followingId = users.id
+    SELECT COUNT(*) FROM follows WHERE following_id = users.id
 )
 WHERE users.id = ?
 `
 
-func (q *Queries) UpdateFollowersCount(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, updateFollowersCount, id)
-	return err
+func (q *Queries) UpdateFollowersCount(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateFollowersCount, id)
 }
 
-const updatePasswordByEmail = `-- name: UpdatePasswordByEmail :exec
+const updateFollowingsCount = `-- name: UpdateFollowingsCount :execresult
 UPDATE users
-SET password_hash = $2, last_password_change = NOW()
-WHERE email = $1
+SET following_count = (
+    SELECT COUNT(*) FROM follows WHERE following_id = users.id
+)
+WHERE users.id = ?
 `
 
+func (q *Queries) UpdateFollowingsCount(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, updateFollowingsCount, id)
+}
+
+const updatePassword = `-- name: UpdatePassword :exec
+UPDATE users
+SET password_hash = ?, last_password_change = NOW()
+WHERE email = ?
+`
+
+type UpdatePasswordParams struct {
+	PasswordHash string `json:"password_hash"`
+	Email        string `json:"email"`
+}
+
 // パスワードを更新するクエリ
-func (q *Queries) UpdatePasswordByEmail(ctx context.Context) error {
-	_, err := q.db.ExecContext(ctx, updatePasswordByEmail)
+func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error {
+	_, err := q.db.ExecContext(ctx, updatePassword, arg.PasswordHash, arg.Email)
 	return err
 }
 
 const updatePostLikesCount = `-- name: UpdatePostLikesCount :exec
 UPDATE posts
 SET likes_count = (
-    SELECT COUNT(*) FROM likes WHERE postId = posts.id
+    SELECT COUNT(*) FROM likes WHERE post_id = posts.id
 )
 WHERE posts.id = ?
 `
@@ -667,31 +1239,161 @@ func (q *Queries) UpdatePostLikesCount(ctx context.Context, id string) error {
 	return err
 }
 
-const updateUserInfo = `-- name: UpdateUserInfo :exec
+const updateUserBanStatus = `-- name: UpdateUserBanStatus :exec
 UPDATE users
-SET bio = ?, location = ?
+SET
+    is_banned = ?,
+    updated_at = CURRENT_TIMESTAMP
 WHERE id = ?
 `
 
-type UpdateUserInfoParams struct {
-	Bio      sql.NullString `json:"bio"`
-	Location sql.NullString `json:"location"`
-	ID       string         `json:"id"`
+type UpdateUserBanStatusParams struct {
+	IsBanned sql.NullBool `json:"is_banned"`
+	ID       string       `json:"id"`
 }
 
-func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) error {
-	_, err := q.db.ExecContext(ctx, updateUserInfo, arg.Bio, arg.Location, arg.ID)
+func (q *Queries) UpdateUserBanStatus(ctx context.Context, arg UpdateUserBanStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserBanStatus, arg.IsBanned, arg.ID)
+	return err
+}
+
+const updateUserEmail = `-- name: UpdateUserEmail :exec
+UPDATE users
+SET
+    email = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserEmailParams struct {
+	Email string `json:"email"`
+	ID    string `json:"id"`
+}
+
+func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserEmail, arg.Email, arg.ID)
+	return err
+}
+
+const updateUserName = `-- name: UpdateUserName :exec
+UPDATE users
+SET
+    username = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserNameParams struct {
+	Username string `json:"username"`
+	ID       string `json:"id"`
+}
+
+func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserName, arg.Username, arg.ID)
+	return err
+}
+
+const updateUserNotifications = `-- name: UpdateUserNotifications :exec
+UPDATE users
+SET
+    notification_settings = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserNotificationsParams struct {
+	NotificationSettings json.RawMessage `json:"notification_settings"`
+	ID                   string          `json:"id"`
+}
+
+func (q *Queries) UpdateUserNotifications(ctx context.Context, arg UpdateUserNotificationsParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserNotifications, arg.NotificationSettings, arg.ID)
+	return err
+}
+
+const updateUserPrivacy = `-- name: UpdateUserPrivacy :exec
+UPDATE users
+SET
+    is_private = ?,
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserPrivacyParams struct {
+	IsPrivate sql.NullBool `json:"is_private"`
+	ID        string       `json:"id"`
+}
+
+func (q *Queries) UpdateUserPrivacy(ctx context.Context, arg UpdateUserPrivacyParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserPrivacy, arg.IsPrivate, arg.ID)
+	return err
+}
+
+const updateUserProfile = `-- name: UpdateUserProfile :exec
+UPDATE users
+SET 
+    profile_image_url = COALESCE(?, profile_image_url),
+    bio = COALESCE(?, bio),
+    location = COALESCE(?, location),
+    website = COALESCE(?, website),
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserProfileParams struct {
+	ProfileImageUrl sql.NullString `json:"profile_image_url"`
+	Bio             sql.NullString `json:"bio"`
+	Location        sql.NullString `json:"location"`
+	Website         sql.NullString `json:"website"`
+	ID              string         `json:"id"`
+}
+
+func (q *Queries) UpdateUserProfile(ctx context.Context, arg UpdateUserProfileParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserProfile,
+		arg.ProfileImageUrl,
+		arg.Bio,
+		arg.Location,
+		arg.Website,
+		arg.ID,
+	)
+	return err
+}
+
+const updateUserSettings = `-- name: UpdateUserSettings :exec
+UPDATE users
+SET 
+    display_name = COALESCE(?, display_name),
+    birth_date = COALESCE(?, birth_date),
+    language = COALESCE(?, language),
+    updated_at = CURRENT_TIMESTAMP
+WHERE id = ?
+`
+
+type UpdateUserSettingsParams struct {
+	DisplayName sql.NullString `json:"display_name"`
+	BirthDate   sql.NullTime   `json:"birth_date"`
+	Language    sql.NullString `json:"language"`
+	ID          string         `json:"id"`
+}
+
+func (q *Queries) UpdateUserSettings(ctx context.Context, arg UpdateUserSettingsParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserSettings,
+		arg.DisplayName,
+		arg.BirthDate,
+		arg.Language,
+		arg.ID,
+	)
 	return err
 }
 
 const validateResetToken = `-- name: ValidateResetToken :one
 SELECT email FROM password_reset_tokens
-WHERE token = $1 AND expiry > NOW()
+WHERE token = ? AND expiry > NOW()
 `
 
 // トークンを検証して対応するメールを取得するクエリ
-func (q *Queries) ValidateResetToken(ctx context.Context) (string, error) {
-	row := q.db.QueryRowContext(ctx, validateResetToken)
+func (q *Queries) ValidateResetToken(ctx context.Context, token string) (string, error) {
+	row := q.db.QueryRowContext(ctx, validateResetToken, token)
 	var email string
 	err := row.Scan(&email)
 	return email, err
