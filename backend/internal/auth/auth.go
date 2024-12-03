@@ -13,11 +13,12 @@ var firebaseAuthClient *auth.Client
 
 // Firebase Admin SDKの初期化
 func InitFirebase() error {
-	opt := option.WithCredentialsFile("/Users/uchidahiroto/hackathon/backend/Term6_Hiroto_Uchida_Firebase_Admin_SDK.json")
+	opt := option.WithCredentialsFile("FirebaseAdminSDK.json")
 	app, err := firebase.NewApp(context.Background(), nil, opt)
 	if err != nil {
 		return fmt.Errorf("error initializing app: %v", err)
 	}
+	fmt.Println("Firebase initialized")
 
 	client, err := app.Auth(context.Background())
 	if err != nil {

@@ -8,4 +8,5 @@ RUN apt-get update && apt-get install -y ca-certificates && rm -rf /var/lib/apt/
 WORKDIR /app
 EXPOSE 8080
 COPY --from=build /go/src/app/app .
+COPY --from=build /go/src/app/FirebaseAdminSDK.json .
 CMD ["./app"]
