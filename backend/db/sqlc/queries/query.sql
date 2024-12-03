@@ -1,6 +1,6 @@
 -- name: CreateUser :execresult
-INSERT INTO users (id, firebase_uid, email, password_hash, username, display_name)
-VALUES (?, ?, ?, ?, ?, ?);
+INSERT INTO users (id, firebase_uid, email, password_hash, username, display_name, created_at)
+VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP);
 
 -- name: DeleteUser :execresult
 DELETE FROM users WHERE id = ?;
