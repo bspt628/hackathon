@@ -9,17 +9,16 @@ import (
 
 // InitDB はデータベース接続を初期化し、DBインスタンスを返す
 func InitDB() (*sql.DB, error) {
-	// 環境変数からデータベース接続情報を取得
+	// DB接続のための準備
 	mysqlUser := os.Getenv("MYSQL_USER")
-	mysqlPwd := os.Getenv("MYSQL_PASSWORD")
-	mysqlDatabase := os.Getenv("MYSQL_NAME")
+	mysqlPwd := os.Getenv("MYSQL_PWD")
 	mysqlHost := os.Getenv("MYSQL_HOST")
-	mysqlPort := os.Getenv("MYSQL_PORT")
+	mysqlDatabase := os.Getenv("MYSQL_DATABASE")
+	
+	fmt.Println(mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
+	
 
-	// 接続文字列を作成
-	connStr := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?parseTime=true", 
-		mysqlUser, mysqlPwd, mysqlHost, mysqlPort, mysqlDatabase)
-	// データベース接続を開く
+	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
 	db, err := sql.Open("mysql", connStr)
 	if err != nil {
 		return nil, fmt.Errorf("データベースの初期化に失敗: %v", err)
