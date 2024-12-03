@@ -23,9 +23,7 @@ SELECT id, firebase_uid, email, username, display_name, bio, location, followers
 FROM users
 WHERE id = ?;
 
--- name: AddLike :exec
-INSERT INTO likes (id, user_id, post_id)
-VALUES (?, ?, ?);
+
 
 -- name: CreateRepost :exec
 INSERT INTO reposts (id, user_id, original_post_id, is_quote_repost, additional_comment)
@@ -110,12 +108,10 @@ INSERT INTO password_reset_tokens (email, token, expiry)
 VALUES (?, ?, ?);
 
 
--- トークンを検証して対応するメールを取得するクエリ
 -- name: ValidateResetToken :one
 SELECT email FROM password_reset_tokens
 WHERE token = ? AND expiry > NOW();
 
--- パスワードを更新するクエリ
 -- name: UpdatePassword :exec
 UPDATE users
 SET password_hash = ?, last_password_change = NOW()
@@ -325,3 +321,65 @@ WHERE id = ?;
 UPDATE posts
 SET is_deleted = false
 WHERE id = ? AND is_deleted = true AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) <= 20;
+
+-- name: AddLike :exec
+INSERT INTO likes (id, user_id, post_id, created_at)
+VALUES (?, ?, ?, CURRENT_TIMESTAMP);
+
+-- name: IncrementLikesCount :exec
+UPDATE posts
+SET likes_count = likes_count + 1
+WHERE id = ?;
+
+-- name: RemoveLike :exec
+DELETE FROM likes
+WHERE user_id = ? AND post_id = ?;
+
+-- name: DecrementLikesCount :exec
+UPDATE posts
+SET likes_count = likes_count - 1
+WHERE id = ?;
+
+-- name: GetPostIDFromLike :one
+SELECT post_id
+FROM likes
+WHERE id = ?;
+
+-- name: GetLikeID :one
+SELECT id
+FROM likes
+WHERE user_id = ? AND post_id = ?;
+
+-- name: GetUserLikes :many
+SELECT post_id
+FROM likes
+WHERE user_id = ?
+ORDER BY created_at DESC
+LIMIT ?;
+
+-- name: GetLikeStatus :one
+SELECT EXISTS(
+    SELECT 1
+    FROM likes
+    WHERE user_id = ? AND post_id = ?
+) AS liked;
+
+-- name: GetPostLikesCount :one
+SELECT likes_count
+FROM posts
+WHERE id = ?;
+
+-- name: GetTimeline :many
+SELECT p.*, u.username, u.display_name
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE p.user_id = ?
+ORDER BY p.created_at DESC
+LIMIT ?;
+
+-- name: GetAllPosts :many
+SELECT p.*, u.username, u.display_name
+FROM posts p
+JOIN users u ON p.user_id = u.id
+ORDER BY p.created_at DESC
+LIMIT ?;
