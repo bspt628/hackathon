@@ -15,7 +15,7 @@ func main() {
 	// }
 
 	// Firebaseの初期化
-    err = auth.InitFirebase()
+    err := auth.InitFirebase()
     if err != nil {
         log.Fatalf("Firebase initialization failed: %v", err)
     }
