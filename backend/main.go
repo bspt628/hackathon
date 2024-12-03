@@ -9,10 +9,10 @@ import (
 
 func main() {
 	// 環境変数の読み込み
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatalf(".env ファイルの読み込みに失敗しました: %v", err)
-	}
+	// err := godotenv.Load()
+	// if err != nil {
+	// 	log.Fatalf(".env ファイルの読み込みに失敗しました: %v", err)
+	// }
 
 	// Firebaseの初期化
     err = auth.InitFirebase()
