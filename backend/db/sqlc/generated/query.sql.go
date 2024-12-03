@@ -1209,20 +1209,20 @@ func (q *Queries) UpdateFollowingsCount(ctx context.Context, id string) (sql.Res
 	return q.db.ExecContext(ctx, updateFollowingsCount, id)
 }
 
-const updatePasswordByEmail = `-- name: UpdatePasswordByEmail :exec
+const updatePassword = `-- name: UpdatePassword :exec
 UPDATE users
 SET password_hash = ?, last_password_change = NOW()
 WHERE email = ?
 `
 
-type UpdatePasswordByEmailParams struct {
+type UpdatePasswordParams struct {
 	PasswordHash string `json:"password_hash"`
 	Email        string `json:"email"`
 }
 
 // パスワードを更新するクエリ
-func (q *Queries) UpdatePasswordByEmail(ctx context.Context, arg UpdatePasswordByEmailParams) error {
-	_, err := q.db.ExecContext(ctx, updatePasswordByEmail, arg.PasswordHash, arg.Email)
+func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error {
+	_, err := q.db.ExecContext(ctx, updatePassword, arg.PasswordHash, arg.Email)
 	return err
 }
 
@@ -1272,23 +1272,6 @@ type UpdateUserEmailParams struct {
 
 func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {
 	_, err := q.db.ExecContext(ctx, updateUserEmail, arg.Email, arg.ID)
-	return err
-}
-
-const updateUserInfo = `-- name: UpdateUserInfo :exec
-UPDATE users
-SET bio = ?, location = ?
-WHERE id = ?
-`
-
-type UpdateUserInfoParams struct {
-	Bio      sql.NullString `json:"bio"`
-	Location sql.NullString `json:"location"`
-	ID       string         `json:"id"`
-}
-
-func (q *Queries) UpdateUserInfo(ctx context.Context, arg UpdateUserInfoParams) error {
-	_, err := q.db.ExecContext(ctx, updateUserInfo, arg.Bio, arg.Location, arg.ID)
 	return err
 }
 

@@ -2,11 +2,6 @@
 INSERT INTO users (id, firebase_uid, email, password_hash, username, display_name)
 VALUES (?, ?, ?, ?, ?, ?);
 
--- name: UpdateUserInfo :exec
-UPDATE users
-SET bio = ?, location = ?
-WHERE id = ?;
-
 -- name: DeleteUser :execresult
 DELETE FROM users WHERE id = ?;
 
@@ -121,7 +116,7 @@ SELECT email FROM password_reset_tokens
 WHERE token = ? AND expiry > NOW();
 
 -- パスワードを更新するクエリ
--- name: UpdatePasswordByEmail :exec
+-- name: UpdatePassword :exec
 UPDATE users
 SET password_hash = ?, last_password_change = NOW()
 WHERE email = ?;

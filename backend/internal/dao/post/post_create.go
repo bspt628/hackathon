@@ -17,7 +17,6 @@ func (dao *PostDAO) CheckRootPostValidity(ctx context.Context, rootPostID string
 	return dao.queries.CheckRootPostValidity(ctx, rootPostID)
 }
 
-
 func (dao *PostDAO) IncrementReplyCount(ctx context.Context, postID string) error {
 	return dao.queries.IncrementReplyCount(ctx, postID)
 }

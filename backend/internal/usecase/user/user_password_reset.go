@@ -26,7 +26,7 @@ func (uc *UserUsecase) RequestPasswordReset(ctx context.Context, email string) e
 	}
 
 	// メール送信
-	resetLink := fmt.Sprintf("http://localhost:8080/reset-password?token=%s", token)
+	resetLink := fmt.Sprintf("http://localhost:8080/api/users/password-reset/reset?token=%s", token)
 	body := fmt.Sprintf("以下のリンクをクリックしてパスワードをリセットしてください:\n\n%s", resetLink)
 	subject := "パスワードリセットのお知らせ"
 
@@ -41,20 +41,7 @@ func (uc *UserUsecase) RequestPasswordReset(ctx context.Context, email string) e
 
 // パスワードリセット処理
 func (uc *UserUsecase) ResetPassword(ctx context.Context, token, newPassword string) error {
-	// トークン検証
-	email, err := uc.dao.ValidateResetToken(ctx, token)
-	if err != nil {
-		return fmt.Errorf("トークン検証エラー: %v", err)
-	}
-
-	// パスワードの更新
-	// ここでは仮にパスワードを更新する関数 UpdatePasswordByEmail を使用します。
-	if err := uc.dao.UpdatePasswordByEmail(ctx, email, newPassword); err != nil {
-		return fmt.Errorf("パスワード更新エラー: %v", err)
-	}
-
-	// トークン削除
-	return uc.dao.DeleteResetToken(ctx, token)
+	return uc.dao.ResetPassword(ctx, token, newPassword)
 }
 
 // メール送信
