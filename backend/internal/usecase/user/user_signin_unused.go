@@ -13,7 +13,7 @@ import (
 func (uc *UserUsecase) SignIn(ctx context.Context, username, password string) (string, error) {
 	// DAOからユーザー情報を取得
 	// emailを出力
-	userID, passwordHash, err := uc.dao.GetUserByEmail(ctx, username)
+	userID, passwordHash, err := uc.dao.SignInCheck(ctx, username)
 	if err != nil {
 		return "", err
 	}

@@ -7,7 +7,7 @@ import (
 
 func (dao *UserDAO) GetUser(ctx context.Context, id string) (*sqlc.User, error) {
 	// GetUserByIdを呼び出して、返り値のGetUserByIdRowを受け取る
-	row, err := dao.queries.GetUserById(ctx, id)
+	row, err := dao.queries.GetUser(ctx, id)
 	if err != nil {
 		return nil, err
 	}

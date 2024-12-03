@@ -49,7 +49,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.HandleFunc("/users/notification-settings", userController.UpdateUserNotifications).Methods("PUT")
 	apiRouter.HandleFunc("/users/privacy", userController.UpdateUserPrivacy).Methods("PUT")
 	apiRouter.HandleFunc("/users/ban-status", userController.UpdateUserBanStatus).Methods("PUT")
-	apiRouter.HandleFunc("/users/username", userController.UpdateUserName).Methods("PUT")
+	apiRouter.HandleFunc("/users/username", userController.UpdateUserUsername).Methods("PUT")
 	apiRouter.HandleFunc("/users/email", userController.UpdateUserEmail).Methods("PUT")
 
 	// 投稿関連
