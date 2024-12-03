@@ -376,17 +376,22 @@ SELECT likes_count
 FROM posts
 WHERE id = ?;
 
--- name: GetTimeline :many
-SELECT p.*, u.username, u.display_name
-FROM posts p
-JOIN users u ON p.user_id = u.id
-WHERE p.user_id = ?
-ORDER BY p.created_at DESC
-LIMIT ?;
-
 -- name: GetAllPosts :many
 SELECT p.*, u.username, u.display_name
 FROM posts p
 JOIN users u ON p.user_id = u.id
+ORDER BY p.created_at DESC
+LIMIT ?;
+
+
+-- name: GetFollowedUsersPosts :many
+SELECT p.*, u.username, u.display_name
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE p.user_id IN (
+    SELECT followed_id
+    FROM follows
+    WHERE follower_id = ?
+)
 ORDER BY p.created_at DESC
 LIMIT ?;
