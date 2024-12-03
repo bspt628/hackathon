@@ -449,91 +449,6 @@ func (q *Queries) GetFollowStatus(ctx context.Context, arg GetFollowStatusParams
 	return following, err
 }
 
-const getFollowedUsersPosts = `-- name: GetFollowedUsersPosts :many
-SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
-FROM posts p
-JOIN users u ON p.user_id = u.id
-WHERE p.user_id IN (
-    SELECT followed_id
-    FROM follows
-    WHERE follower_id = ?
-)
-ORDER BY p.created_at DESC
-LIMIT ?
-`
-
-type GetFollowedUsersPostsParams struct {
-	FollowerID sql.NullString `json:"follower_id"`
-	Limit      int32          `json:"limit"`
-}
-
-type GetFollowedUsersPostsRow struct {
-	ID             string          `json:"id"`
-	UserID         sql.NullString  `json:"user_id"`
-	Content        sql.NullString  `json:"content"`
-	CreatedAt      sql.NullTime    `json:"created_at"`
-	UpdatedAt      sql.NullTime    `json:"updated_at"`
-	IsRepost       sql.NullBool    `json:"is_repost"`
-	OriginalPostID sql.NullString  `json:"original_post_id"`
-	ReplyToID      sql.NullString  `json:"reply_to_id"`
-	RootPostID     sql.NullString  `json:"root_post_id"`
-	IsReply        sql.NullBool    `json:"is_reply"`
-	MediaUrls      json.RawMessage `json:"media_urls"`
-	LikesCount     sql.NullInt32   `json:"likes_count"`
-	RepostsCount   sql.NullInt32   `json:"reposts_count"`
-	RepliesCount   sql.NullInt32   `json:"replies_count"`
-	ViewsCount     sql.NullInt32   `json:"views_count"`
-	Visibility     sql.NullString  `json:"visibility"`
-	IsPinned       sql.NullBool    `json:"is_pinned"`
-	IsDeleted      sql.NullBool    `json:"is_deleted"`
-	Username       string          `json:"username"`
-	DisplayName    sql.NullString  `json:"display_name"`
-}
-
-func (q *Queries) GetFollowedUsersPosts(ctx context.Context, arg GetFollowedUsersPostsParams) ([]GetFollowedUsersPostsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getFollowedUsersPosts, arg.FollowerID, arg.Limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetFollowedUsersPostsRow
-	for rows.Next() {
-		var i GetFollowedUsersPostsRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Content,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsRepost,
-			&i.OriginalPostID,
-			&i.ReplyToID,
-			&i.RootPostID,
-			&i.IsReply,
-			&i.MediaUrls,
-			&i.LikesCount,
-			&i.RepostsCount,
-			&i.RepliesCount,
-			&i.ViewsCount,
-			&i.Visibility,
-			&i.IsPinned,
-			&i.IsDeleted,
-			&i.Username,
-			&i.DisplayName,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getFollowers = `-- name: GetFollowers :many
 SELECT u.id, u.username, u.display_name
 FROM follows f
@@ -628,6 +543,91 @@ func (q *Queries) GetFollowersCount(ctx context.Context, id string) (sql.NullInt
 	var followers_count sql.NullInt32
 	err := row.Scan(&followers_count)
 	return followers_count, err
+}
+
+const getFollowingUsersPosts = `-- name: GetFollowingUsersPosts :many
+SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
+FROM posts p
+JOIN users u ON p.user_id = u.id
+WHERE p.user_id IN (
+    SELECT following_id
+    FROM follows
+    WHERE follower_id = ?
+)
+ORDER BY p.created_at DESC
+LIMIT ?
+`
+
+type GetFollowingUsersPostsParams struct {
+	FollowerID sql.NullString `json:"follower_id"`
+	Limit      int32          `json:"limit"`
+}
+
+type GetFollowingUsersPostsRow struct {
+	ID             string          `json:"id"`
+	UserID         sql.NullString  `json:"user_id"`
+	Content        sql.NullString  `json:"content"`
+	CreatedAt      sql.NullTime    `json:"created_at"`
+	UpdatedAt      sql.NullTime    `json:"updated_at"`
+	IsRepost       sql.NullBool    `json:"is_repost"`
+	OriginalPostID sql.NullString  `json:"original_post_id"`
+	ReplyToID      sql.NullString  `json:"reply_to_id"`
+	RootPostID     sql.NullString  `json:"root_post_id"`
+	IsReply        sql.NullBool    `json:"is_reply"`
+	MediaUrls      json.RawMessage `json:"media_urls"`
+	LikesCount     sql.NullInt32   `json:"likes_count"`
+	RepostsCount   sql.NullInt32   `json:"reposts_count"`
+	RepliesCount   sql.NullInt32   `json:"replies_count"`
+	ViewsCount     sql.NullInt32   `json:"views_count"`
+	Visibility     sql.NullString  `json:"visibility"`
+	IsPinned       sql.NullBool    `json:"is_pinned"`
+	IsDeleted      sql.NullBool    `json:"is_deleted"`
+	Username       string          `json:"username"`
+	DisplayName    sql.NullString  `json:"display_name"`
+}
+
+func (q *Queries) GetFollowingUsersPosts(ctx context.Context, arg GetFollowingUsersPostsParams) ([]GetFollowingUsersPostsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFollowingUsersPosts, arg.FollowerID, arg.Limit)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetFollowingUsersPostsRow
+	for rows.Next() {
+		var i GetFollowingUsersPostsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.UserID,
+			&i.Content,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.IsRepost,
+			&i.OriginalPostID,
+			&i.ReplyToID,
+			&i.RootPostID,
+			&i.IsReply,
+			&i.MediaUrls,
+			&i.LikesCount,
+			&i.RepostsCount,
+			&i.RepliesCount,
+			&i.ViewsCount,
+			&i.Visibility,
+			&i.IsPinned,
+			&i.IsDeleted,
+			&i.Username,
+			&i.DisplayName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const getFollowings = `-- name: GetFollowings :many

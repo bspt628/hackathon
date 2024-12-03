@@ -57,6 +57,8 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// apiRouter.HandleFunc("/posts/{id}", postController.GetPost).Methods("GET")
 	apiRouter.HandleFunc("/posts/{id}", postController.DeletePost).Methods("DELETE")
 	apiRouter.HandleFunc("/posts/{id}/restore", postController.RestorePost).Methods("PUT")
+	apiRouter.HandleFunc("/posts/timeline/all", postController.GetAllPosts).Methods("GET")
+	apiRouter.HandleFunc("/posts/timeline/follow", postController.GetFollowingUsersPosts).Methods("GET")
 	// router.HandleFunc("/api/posts/recent", postController.GetRecentPosts).Methods("GET")
 	// router.HandleFunc("/api/posts/search", postController.SearchPostsByHashtag).Methods("GET")
 	// router.HandleFunc("/api/timeline", postController.GetUserTimeline).Methods("GET")

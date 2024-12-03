@@ -384,12 +384,12 @@ ORDER BY p.created_at DESC
 LIMIT ?;
 
 
--- name: GetFollowedUsersPosts :many
+-- name: GetFollowingUsersPosts :many
 SELECT p.*, u.username, u.display_name
 FROM posts p
 JOIN users u ON p.user_id = u.id
 WHERE p.user_id IN (
-    SELECT followed_id
+    SELECT following_id
     FROM follows
     WHERE follower_id = ?
 )

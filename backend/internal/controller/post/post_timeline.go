@@ -29,7 +29,7 @@ func (pc *PostController) GetAllPosts(w http.ResponseWriter, r *http.Request) {
 	
 }
 
-func (pc *PostController) GetFollowedUsersPosts(w http.ResponseWriter, r *http.Request) {
+func (pc *PostController) GetFollowingUsersPosts(w http.ResponseWriter, r *http.Request) {
     firebaseUID := r.Header.Get("UserID")
 	if firebaseUID == "" {
 		http.Error(w, "UserID missing in request context", http.StatusUnauthorized)
@@ -48,7 +48,7 @@ func (pc *PostController) GetFollowedUsersPosts(w http.ResponseWriter, r *http.R
         limit = 10 // デフォルト値
     }
 
-    posts, err := pc.postUsecase.GetFollowedUsersPosts(context.Background(), userID, int32(limit))
+    posts, err := pc.postUsecase.GetFollowingUsersPosts(context.Background(), userID, int32(limit))
     if err != nil {
 		http.Error(w, fmt.Sprintf("フォロー中のユーザーのポストの取得に失敗しました: %v", err), http.StatusInternalServerError)
 		return
