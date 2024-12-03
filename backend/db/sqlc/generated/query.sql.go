@@ -13,8 +13,8 @@ import (
 )
 
 const addBlock = `-- name: AddBlock :exec
-INSERT INTO blocks (id, blocked_by_id, blocked_user_id)
-VALUES (?, ?, ?)
+INSERT INTO blocks (id, blocked_by_id, blocked_user_id, created_at)
+VALUES (?, ?, ?, CURRENT_TIMESTAMP)
 `
 
 type AddBlockParams struct {
@@ -102,8 +102,8 @@ func (q *Queries) CountReplyPosts(ctx context.Context, rootPostID sql.NullString
 }
 
 const createNotification = `-- name: CreateNotification :exec
-INSERT INTO notifications (id, user_id, type, message)
-VALUES (?, ?, ?, ?)
+INSERT INTO notifications (id, user_id, type, message, created_at)
+VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
 `
 
 type CreateNotificationParams struct {
@@ -160,8 +160,8 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
 }
 
 const createRepost = `-- name: CreateRepost :exec
-INSERT INTO reposts (id, user_id, original_post_id, is_quote_repost, additional_comment)
-VALUES (?, ?, ?, ?, ?)
+INSERT INTO reposts (id, user_id, original_post_id, is_quote_repost, additional_comment, reposted_at)
+VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 `
 
 type CreateRepostParams struct {
@@ -1064,8 +1064,8 @@ func (q *Queries) RestorePost(ctx context.Context, id string) (sql.Result, error
 
 const saveResetToken = `-- name: SaveResetToken :exec
 
-INSERT INTO password_reset_tokens (email, token, expiry)
-VALUES (?, ?, ?)
+INSERT INTO password_reset_tokens (email, token, expiry, created_at)
+VALUES (?, ?, ?, CURRENT_TIMESTAMP)
 `
 
 type SaveResetTokenParams struct {
@@ -1164,8 +1164,8 @@ func (q *Queries) SearchPostsByHashtag(ctx context.Context, arg SearchPostsByHas
 }
 
 const sendDM = `-- name: SendDM :exec
-INSERT INTO dms (id, sender_id, receiver_id, content)
-VALUES (?, ?, ?, ?)
+INSERT INTO dms (id, sender_id, receiver_id, content, created_at)
+VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)
 `
 
 type SendDMParams struct {
@@ -1211,7 +1211,10 @@ func (q *Queries) UpdateFollowingsCount(ctx context.Context, id string) (sql.Res
 
 const updatePassword = `-- name: UpdatePassword :exec
 UPDATE users
-SET password_hash = ?, last_password_change = NOW()
+SET 
+    password_hash = ?, 
+    last_password_change = CURRENT_TIMESTAMP,
+    updated_at = CURRENT_TIMESTAMP
 WHERE email = ?
 `
 
@@ -1228,9 +1231,11 @@ func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) 
 
 const updatePostLikesCount = `-- name: UpdatePostLikesCount :exec
 UPDATE posts
-SET likes_count = (
-    SELECT COUNT(*) FROM likes WHERE post_id = posts.id
-)
+SET 
+    likes_count = (
+        SELECT COUNT(*) FROM likes WHERE post_id = posts.id
+    ),
+    updated_at = CURRENT_TIMESTAMP
 WHERE posts.id = ?
 `
 

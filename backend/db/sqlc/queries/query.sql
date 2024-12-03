@@ -28,30 +28,30 @@ INSERT INTO likes (id, user_id, post_id)
 VALUES (?, ?, ?);
 
 -- name: CreateRepost :exec
-INSERT INTO reposts (id, user_id, original_post_id, is_quote_repost, additional_comment)
-VALUES (?, ?, ?, ?, ?);
+INSERT INTO reposts (id, user_id, original_post_id, is_quote_repost, additional_comment, reposted_at)
+VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP);
 
 
 
 -- name: AddBlock :exec
-INSERT INTO blocks (id, blocked_by_id, blocked_user_id)
-VALUES (?, ?, ?);
+INSERT INTO blocks (id, blocked_by_id, blocked_user_id, created_at)
+VALUES (?, ?, ?, CURRENT_TIMESTAMP);
 
 -- name: CreateNotification :exec
-INSERT INTO notifications (id, user_id, type, message)
-VALUES (?, ?, ?, ?);
+INSERT INTO notifications (id, user_id, type, message, created_at)
+VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP);
 
 -- name: SendDM :exec
-INSERT INTO dms (id, sender_id, receiver_id, content)
-VALUES (?, ?, ?, ?);
-
-
+INSERT INTO dms (id, sender_id, receiver_id, content, created_at)
+VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP);
 
 -- name: UpdatePostLikesCount :exec
 UPDATE posts
-SET likes_count = (
-    SELECT COUNT(*) FROM likes WHERE post_id = posts.id
-)
+SET 
+    likes_count = (
+        SELECT COUNT(*) FROM likes WHERE post_id = posts.id
+    ),
+    updated_at = CURRENT_TIMESTAMP
 WHERE posts.id = ?;
 
 -- name: GetUserTimeline :many
@@ -106,8 +106,8 @@ ORDER BY createdAt ASC;
 
 -- name: SaveResetToken :exec
 -- params: email, token, expiry
-INSERT INTO password_reset_tokens (email, token, expiry)
-VALUES (?, ?, ?);
+INSERT INTO password_reset_tokens (email, token, expiry, created_at)
+VALUES (?, ?, ?, CURRENT_TIMESTAMP);
 
 
 -- トークンを検証して対応するメールを取得するクエリ
@@ -118,7 +118,10 @@ WHERE token = ? AND expiry > NOW();
 -- パスワードを更新するクエリ
 -- name: UpdatePassword :exec
 UPDATE users
-SET password_hash = ?, last_password_change = NOW()
+SET 
+    password_hash = ?, 
+    last_password_change = CURRENT_TIMESTAMP,
+    updated_at = CURRENT_TIMESTAMP
 WHERE email = ?;
 
 -- 使用済みのリセットトークンを削除するクエリ
