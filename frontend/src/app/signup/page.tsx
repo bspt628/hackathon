@@ -15,6 +15,13 @@ export default function SignupPage() {
 	const [confirmPassword, setConfirmPassword] = useState("");
 	const [username, setUsername] = useState("");
 	const [displayName, setDisplayName] = useState("");
+	const [touched, setTouched] = useState({
+		email: false,
+		password: false,
+		confirmPassword: false,
+		username: false,
+		displayName: false,
+	});
 	const [errors, setErrors] = useState({
 		email: "",
 		password: "",
@@ -46,19 +53,32 @@ export default function SignupPage() {
 	};
 
 	useEffect(() => {
-			setErrors({
-				email: validateEmail(email),
-				password: validatePassword(password),
-				confirmPassword: validateConfirmPassword(confirmPassword),
-				username: validateUsername(username),
-				displayName: validateDisplayName(displayName),
-				form: "",
-			});
-		}, [email, password, confirmPassword, username, displayName, validateConfirmPassword]);
+		setErrors({
+			email: touched.email ? validateEmail(email) : "",
+			password: touched.password ? validatePassword(password) : "",
+			confirmPassword: touched.confirmPassword ? validateConfirmPassword(confirmPassword) : "",
+			username: touched.username ? validateUsername(username) : "",
+			displayName: touched.displayName ? validateDisplayName(displayName) : "",
+			form: "",
+		});
+	}, [email, password, confirmPassword, username, displayName, validateConfirmPassword, touched]);
+
+	const handleBlur = (field: keyof typeof touched) => {
+		setTouched(prev => ({ ...prev, [field]: true }));
+	};
 
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setIsLoading(true);
+
+		// すべてのフィールドをタッチ済みにする
+		setTouched({
+			email: true,
+			password: true,
+			confirmPassword: true,
+			username: true,
+			displayName: true,
+		});
 
 		if (Object.values(errors).some((error) => error !== "")) {
 			setIsLoading(false);
@@ -100,8 +120,9 @@ export default function SignupPage() {
 							placeholder="example@email.com"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
+							onBlur={() => handleBlur('email')}
 						/>
-						{errors.email && <div className="text-red-500 text-sm">{errors.email}</div>}
+						{touched.email && errors.email && <div className="text-red-500 text-sm">{errors.email}</div>}
 					</div>
 
 					<div className="space-y-2">
@@ -115,8 +136,9 @@ export default function SignupPage() {
 							placeholder="••••••••"
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
+							onBlur={() => handleBlur('password')}
 						/>
-						{errors.password && <div className="text-red-500 text-sm">{errors.password}</div>}
+						{touched.password && errors.password && <div className="text-red-500 text-sm">{errors.password}</div>}
 					</div>
 
 					<div className="space-y-2">
@@ -130,8 +152,9 @@ export default function SignupPage() {
 							placeholder="••••••••"
 							value={confirmPassword}
 							onChange={(e) => setConfirmPassword(e.target.value)}
+							onBlur={() => handleBlur('confirmPassword')}
 						/>
-						{errors.confirmPassword && <div className="text-red-500 text-sm">{errors.confirmPassword}</div>}
+						{touched.confirmPassword && errors.confirmPassword && <div className="text-red-500 text-sm">{errors.confirmPassword}</div>}
 					</div>
 
 					<div className="space-y-2">
@@ -144,8 +167,9 @@ export default function SignupPage() {
 							placeholder="@username"
 							value={username}
 							onChange={(e) => setUsername(e.target.value)}
+							onBlur={() => handleBlur('username')}
 						/>
-						{errors.username && <div className="text-red-500 text-sm">{errors.username}</div>}
+						{touched.username && errors.username && <div className="text-red-500 text-sm">{errors.username}</div>}
 					</div>
 
 					<div className="space-y-2">
@@ -158,8 +182,9 @@ export default function SignupPage() {
 							placeholder="表示名"
 							value={displayName}
 							onChange={(e) => setDisplayName(e.target.value)}
+							onBlur={() => handleBlur('displayName')}
 						/>
-						{errors.displayName && <div className="text-red-500 text-sm">{errors.displayName}</div>}
+						{touched.displayName && errors.displayName && <div className="text-red-500 text-sm">{errors.displayName}</div>}
 					</div>
 
 					{errors.form && (
