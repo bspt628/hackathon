@@ -1,3 +1,5 @@
+'use server'
+
 interface SignupData {
   email: string
   password: string
@@ -32,7 +34,7 @@ export async function signupUser(formData: FormData) {
     return { success: true }
   } catch (error) {
     console.error('Signup error:', error);
-    return { success: false, error: 'アカウントの作成に失敗しました。' }
+    return { success: false, error: error instanceof Error ? error.message : 'アカウントの作成に失敗しました。' }
   }
 }
 
