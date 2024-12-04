@@ -17,7 +17,34 @@ export default function SignupPage() {
 		setIsLoading(true);
 		setError(null);
 
-		const result = await signupUser(new FormData(event.currentTarget));
+		const formData = new FormData(event.currentTarget);
+		const password = formData.get("password") as string;
+		const confirmPassword = formData.get("confirm_password") as string;
+		const email = formData.get("email") as string;
+
+		// メールアドレスの形式チェック
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		if (!emailRegex.test(email)) {
+			setError("メールアドレスの形式が正しくありません。");
+			setIsLoading(false);
+			return;
+		}
+
+		// パスワード一致チェック
+		if (password !== confirmPassword) {
+			setError("パスワードが一致しません。");
+			setIsLoading(false);
+			return;
+		}
+
+		// パスワード長チェック
+		if (password.length <= 5) {
+			setError("パスワードは5文字以上にしてください。");
+			setIsLoading(false);
+			return;
+		}
+
+		const result = await signupUser(formData);
 
 		if (result.success) {
 			router.push("/home"); // Redirect to home page after successful signup
@@ -57,6 +84,18 @@ export default function SignupPage() {
 						<Input
 							id="password"
 							name="password"
+							type="password"
+							required
+							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
+							placeholder="••••••••"
+						/>
+					</div>
+
+					<div className="space-y-2">
+						<Label htmlFor="confirm_password">パスワード（確認）</Label>
+						<Input
+							id="confirm_password"
+							name="confirm_password"
 							type="password"
 							required
 							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
