@@ -3,6 +3,7 @@ package auth
 import (
 	"net/http"
 	"fmt"
+	"log"
 )
 
 func CORS(next http.Handler) http.Handler {
@@ -20,8 +21,8 @@ func CORS(next http.Handler) http.Handler {
 			w.WriteHeader(http.StatusOK)
 		}
 		// ヘッダーをコンソールに出力
-
 		fmt.Println("Request Headers: ", r.Header)
+		log.Println("Request Headers: ", r.Header)
 
 		next.ServeHTTP(w, r)
 	})
