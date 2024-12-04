@@ -13,7 +13,11 @@ export async function signupUser(formData: FormData) {
     password: formData.get('password') as string,
     username: formData.get('username') as string,
     display_name: formData.get('display_name') as string,
+    
   }
+    // コンソールに表示されるデータを確認する
+    console.log(data)
+    
 
   try {
     const response = await fetch(
