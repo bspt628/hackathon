@@ -13,7 +13,7 @@ export default function LoginPage() {
         <CardHeader className="space-y-12">
           <div className="w-12 h-12 relative mx-auto">
             <Image
-              src="/placeholder.svg"
+              src="/favicon.ico"
               alt="Logo"
               fill
               className="object-contain"
