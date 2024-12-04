@@ -20,11 +20,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      setUser(user)
       if (user) {
+        console.log("認証成功:", user.email);
+        setUser(user)
         const token = await user.getIdToken()
         setIdToken(token)
       } else {
+        console.log("認証されていないか、ログアウトしました");
+        setUser(null)
         setIdToken(null)
       }
     })

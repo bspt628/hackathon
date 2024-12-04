@@ -53,6 +53,7 @@ export function Timeline() {
 	if (isLoading) {
 		return <div className="p-4 text-center">読み込み中...</div>;
 	}
+	console.log(posts);
 
 	return (
 		<div>
