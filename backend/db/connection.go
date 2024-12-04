@@ -18,7 +18,7 @@ func InitDB() (*sql.DB, error) {
 	fmt.Println(mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
 	
 
-	connStr := fmt.Sprintf("%s:%s@%s/%s", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
+	connStr := fmt.Sprintf("%s:%s@%s/%s?parseTime=true&loc=Asia%%2FTokyo", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
 	db, err := sql.Open("mysql", connStr)
 	if err != nil {
 		return nil, fmt.Errorf("データベースの初期化に失敗: %v", err)
