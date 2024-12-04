@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -9,47 +9,69 @@ import { signupUser } from "../actions/signup";
 
 export default function SignupPage() {
 	const router = useRouter();
-	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
+	const [email, setEmail] = useState("");
+	const [password, setPassword] = useState("");
+	const [confirmPassword, setConfirmPassword] = useState("");
+	const [username, setUsername] = useState("");
+	const [displayName, setDisplayName] = useState("");
+	const [errors, setErrors] = useState({
+		email: "",
+		password: "",
+		confirmPassword: "",
+		username: "",
+		displayName: "",
+		form: "",
+	});
+
+	const validateEmail = (email: string) => {
+		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+		return emailRegex.test(email) ? "" : "メールアドレスの形式が正しくありません。";
+	};
+
+	const validatePassword = (password: string) => {
+		return password.length > 5 ? "" : "パスワードは5文字以上にしてください。";
+	};
+
+	const validateConfirmPassword = useCallback((confirmPassword: string) => {
+		return confirmPassword === password ? "" : "パスワードが一致しません。";
+	}, [password]);
+
+	const validateUsername = (username: string) => {
+		return username ? "" : "ユーザーネームは必須です。";
+	};
+
+	const validateDisplayName = (displayName: string) => {
+		return displayName ? "" : "表示名は必須です。";
+	};
+
+	useEffect(() => {
+			setErrors({
+				email: validateEmail(email),
+				password: validatePassword(password),
+				confirmPassword: validateConfirmPassword(confirmPassword),
+				username: validateUsername(username),
+				displayName: validateDisplayName(displayName),
+				form: "",
+			});
+		}, [email, password, confirmPassword, username, displayName, validateConfirmPassword]);
 
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
 		event.preventDefault();
 		setIsLoading(true);
-		setError(null);
+
+		if (Object.values(errors).some((error) => error !== "")) {
+			setIsLoading(false);
+			return;
+		}
 
 		const formData = new FormData(event.currentTarget);
-		const password = formData.get("password") as string;
-		const confirmPassword = formData.get("confirm_password") as string;
-		const email = formData.get("email") as string;
-
-		// メールアドレスの形式チェック
-		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		if (!emailRegex.test(email)) {
-			setError("メールアドレスの形式が正しくありません。");
-			setIsLoading(false);
-			return;
-		}
-
-		// パスワード一致チェック
-		if (password !== confirmPassword) {
-			setError("パスワードが一致しません。");
-			setIsLoading(false);
-			return;
-		}
-
-		// パスワード長チェック
-		if (password.length <= 5) {
-			setError("パスワードは5文字以上にしてください。");
-			setIsLoading(false);
-			return;
-		}
-
 		const result = await signupUser(formData);
 
 		if (result.success) {
-			router.push("/home"); // Redirect to home page after successful signup
+			router.push("/home");
 		} else {
-			setError(result.error ?? "アカウントの作成に失敗しました。");
+			setErrors({ ...errors, form: result.error ?? "アカウントの作成に失敗しました。" });
 		}
 		setIsLoading(false);
 	}
@@ -76,7 +98,10 @@ export default function SignupPage() {
 							required
 							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
 							placeholder="example@email.com"
+							value={email}
+							onChange={(e) => setEmail(e.target.value)}
 						/>
+						{errors.email && <div className="text-red-500 text-sm">{errors.email}</div>}
 					</div>
 
 					<div className="space-y-2">
@@ -88,7 +113,10 @@ export default function SignupPage() {
 							required
 							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
 							placeholder="••••••••"
+							value={password}
+							onChange={(e) => setPassword(e.target.value)}
 						/>
+						{errors.password && <div className="text-red-500 text-sm">{errors.password}</div>}
 					</div>
 
 					<div className="space-y-2">
@@ -100,7 +128,10 @@ export default function SignupPage() {
 							required
 							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
 							placeholder="••••••••"
+							value={confirmPassword}
+							onChange={(e) => setConfirmPassword(e.target.value)}
 						/>
+						{errors.confirmPassword && <div className="text-red-500 text-sm">{errors.confirmPassword}</div>}
 					</div>
 
 					<div className="space-y-2">
@@ -111,7 +142,10 @@ export default function SignupPage() {
 							required
 							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
 							placeholder="@username"
+							value={username}
+							onChange={(e) => setUsername(e.target.value)}
 						/>
+						{errors.username && <div className="text-red-500 text-sm">{errors.username}</div>}
 					</div>
 
 					<div className="space-y-2">
@@ -122,16 +156,19 @@ export default function SignupPage() {
 							required
 							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
 							placeholder="表示名"
+							value={displayName}
+							onChange={(e) => setDisplayName(e.target.value)}
 						/>
+						{errors.displayName && <div className="text-red-500 text-sm">{errors.displayName}</div>}
 					</div>
 
-					{error && (
-						<div className="text-red-500 text-sm text-center">{error}</div>
+					{errors.form && (
+						<div className="text-red-500 text-sm text-center">{errors.form}</div>
 					)}
 
 					<Button
 						type="submit"
-						disabled={isLoading}
+						disabled={isLoading || Object.values(errors).some((error) => error !== "")}
 						className="w-full bg-white hover:bg-white/90 text-black"
 					>
 						{isLoading ? "処理中..." : "次へ"}
