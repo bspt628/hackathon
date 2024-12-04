@@ -17,7 +17,8 @@ export async function signupUser(formData: FormData) {
 
 	try {
 		const response = await fetch(
-			"https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/users/signup",
+            "https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/users/signup",
+            
 			{
 				method: "POST",
 				headers: {

@@ -19,6 +19,7 @@ func CORS(next http.Handler) http.Handler {
 		// プリフライトリクエスト (OPTIONS) に対して早期に応答
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
+			return 
 		}
 		// レスポンスヘッダーをコンソールに出力
 		log.Printf("Response Headers: %v", w.Header())
