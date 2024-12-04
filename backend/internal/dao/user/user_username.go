@@ -9,8 +9,8 @@ import (
 )
 
 // ユーザーのメールアドレスを更新
-func (dao *UserDAO) UpdateUserName(ctx context.Context, params sqlc.UpdateUserNameParams) error {
-	err := dao.queries.UpdateUserName(ctx, params)
+func (dao *UserDAO) UpdateUserUsername(ctx context.Context, params sqlc.UpdateUserNameParams) error {
+	err := dao.queries.UpdateUserUsername(ctx, params)
 
 	if err != nil {
 		// MySQLエラーを検出

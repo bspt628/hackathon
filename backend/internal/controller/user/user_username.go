@@ -7,7 +7,7 @@ import (
 	"net/http"
 )
 
-func (uc *UserController) UpdateUserName(w http.ResponseWriter, r *http.Request) {
+func (uc *UserController) UpdateUserUsername(w http.ResponseWriter, r *http.Request) {
 	var request struct {
 		Username string `json:"username"`
 	}
@@ -22,7 +22,7 @@ func (uc *UserController) UpdateUserName(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	username, err := uc.userUsecase.UpdateUserName(context.Background(), request.Username, ID)
+	username, err := uc.userUsecase.UpdateUserUsername(context.Background(), request.Username, ID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("ユーザープロフィール更新に失敗しました: %v", err), http.StatusInternalServerError)
 		return

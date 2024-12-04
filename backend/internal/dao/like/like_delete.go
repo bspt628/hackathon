@@ -3,7 +3,7 @@ package likedao
 import (
 	"context"
 	"errors"
-	"hackathon/db/sqlc/generated"
+	sqlc "hackathon/db/sqlc/generated"
 )
 
 func (dao *LikeDAO) DeleteLike(ctx context.Context, arg sqlc.RemoveLikeParams) error {

@@ -8,7 +8,7 @@ import (
 	"strings"
 )
 
-func (uc *UserUsecase) UpdateUserName(ctx context.Context, username string, id string) (*domain.UserUpdateUsernameResult, error) {
+func (uc *UserUsecase) UpdateUserUsername(ctx context.Context, username string, id string) (*domain.UserUpdateUsernameResult, error) {
 	// 入力検証
 	if username == "" {
 		return nil, fmt.Errorf("ユーザー名を入力してください")
@@ -16,13 +16,13 @@ func (uc *UserUsecase) UpdateUserName(ctx context.Context, username string, id s
 
 	// todo 現在と同じメールアドレスの場合はエラーを返す
 
-	arg := sqlc.UpdateUserNameParams{
+	arg := sqlc.UpdateUserUsernameParams{
 		Username: username,
 		ID:       id,
 	}
 
 	// DAO層の関数を呼び出す
-	err := uc.dao.UpdateUserName(ctx, arg)
+	err := uc.dao.UpdateUserUsername(ctx, arg)
 	if err != nil {
 		// 重複エラーの場合
 		if strings.Contains(err.Error(), "is already taken") {
