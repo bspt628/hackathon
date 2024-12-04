@@ -9,6 +9,9 @@ import (
 
 // CreateUser は新規ユーザーを作成するエンドポイント
 func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Access-Control-Allow-Origin", "https://hackathon-five-rho.vercel.app") // "*" は任意のオリジンを許可
+	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS") // 許可する HTTP メソッド
+	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization") // 許可するヘッダー
 	// リクエストボディからユーザー情報を取得
 	var request struct {
 		Email        string `json:"email"`
