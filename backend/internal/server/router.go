@@ -12,6 +12,7 @@ import (
 
 func NewRouter(dbConn *sql.DB) *mux.Router {
 	router := mux.NewRouter()
+	router.Use(auth.CORS)
 
 	// コントローラーの初期化
 	userController := usercontroller.NewUserController(dbConn)
