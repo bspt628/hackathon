@@ -1,7 +1,6 @@
 'use client'
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Apple, Chrome } from 'lucide-react'
 import Image from "next/image"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
@@ -26,20 +25,6 @@ export default function LoginPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
-          <Button 
-            variant="outline" 
-            className="w-full bg-transparent text-white border-[#536471] hover:bg-white/10"
-          >
-            <Chrome className="mr-2 h-4 w-4" />
-            大倉 でログイン
-          </Button>
-          <Button 
-            variant="outline" 
-            className="w-full bg-transparent text-white border-[#536471] hover:bg-white/10"
-          >
-            <Apple className="mr-2 h-4 w-4" />
-            Appleのアカウントで登録
-          </Button>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-[#536471]" />
