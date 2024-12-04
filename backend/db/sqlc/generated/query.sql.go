@@ -9,7 +9,6 @@ import (
 	"context"
 	"database/sql"
 	"encoding/json"
-	"time"
 )
 
 const addBlock = `-- name: AddBlock :exec
@@ -183,31 +182,6 @@ func (q *Queries) CreateRepost(ctx context.Context, arg CreateRepostParams) erro
 	return err
 }
 
-const createUser = `-- name: CreateUser :execresult
-INSERT INTO users (id, firebase_uid, email, password_hash, username, display_name, created_at)
-VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
-`
-
-type CreateUserParams struct {
-	ID           string         `json:"id"`
-	FirebaseUid  string         `json:"firebase_uid"`
-	Email        string         `json:"email"`
-	PasswordHash string         `json:"password_hash"`
-	Username     string         `json:"username"`
-	DisplayName  sql.NullString `json:"display_name"`
-}
-
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createUser,
-		arg.ID,
-		arg.FirebaseUid,
-		arg.Email,
-		arg.PasswordHash,
-		arg.Username,
-		arg.DisplayName,
-	)
-}
-
 const decrementReplyCount = `-- name: DecrementReplyCount :exec
 UPDATE posts
 SET replies_count = replies_count - 1
@@ -230,25 +204,6 @@ WHERE id = ?
 func (q *Queries) DeletePost(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, deletePost, id)
 	return err
-}
-
-const deleteResetToken = `-- name: DeleteResetToken :exec
-DELETE FROM password_reset_tokens
-WHERE token = ?
-`
-
-// 使用済みのリセットトークンを削除するクエリ
-func (q *Queries) DeleteResetToken(ctx context.Context, token string) error {
-	_, err := q.db.ExecContext(ctx, deleteResetToken, token)
-	return err
-}
-
-const deleteUser = `-- name: DeleteUser :execresult
-DELETE FROM users WHERE id = ?
-`
-
-func (q *Queries) DeleteUser(ctx context.Context, id string) (sql.Result, error) {
-	return q.db.ExecContext(ctx, deleteUser, id)
 }
 
 const getDMConversation = `-- name: GetDMConversation :many
@@ -298,19 +253,6 @@ func (q *Queries) GetDMConversation(ctx context.Context, arg GetDMConversationPa
 		return nil, err
 	}
 	return items, nil
-}
-
-const getEmailFromUsername = `-- name: GetEmailFromUsername :one
-SELECT email
-FROM users
-WHERE username = ?
-`
-
-func (q *Queries) GetEmailFromUsername(ctx context.Context, username string) (string, error) {
-	row := q.db.QueryRowContext(ctx, getEmailFromUsername, username)
-	var email string
-	err := row.Scan(&email)
-	return email, err
 }
 
 const getFirebaseUIDfromUserID = `-- name: GetFirebaseUIDfromUserID :one
@@ -851,6 +793,8 @@ func (q *Queries) GetUnreadNotifications(ctx context.Context, userID sql.NullStr
 }
 
 const getUserByEmail = `-- name: GetUserByEmail :one
+
+
 SELECT id, password_hash FROM users WHERE username = ?
 `
 
@@ -859,85 +803,11 @@ type GetUserByEmailRow struct {
 	PasswordHash string `json:"password_hash"`
 }
 
+// ここから自作
 func (q *Queries) GetUserByEmail(ctx context.Context, username string) (GetUserByEmailRow, error) {
 	row := q.db.QueryRowContext(ctx, getUserByEmail, username)
 	var i GetUserByEmailRow
 	err := row.Scan(&i.ID, &i.PasswordHash)
-	return i, err
-}
-
-const getUserById = `-- name: GetUserById :one
-SELECT id, firebase_uid, email, username, display_name, bio, location, followers_count, following_count, posts_count
-FROM users
-WHERE id = ?
-`
-
-type GetUserByIdRow struct {
-	ID             string         `json:"id"`
-	FirebaseUid    string         `json:"firebase_uid"`
-	Email          string         `json:"email"`
-	Username       string         `json:"username"`
-	DisplayName    sql.NullString `json:"display_name"`
-	Bio            sql.NullString `json:"bio"`
-	Location       sql.NullString `json:"location"`
-	FollowersCount sql.NullInt32  `json:"followers_count"`
-	FollowingCount sql.NullInt32  `json:"following_count"`
-	PostsCount     sql.NullInt32  `json:"posts_count"`
-}
-
-func (q *Queries) GetUserById(ctx context.Context, id string) (GetUserByIdRow, error) {
-	row := q.db.QueryRowContext(ctx, getUserById, id)
-	var i GetUserByIdRow
-	err := row.Scan(
-		&i.ID,
-		&i.FirebaseUid,
-		&i.Email,
-		&i.Username,
-		&i.DisplayName,
-		&i.Bio,
-		&i.Location,
-		&i.FollowersCount,
-		&i.FollowingCount,
-		&i.PostsCount,
-	)
-	return i, err
-}
-
-const getUserStats = `-- name: GetUserStats :one
-SELECT
-    u.id,
-    u.username,
-    u.followers_count,
-    u.following_count,
-    u.posts_count,
-    COUNT(DISTINCT l.id) AS total_likes_received
-FROM users u
-LEFT JOIN posts p ON u.id = p.user_id
-LEFT JOIN likes l ON p.id = l.postId
-WHERE u.id = ?
-GROUP BY u.id
-`
-
-type GetUserStatsRow struct {
-	ID                 string        `json:"id"`
-	Username           string        `json:"username"`
-	FollowersCount     sql.NullInt32 `json:"followers_count"`
-	FollowingCount     sql.NullInt32 `json:"following_count"`
-	PostsCount         sql.NullInt32 `json:"posts_count"`
-	TotalLikesReceived int64         `json:"total_likes_received"`
-}
-
-func (q *Queries) GetUserStats(ctx context.Context, id string) (GetUserStatsRow, error) {
-	row := q.db.QueryRowContext(ctx, getUserStats, id)
-	var i GetUserStatsRow
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.FollowersCount,
-		&i.FollowingCount,
-		&i.PostsCount,
-		&i.TotalLikesReceived,
-	)
 	return i, err
 }
 
@@ -1060,26 +930,6 @@ WHERE id = ? AND is_deleted = true AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) 
 
 func (q *Queries) RestorePost(ctx context.Context, id string) (sql.Result, error) {
 	return q.db.ExecContext(ctx, restorePost, id)
-}
-
-const saveResetToken = `-- name: SaveResetToken :exec
-
-INSERT INTO password_reset_tokens (email, token, expiry, created_at)
-VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-`
-
-type SaveResetTokenParams struct {
-	Email  string    `json:"email"`
-	Token  string    `json:"token"`
-	Expiry time.Time `json:"expiry"`
-}
-
-// ここから自作
-// パスワードリセット用のトークンを保存するクエリ
-// params: email, token, expiry
-func (q *Queries) SaveResetToken(ctx context.Context, arg SaveResetTokenParams) error {
-	_, err := q.db.ExecContext(ctx, saveResetToken, arg.Email, arg.Token, arg.Expiry)
-	return err
 }
 
 const searchPostsByHashtag = `-- name: SearchPostsByHashtag :many
@@ -1207,26 +1057,6 @@ WHERE users.id = ?
 
 func (q *Queries) UpdateFollowingsCount(ctx context.Context, id string) (sql.Result, error) {
 	return q.db.ExecContext(ctx, updateFollowingsCount, id)
-}
-
-const updatePassword = `-- name: UpdatePassword :exec
-UPDATE users
-SET 
-    password_hash = ?, 
-    last_password_change = CURRENT_TIMESTAMP,
-    updated_at = CURRENT_TIMESTAMP
-WHERE email = ?
-`
-
-type UpdatePasswordParams struct {
-	PasswordHash string `json:"password_hash"`
-	Email        string `json:"email"`
-}
-
-// パスワードを更新するクエリ
-func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error {
-	_, err := q.db.ExecContext(ctx, updatePassword, arg.PasswordHash, arg.Email)
-	return err
 }
 
 const updatePostLikesCount = `-- name: UpdatePostLikesCount :exec
@@ -1389,17 +1219,4 @@ func (q *Queries) UpdateUserSettings(ctx context.Context, arg UpdateUserSettings
 		arg.ID,
 	)
 	return err
-}
-
-const validateResetToken = `-- name: ValidateResetToken :one
-SELECT email FROM password_reset_tokens
-WHERE token = ? AND expiry > NOW()
-`
-
-// トークンを検証して対応するメールを取得するクエリ
-func (q *Queries) ValidateResetToken(ctx context.Context, token string) (string, error) {
-	row := q.db.QueryRowContext(ctx, validateResetToken, token)
-	var email string
-	err := row.Scan(&email)
-	return email, err
 }

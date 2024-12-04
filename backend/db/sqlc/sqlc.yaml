@@ -16,6 +16,16 @@ sql:
 
     queries:
       - "./queries/query.sql"
+      - "./queries/01_users.sql"
+      - "./queries/02_posts.sql"
+      - "./queries/03_reposts.sql"
+      - "./queries/04_likes.sql"
+      - "./queries/05_replies.sql"
+      - "./queries/06_follows.sql" 
+      - "./queries/07_blocks.sql" 
+      - "./queries/08_notifications.sql"  
+      - "./queries/09_dms.sql"
+      - "./queries/10_password_reset_tokens.sql"  
 
     engine: "mysql"
 
