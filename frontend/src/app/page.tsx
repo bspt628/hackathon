@@ -58,9 +58,10 @@ export default function LoginPage() {
 				</CardContent>
 				<CardFooter className="flex flex-col space-y-4">
 					<h2 className="font-bold">アカウントをお持ちの場合</h2>
-					<Button
-						variant="outline"
+					<Button 
+						variant="outline" 
 						className="w-full bg-transparent text-[#1d9bf0] border-[#536471] hover:bg-[#1d9bf0]/10"
+						onClick={() => router.push('/login')}
 					>
 						ログイン
 					</Button>

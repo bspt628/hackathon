@@ -33,16 +33,21 @@ export default function SignupPage() {
 
 	const validateEmail = (email: string) => {
 		const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-		return emailRegex.test(email) ? "" : "メールアドレスの形式が正しくありません。";
+		return emailRegex.test(email)
+			? ""
+			: "メールアドレスの形式が正しくありません。";
 	};
 
 	const validatePassword = (password: string) => {
-		return password.length > 5 ? "" : "パスワードは5文字以上にしてください。";
+		return password.length > 5 ? "" : "パスワードは6文字以上にしてください。";
 	};
 
-	const validateConfirmPassword = useCallback((confirmPassword: string) => {
-		return confirmPassword === password ? "" : "パスワードが一致しません。";
-	}, [password]);
+	const validateConfirmPassword = useCallback(
+		(confirmPassword: string) => {
+			return confirmPassword === password ? "" : "パスワードが一致しません。";
+		},
+		[password]
+	);
 
 	const validateUsername = (username: string) => {
 		return username ? "" : "ユーザーネームは必須です。";
@@ -56,15 +61,25 @@ export default function SignupPage() {
 		setErrors({
 			email: touched.email ? validateEmail(email) : "",
 			password: touched.password ? validatePassword(password) : "",
-			confirmPassword: touched.confirmPassword ? validateConfirmPassword(confirmPassword) : "",
+			confirmPassword: touched.confirmPassword
+				? validateConfirmPassword(confirmPassword)
+				: "",
 			username: touched.username ? validateUsername(username) : "",
 			displayName: touched.displayName ? validateDisplayName(displayName) : "",
 			form: "",
 		});
-	}, [email, password, confirmPassword, username, displayName, validateConfirmPassword, touched]);
+	}, [
+		email,
+		password,
+		confirmPassword,
+		username,
+		displayName,
+		validateConfirmPassword,
+		touched,
+	]);
 
 	const handleBlur = (field: keyof typeof touched) => {
-		setTouched(prev => ({ ...prev, [field]: true }));
+		setTouched((prev) => ({ ...prev, [field]: true }));
 	};
 
 	async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
@@ -91,7 +106,10 @@ export default function SignupPage() {
 		if (result.success) {
 			router.push("/home");
 		} else {
-			setErrors({ ...errors, form: result.error ?? "アカウントの作成に失敗しました。" });
+			setErrors({
+				...errors,
+				form: result.error ?? "アカウントの作成に失敗しました。",
+			});
 		}
 		setIsLoading(false);
 	}
@@ -120,9 +138,11 @@ export default function SignupPage() {
 							placeholder="example@email.com"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
-							onBlur={() => handleBlur('email')}
+							onBlur={() => handleBlur("email")}
 						/>
-						{touched.email && errors.email && <div className="text-red-500 text-sm">{errors.email}</div>}
+						{touched.email && errors.email && (
+							<div className="text-red-500 text-sm">{errors.email}</div>
+						)}
 					</div>
 
 					<div className="space-y-2">
@@ -136,9 +156,11 @@ export default function SignupPage() {
 							placeholder="••••••••"
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
-							onBlur={() => handleBlur('password')}
+							onBlur={() => handleBlur("password")}
 						/>
-						{touched.password && errors.password && <div className="text-red-500 text-sm">{errors.password}</div>}
+						{touched.password && errors.password && (
+							<div className="text-red-500 text-sm">{errors.password}</div>
+						)}
 					</div>
 
 					<div className="space-y-2">
@@ -152,9 +174,13 @@ export default function SignupPage() {
 							placeholder="••••••••"
 							value={confirmPassword}
 							onChange={(e) => setConfirmPassword(e.target.value)}
-							onBlur={() => handleBlur('confirmPassword')}
+							onBlur={() => handleBlur("confirmPassword")}
 						/>
-						{touched.confirmPassword && errors.confirmPassword && <div className="text-red-500 text-sm">{errors.confirmPassword}</div>}
+						{touched.confirmPassword && errors.confirmPassword && (
+							<div className="text-red-500 text-sm">
+								{errors.confirmPassword}
+							</div>
+						)}
 					</div>
 
 					<div className="space-y-2">
@@ -167,9 +193,11 @@ export default function SignupPage() {
 							placeholder="@username"
 							value={username}
 							onChange={(e) => setUsername(e.target.value)}
-							onBlur={() => handleBlur('username')}
+							onBlur={() => handleBlur("username")}
 						/>
-						{touched.username && errors.username && <div className="text-red-500 text-sm">{errors.username}</div>}
+						{touched.username && errors.username && (
+							<div className="text-red-500 text-sm">{errors.username}</div>
+						)}
 					</div>
 
 					<div className="space-y-2">
@@ -182,18 +210,24 @@ export default function SignupPage() {
 							placeholder="表示名"
 							value={displayName}
 							onChange={(e) => setDisplayName(e.target.value)}
-							onBlur={() => handleBlur('displayName')}
+							onBlur={() => handleBlur("displayName")}
 						/>
-						{touched.displayName && errors.displayName && <div className="text-red-500 text-sm">{errors.displayName}</div>}
+						{touched.displayName && errors.displayName && (
+							<div className="text-red-500 text-sm">{errors.displayName}</div>
+						)}
 					</div>
 
 					{errors.form && (
-						<div className="text-red-500 text-sm text-center">{errors.form}</div>
+						<div className="text-red-500 text-sm text-center">
+							{errors.form}
+						</div>
 					)}
 
 					<Button
 						type="submit"
-						disabled={isLoading || Object.values(errors).some((error) => error !== "")}
+						disabled={
+							isLoading || Object.values(errors).some((error) => error !== "")
+						}
 						className="w-full bg-white hover:bg-white/90 text-black"
 					>
 						{isLoading ? "処理中..." : "次へ"}
