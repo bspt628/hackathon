@@ -195,23 +195,6 @@ func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams
 	return err
 }
 
-const updateUserName = `-- name: UpdateUserName :exec
-UPDATE users
-SET
-    username = ?
-WHERE id = ?
-`
-
-type UpdateUserNameParams struct {
-	Username string `json:"username"`
-	ID       string `json:"id"`
-}
-
-func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) error {
-	_, err := q.db.ExecContext(ctx, updateUserName, arg.Username, arg.ID)
-	return err
-}
-
 const updateUserNotifications = `-- name: UpdateUserNotifications :exec
 UPDATE users
 SET
@@ -298,5 +281,22 @@ func (q *Queries) UpdateUserSettings(ctx context.Context, arg UpdateUserSettings
 		arg.Language,
 		arg.ID,
 	)
+	return err
+}
+
+const updateUserUsername = `-- name: UpdateUserUsername :exec
+UPDATE users
+SET
+    username = ?
+WHERE id = ?
+`
+
+type UpdateUserUsernameParams struct {
+	Username string `json:"username"`
+	ID       string `json:"id"`
+}
+
+func (q *Queries) UpdateUserUsername(ctx context.Context, arg UpdateUserUsernameParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserUsername, arg.Username, arg.ID)
 	return err
 }

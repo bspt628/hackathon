@@ -4,7 +4,7 @@ FROM likes l
 JOIN users u ON l.user_id = u.id
 WHERE l.post_id = ?;
 
--- name: AddLike :exec
+-- name: AddLike :execresult
 INSERT INTO likes (id, user_id, post_id)
 VALUES (?, ?, ?);
 
@@ -49,3 +49,10 @@ WHERE (id = ? AND likes_count > 0);
 SELECT id
 FROM likes
 WHERE user_id = ? AND post_id = ?;
+
+-- name: CheckLikeExists :one
+SELECT EXISTS(
+    SELECT 1
+    FROM likes
+    WHERE user_id = ? AND post_id = ?
+) AS liked;

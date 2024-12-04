@@ -69,7 +69,7 @@ SET
     is_banned = ?
 WHERE id = ?;
 
--- name: UpdateUserName :exec
+-- name: UpdateUserUsername :exec
 UPDATE users
 SET
     username = ?

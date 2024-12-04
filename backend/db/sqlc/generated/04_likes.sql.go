@@ -10,7 +10,7 @@ import (
 	"database/sql"
 )
 
-const addLike = `-- name: AddLike :exec
+const addLike = `-- name: AddLike :execresult
 INSERT INTO likes (id, user_id, post_id)
 VALUES (?, ?, ?)
 `
@@ -21,9 +21,28 @@ type AddLikeParams struct {
 	PostID sql.NullString `json:"post_id"`
 }
 
-func (q *Queries) AddLike(ctx context.Context, arg AddLikeParams) error {
-	_, err := q.db.ExecContext(ctx, addLike, arg.ID, arg.UserID, arg.PostID)
-	return err
+func (q *Queries) AddLike(ctx context.Context, arg AddLikeParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, addLike, arg.ID, arg.UserID, arg.PostID)
+}
+
+const checkLikeExists = `-- name: CheckLikeExists :one
+SELECT EXISTS(
+    SELECT 1
+    FROM likes
+    WHERE user_id = ? AND post_id = ?
+) AS liked
+`
+
+type CheckLikeExistsParams struct {
+	UserID sql.NullString `json:"user_id"`
+	PostID sql.NullString `json:"post_id"`
+}
+
+func (q *Queries) CheckLikeExists(ctx context.Context, arg CheckLikeExistsParams) (bool, error) {
+	row := q.db.QueryRowContext(ctx, checkLikeExists, arg.UserID, arg.PostID)
+	var liked bool
+	err := row.Scan(&liked)
+	return liked, err
 }
 
 const decrementLikesCount = `-- name: DecrementLikesCount :exec
