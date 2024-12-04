@@ -12,22 +12,6 @@ import (
 	"time"
 )
 
-const addBlock = `-- name: AddBlock :exec
-INSERT INTO blocks (id, blocked_by_id, blocked_user_id)
-VALUES (?, ?, ?)
-`
-
-type AddBlockParams struct {
-	ID            string         `json:"id"`
-	BlockedByID   sql.NullString `json:"blocked_by_id"`
-	BlockedUserID sql.NullString `json:"blocked_user_id"`
-}
-
-func (q *Queries) AddBlock(ctx context.Context, arg AddBlockParams) error {
-	_, err := q.db.ExecContext(ctx, addBlock, arg.ID, arg.BlockedByID, arg.BlockedUserID)
-	return err
-}
-
 const addFollow = `-- name: AddFollow :exec
 INSERT INTO follows (id, follower_id, following_id, created_at)
 VALUES (?, ?, ?, CURRENT_TIMESTAMP)
@@ -39,106 +23,9 @@ type AddFollowParams struct {
 	FollowingID sql.NullString `json:"following_id"`
 }
 
+// 実装済み
 func (q *Queries) AddFollow(ctx context.Context, arg AddFollowParams) error {
 	_, err := q.db.ExecContext(ctx, addFollow, arg.ID, arg.FollowerID, arg.FollowingID)
-	return err
-}
-
-const addLike = `-- name: AddLike :execresult
-INSERT INTO likes (id, user_id, post_id, created_at)
-VALUES (?, ?, ?, CURRENT_TIMESTAMP)
-`
-
-type AddLikeParams struct {
-	ID     string         `json:"id"`
-	UserID sql.NullString `json:"user_id"`
-	PostID sql.NullString `json:"post_id"`
-}
-
-func (q *Queries) AddLike(ctx context.Context, arg AddLikeParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, addLike, arg.ID, arg.UserID, arg.PostID)
-}
-
-const checkLikeExists = `-- name: CheckLikeExists :one
-SELECT EXISTS (
-    SELECT 1
-    FROM likes
-    WHERE user_id = ? AND post_id = ?
-) AS liked
-`
-
-type CheckLikeExistsParams struct {
-	UserID sql.NullString `json:"user_id"`
-	PostID sql.NullString `json:"post_id"`
-}
-
-func (q *Queries) CheckLikeExists(ctx context.Context, arg CheckLikeExistsParams) (bool, error) {
-	row := q.db.QueryRowContext(ctx, checkLikeExists, arg.UserID, arg.PostID)
-	var liked bool
-	err := row.Scan(&liked)
-	return liked, err
-}
-
-const checkPostExists = `-- name: CheckPostExists :one
-SELECT EXISTS (
-    SELECT 1 
-    FROM posts 
-    WHERE id = ?
-)
-`
-
-func (q *Queries) CheckPostExists(ctx context.Context, id string) (bool, error) {
-	row := q.db.QueryRowContext(ctx, checkPostExists, id)
-	var exists bool
-	err := row.Scan(&exists)
-	return exists, err
-}
-
-const checkRootPostValidity = `-- name: CheckRootPostValidity :one
-SELECT root_post_id IS NULL AS is_valid
-FROM posts
-WHERE id = ?
-`
-
-func (q *Queries) CheckRootPostValidity(ctx context.Context, id string) (bool, error) {
-	row := q.db.QueryRowContext(ctx, checkRootPostValidity, id)
-	var is_valid bool
-	err := row.Scan(&is_valid)
-	return is_valid, err
-}
-
-const countReplyPosts = `-- name: CountReplyPosts :one
-SELECT COUNT(*) AS reply_count
-FROM posts
-WHERE root_post_id = ?
-`
-
-func (q *Queries) CountReplyPosts(ctx context.Context, rootPostID sql.NullString) (int64, error) {
-	row := q.db.QueryRowContext(ctx, countReplyPosts, rootPostID)
-	var reply_count int64
-	err := row.Scan(&reply_count)
-	return reply_count, err
-}
-
-const createNotification = `-- name: CreateNotification :exec
-INSERT INTO notifications (id, user_id, type, message)
-VALUES (?, ?, ?, ?)
-`
-
-type CreateNotificationParams struct {
-	ID      string         `json:"id"`
-	UserID  sql.NullString `json:"user_id"`
-	Type    sql.NullString `json:"type"`
-	Message sql.NullString `json:"message"`
-}
-
-func (q *Queries) CreateNotification(ctx context.Context, arg CreateNotificationParams) error {
-	_, err := q.db.ExecContext(ctx, createNotification,
-		arg.ID,
-		arg.UserID,
-		arg.Type,
-		arg.Message,
-	)
 	return err
 }
 
@@ -162,6 +49,7 @@ type CreatePostParams struct {
 	IsReply        sql.NullBool    `json:"is_reply"`
 }
 
+// 実装済み
 func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
 	_, err := q.db.ExecContext(ctx, createPost,
 		arg.ID,
@@ -178,33 +66,9 @@ func (q *Queries) CreatePost(ctx context.Context, arg CreatePostParams) error {
 	return err
 }
 
-const createRepost = `-- name: CreateRepost :exec
-INSERT INTO reposts (id, user_id, original_post_id, is_quote_repost, additional_comment)
-VALUES (?, ?, ?, ?, ?)
-`
-
-type CreateRepostParams struct {
-	ID                string         `json:"id"`
-	UserID            sql.NullString `json:"user_id"`
-	OriginalPostID    sql.NullString `json:"original_post_id"`
-	IsQuoteRepost     sql.NullBool   `json:"is_quote_repost"`
-	AdditionalComment sql.NullString `json:"additional_comment"`
-}
-
-func (q *Queries) CreateRepost(ctx context.Context, arg CreateRepostParams) error {
-	_, err := q.db.ExecContext(ctx, createRepost,
-		arg.ID,
-		arg.UserID,
-		arg.OriginalPostID,
-		arg.IsQuoteRepost,
-		arg.AdditionalComment,
-	)
-	return err
-}
-
 const createUser = `-- name: CreateUser :execresult
-INSERT INTO users (id, firebase_uid, email, password_hash, username, display_name)
-VALUES (?, ?, ?, ?, ?, ?)
+INSERT INTO users (id, firebase_uid, email, password_hash, username, display_name, created_at)
+VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
 `
 
 type CreateUserParams struct {
@@ -228,28 +92,6 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Res
 	)
 }
 
-const decrementLikesCount = `-- name: DecrementLikesCount :exec
-UPDATE posts
-SET likes_count = likes_count - 1
-WHERE id = ?
-`
-
-func (q *Queries) DecrementLikesCount(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, decrementLikesCount, id)
-	return err
-}
-
-const decrementReplyCount = `-- name: DecrementReplyCount :exec
-UPDATE posts
-SET replies_count = replies_count - 1
-WHERE (id = ? AND replies_count > 0)
-`
-
-func (q *Queries) DecrementReplyCount(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, decrementReplyCount, id)
-	return err
-}
-
 const deletePost = `-- name: DeletePost :exec
 UPDATE posts
 SET 
@@ -258,6 +100,7 @@ SET
 WHERE id = ?
 `
 
+// 実装済み
 func (q *Queries) DeletePost(ctx context.Context, id string) error {
 	_, err := q.db.ExecContext(ctx, deletePost, id)
 	return err
@@ -283,130 +126,6 @@ func (q *Queries) DeleteUser(ctx context.Context, id string) (sql.Result, error)
 	return q.db.ExecContext(ctx, deleteUser, id)
 }
 
-const getAllPosts = `-- name: GetAllPosts :many
-SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
-FROM posts p
-JOIN users u ON p.user_id = u.id
-ORDER BY p.created_at DESC
-LIMIT ?
-`
-
-type GetAllPostsRow struct {
-	ID             string          `json:"id"`
-	UserID         sql.NullString  `json:"user_id"`
-	Content        sql.NullString  `json:"content"`
-	CreatedAt      sql.NullTime    `json:"created_at"`
-	UpdatedAt      sql.NullTime    `json:"updated_at"`
-	IsRepost       sql.NullBool    `json:"is_repost"`
-	OriginalPostID sql.NullString  `json:"original_post_id"`
-	ReplyToID      sql.NullString  `json:"reply_to_id"`
-	RootPostID     sql.NullString  `json:"root_post_id"`
-	IsReply        sql.NullBool    `json:"is_reply"`
-	MediaUrls      json.RawMessage `json:"media_urls"`
-	LikesCount     sql.NullInt32   `json:"likes_count"`
-	RepostsCount   sql.NullInt32   `json:"reposts_count"`
-	RepliesCount   sql.NullInt32   `json:"replies_count"`
-	ViewsCount     sql.NullInt32   `json:"views_count"`
-	Visibility     sql.NullString  `json:"visibility"`
-	IsPinned       sql.NullBool    `json:"is_pinned"`
-	IsDeleted      sql.NullBool    `json:"is_deleted"`
-	Username       string          `json:"username"`
-	DisplayName    sql.NullString  `json:"display_name"`
-}
-
-func (q *Queries) GetAllPosts(ctx context.Context, limit int32) ([]GetAllPostsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getAllPosts, limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetAllPostsRow
-	for rows.Next() {
-		var i GetAllPostsRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Content,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsRepost,
-			&i.OriginalPostID,
-			&i.ReplyToID,
-			&i.RootPostID,
-			&i.IsReply,
-			&i.MediaUrls,
-			&i.LikesCount,
-			&i.RepostsCount,
-			&i.RepliesCount,
-			&i.ViewsCount,
-			&i.Visibility,
-			&i.IsPinned,
-			&i.IsDeleted,
-			&i.Username,
-			&i.DisplayName,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getDMConversation = `-- name: GetDMConversation :many
-SELECT id, sender_id, receiver_id, content, created_at
-FROM dms
-WHERE (sender_id = ? AND receiver_id = ?)
-   OR (sender_id = ? AND receiver_id = ?)
-ORDER BY createdAt ASC
-`
-
-type GetDMConversationParams struct {
-	SenderID     sql.NullString `json:"sender_id"`
-	ReceiverID   sql.NullString `json:"receiver_id"`
-	SenderID_2   sql.NullString `json:"sender_id_2"`
-	ReceiverID_2 sql.NullString `json:"receiver_id_2"`
-}
-
-func (q *Queries) GetDMConversation(ctx context.Context, arg GetDMConversationParams) ([]Dm, error) {
-	rows, err := q.db.QueryContext(ctx, getDMConversation,
-		arg.SenderID,
-		arg.ReceiverID,
-		arg.SenderID_2,
-		arg.ReceiverID_2,
-	)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Dm
-	for rows.Next() {
-		var i Dm
-		if err := rows.Scan(
-			&i.ID,
-			&i.SenderID,
-			&i.ReceiverID,
-			&i.Content,
-			&i.CreatedAt,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
 const getEmailFromUsername = `-- name: GetEmailFromUsername :one
 SELECT email
 FROM users
@@ -419,17 +138,6 @@ func (q *Queries) GetEmailFromUsername(ctx context.Context, username string) (st
 	var email string
 	err := row.Scan(&email)
 	return email, err
-}
-
-const getFirebaseUIDfromUserID = `-- name: GetFirebaseUIDfromUserID :one
-SELECT firebase_uid FROM users WHERE id = ?
-`
-
-func (q *Queries) GetFirebaseUIDfromUserID(ctx context.Context, id string) (string, error) {
-	row := q.db.QueryRowContext(ctx, getFirebaseUIDfromUserID, id)
-	var firebase_uid string
-	err := row.Scan(&firebase_uid)
-	return firebase_uid, err
 }
 
 const getFollowStatus = `-- name: GetFollowStatus :one
@@ -445,6 +153,7 @@ type GetFollowStatusParams struct {
 	FollowingID sql.NullString `json:"following_id"`
 }
 
+// 実装済み
 func (q *Queries) GetFollowStatus(ctx context.Context, arg GetFollowStatusParams) (bool, error) {
 	row := q.db.QueryRowContext(ctx, getFollowStatus, arg.FollowerID, arg.FollowingID)
 	var following bool
@@ -465,6 +174,7 @@ type GetFollowersRow struct {
 	DisplayName sql.NullString `json:"display_name"`
 }
 
+// 実装済み
 func (q *Queries) GetFollowers(ctx context.Context, followingID sql.NullString) ([]GetFollowersRow, error) {
 	rows, err := q.db.QueryContext(ctx, getFollowers, followingID)
 	if err != nil {
@@ -508,6 +218,7 @@ type GetFollowersAndFollowingsRow struct {
 	FollowingID sql.NullString `json:"following_id"`
 }
 
+// 実装済み
 func (q *Queries) GetFollowersAndFollowings(ctx context.Context, arg GetFollowersAndFollowingsParams) ([]GetFollowersAndFollowingsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getFollowersAndFollowings, arg.FollowingID, arg.FollowerID)
 	if err != nil {
@@ -541,96 +252,12 @@ const getFollowersCount = `-- name: GetFollowersCount :one
 SELECT followers_count FROM users WHERE id = ?
 `
 
+// 実装済み
 func (q *Queries) GetFollowersCount(ctx context.Context, id string) (sql.NullInt32, error) {
 	row := q.db.QueryRowContext(ctx, getFollowersCount, id)
 	var followers_count sql.NullInt32
 	err := row.Scan(&followers_count)
 	return followers_count, err
-}
-
-const getFollowingUsersPosts = `-- name: GetFollowingUsersPosts :many
-SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
-FROM posts p
-JOIN users u ON p.user_id = u.id
-WHERE p.user_id IN (
-    SELECT following_id
-    FROM follows
-    WHERE follower_id = ?
-)
-ORDER BY p.created_at DESC
-LIMIT ?
-`
-
-type GetFollowingUsersPostsParams struct {
-	FollowerID sql.NullString `json:"follower_id"`
-	Limit      int32          `json:"limit"`
-}
-
-type GetFollowingUsersPostsRow struct {
-	ID             string          `json:"id"`
-	UserID         sql.NullString  `json:"user_id"`
-	Content        sql.NullString  `json:"content"`
-	CreatedAt      sql.NullTime    `json:"created_at"`
-	UpdatedAt      sql.NullTime    `json:"updated_at"`
-	IsRepost       sql.NullBool    `json:"is_repost"`
-	OriginalPostID sql.NullString  `json:"original_post_id"`
-	ReplyToID      sql.NullString  `json:"reply_to_id"`
-	RootPostID     sql.NullString  `json:"root_post_id"`
-	IsReply        sql.NullBool    `json:"is_reply"`
-	MediaUrls      json.RawMessage `json:"media_urls"`
-	LikesCount     sql.NullInt32   `json:"likes_count"`
-	RepostsCount   sql.NullInt32   `json:"reposts_count"`
-	RepliesCount   sql.NullInt32   `json:"replies_count"`
-	ViewsCount     sql.NullInt32   `json:"views_count"`
-	Visibility     sql.NullString  `json:"visibility"`
-	IsPinned       sql.NullBool    `json:"is_pinned"`
-	IsDeleted      sql.NullBool    `json:"is_deleted"`
-	Username       string          `json:"username"`
-	DisplayName    sql.NullString  `json:"display_name"`
-}
-
-func (q *Queries) GetFollowingUsersPosts(ctx context.Context, arg GetFollowingUsersPostsParams) ([]GetFollowingUsersPostsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getFollowingUsersPosts, arg.FollowerID, arg.Limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetFollowingUsersPostsRow
-	for rows.Next() {
-		var i GetFollowingUsersPostsRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Content,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsRepost,
-			&i.OriginalPostID,
-			&i.ReplyToID,
-			&i.RootPostID,
-			&i.IsReply,
-			&i.MediaUrls,
-			&i.LikesCount,
-			&i.RepostsCount,
-			&i.RepliesCount,
-			&i.ViewsCount,
-			&i.Visibility,
-			&i.IsPinned,
-			&i.IsDeleted,
-			&i.Username,
-			&i.DisplayName,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const getFollowings = `-- name: GetFollowings :many
@@ -646,6 +273,7 @@ type GetFollowingsRow struct {
 	DisplayName sql.NullString `json:"display_name"`
 }
 
+// 実装済み
 func (q *Queries) GetFollowings(ctx context.Context, followerID sql.NullString) ([]GetFollowingsRow, error) {
 	rows, err := q.db.QueryContext(ctx, getFollowings, followerID)
 	if err != nil {
@@ -673,6 +301,7 @@ const getFollowingsCount = `-- name: GetFollowingsCount :one
 SELECT following_count FROM users WHERE id = ?
 `
 
+// 実装済み
 func (q *Queries) GetFollowingsCount(ctx context.Context, id string) (sql.NullInt32, error) {
 	row := q.db.QueryRowContext(ctx, getFollowingsCount, id)
 	var following_count sql.NullInt32
@@ -684,351 +313,12 @@ const getIDfromFirebaseUID = `-- name: GetIDfromFirebaseUID :one
 SELECT id FROM users WHERE firebase_uid = ?
 `
 
+// 実装済み
 func (q *Queries) GetIDfromFirebaseUID(ctx context.Context, firebaseUid string) (string, error) {
 	row := q.db.QueryRowContext(ctx, getIDfromFirebaseUID, firebaseUid)
 	var id string
 	err := row.Scan(&id)
 	return id, err
-}
-
-const getLikeID = `-- name: GetLikeID :one
-SELECT id
-FROM likes
-WHERE user_id = ? AND post_id = ?
-`
-
-type GetLikeIDParams struct {
-	UserID sql.NullString `json:"user_id"`
-	PostID sql.NullString `json:"post_id"`
-}
-
-func (q *Queries) GetLikeID(ctx context.Context, arg GetLikeIDParams) (string, error) {
-	row := q.db.QueryRowContext(ctx, getLikeID, arg.UserID, arg.PostID)
-	var id string
-	err := row.Scan(&id)
-	return id, err
-}
-
-const getLikeStatus = `-- name: GetLikeStatus :one
-SELECT EXISTS(
-    SELECT 1
-    FROM likes
-    WHERE user_id = ? AND post_id = ?
-) AS liked
-`
-
-type GetLikeStatusParams struct {
-	UserID sql.NullString `json:"user_id"`
-	PostID sql.NullString `json:"post_id"`
-}
-
-func (q *Queries) GetLikeStatus(ctx context.Context, arg GetLikeStatusParams) (bool, error) {
-	row := q.db.QueryRowContext(ctx, getLikeStatus, arg.UserID, arg.PostID)
-	var liked bool
-	err := row.Scan(&liked)
-	return liked, err
-}
-
-const getPost = `-- name: GetPost :one
-SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
-FROM posts p
-JOIN users u ON p.user_id = u.id
-WHERE p.id = ?
-`
-
-type GetPostRow struct {
-	ID             string          `json:"id"`
-	UserID         sql.NullString  `json:"user_id"`
-	Content        sql.NullString  `json:"content"`
-	CreatedAt      sql.NullTime    `json:"created_at"`
-	UpdatedAt      sql.NullTime    `json:"updated_at"`
-	IsRepost       sql.NullBool    `json:"is_repost"`
-	OriginalPostID sql.NullString  `json:"original_post_id"`
-	ReplyToID      sql.NullString  `json:"reply_to_id"`
-	RootPostID     sql.NullString  `json:"root_post_id"`
-	IsReply        sql.NullBool    `json:"is_reply"`
-	MediaUrls      json.RawMessage `json:"media_urls"`
-	LikesCount     sql.NullInt32   `json:"likes_count"`
-	RepostsCount   sql.NullInt32   `json:"reposts_count"`
-	RepliesCount   sql.NullInt32   `json:"replies_count"`
-	ViewsCount     sql.NullInt32   `json:"views_count"`
-	Visibility     sql.NullString  `json:"visibility"`
-	IsPinned       sql.NullBool    `json:"is_pinned"`
-	IsDeleted      sql.NullBool    `json:"is_deleted"`
-	Username       string          `json:"username"`
-	DisplayName    sql.NullString  `json:"display_name"`
-}
-
-func (q *Queries) GetPost(ctx context.Context, id string) (GetPostRow, error) {
-	row := q.db.QueryRowContext(ctx, getPost, id)
-	var i GetPostRow
-	err := row.Scan(
-		&i.ID,
-		&i.UserID,
-		&i.Content,
-		&i.CreatedAt,
-		&i.UpdatedAt,
-		&i.IsRepost,
-		&i.OriginalPostID,
-		&i.ReplyToID,
-		&i.RootPostID,
-		&i.IsReply,
-		&i.MediaUrls,
-		&i.LikesCount,
-		&i.RepostsCount,
-		&i.RepliesCount,
-		&i.ViewsCount,
-		&i.Visibility,
-		&i.IsPinned,
-		&i.IsDeleted,
-		&i.Username,
-		&i.DisplayName,
-	)
-	return i, err
-}
-
-const getPostIDFromLike = `-- name: GetPostIDFromLike :one
-SELECT post_id
-FROM likes
-WHERE id = ?
-`
-
-func (q *Queries) GetPostIDFromLike(ctx context.Context, id string) (sql.NullString, error) {
-	row := q.db.QueryRowContext(ctx, getPostIDFromLike, id)
-	var post_id sql.NullString
-	err := row.Scan(&post_id)
-	return post_id, err
-}
-
-const getPostLikes = `-- name: GetPostLikes :many
-SELECT u.id, u.username, u.display_name
-FROM likes l
-JOIN users u ON l.user_id = u.id
-WHERE l.post_id = ?
-`
-
-type GetPostLikesRow struct {
-	ID          string         `json:"id"`
-	Username    string         `json:"username"`
-	DisplayName sql.NullString `json:"display_name"`
-}
-
-func (q *Queries) GetPostLikes(ctx context.Context, postID sql.NullString) ([]GetPostLikesRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPostLikes, postID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetPostLikesRow
-	for rows.Next() {
-		var i GetPostLikesRow
-		if err := rows.Scan(&i.ID, &i.Username, &i.DisplayName); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getPostLikesCount = `-- name: GetPostLikesCount :one
-SELECT likes_count
-FROM posts
-WHERE id = ?
-`
-
-func (q *Queries) GetPostLikesCount(ctx context.Context, id string) (sql.NullInt32, error) {
-	row := q.db.QueryRowContext(ctx, getPostLikesCount, id)
-	var likes_count sql.NullInt32
-	err := row.Scan(&likes_count)
-	return likes_count, err
-}
-
-const getPostReplies = `-- name: GetPostReplies :many
-SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
-FROM posts p
-JOIN users u ON p.user_id = u.id
-WHERE p.root_post_id = ?
-ORDER BY p.created_at ASC
-`
-
-type GetPostRepliesRow struct {
-	ID             string          `json:"id"`
-	UserID         sql.NullString  `json:"user_id"`
-	Content        sql.NullString  `json:"content"`
-	CreatedAt      sql.NullTime    `json:"created_at"`
-	UpdatedAt      sql.NullTime    `json:"updated_at"`
-	IsRepost       sql.NullBool    `json:"is_repost"`
-	OriginalPostID sql.NullString  `json:"original_post_id"`
-	ReplyToID      sql.NullString  `json:"reply_to_id"`
-	RootPostID     sql.NullString  `json:"root_post_id"`
-	IsReply        sql.NullBool    `json:"is_reply"`
-	MediaUrls      json.RawMessage `json:"media_urls"`
-	LikesCount     sql.NullInt32   `json:"likes_count"`
-	RepostsCount   sql.NullInt32   `json:"reposts_count"`
-	RepliesCount   sql.NullInt32   `json:"replies_count"`
-	ViewsCount     sql.NullInt32   `json:"views_count"`
-	Visibility     sql.NullString  `json:"visibility"`
-	IsPinned       sql.NullBool    `json:"is_pinned"`
-	IsDeleted      sql.NullBool    `json:"is_deleted"`
-	Username       string          `json:"username"`
-	DisplayName    sql.NullString  `json:"display_name"`
-}
-
-func (q *Queries) GetPostReplies(ctx context.Context, rootPostID sql.NullString) ([]GetPostRepliesRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPostReplies, rootPostID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetPostRepliesRow
-	for rows.Next() {
-		var i GetPostRepliesRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Content,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsRepost,
-			&i.OriginalPostID,
-			&i.ReplyToID,
-			&i.RootPostID,
-			&i.IsReply,
-			&i.MediaUrls,
-			&i.LikesCount,
-			&i.RepostsCount,
-			&i.RepliesCount,
-			&i.ViewsCount,
-			&i.Visibility,
-			&i.IsPinned,
-			&i.IsDeleted,
-			&i.Username,
-			&i.DisplayName,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getPostRepliesCount = `-- name: GetPostRepliesCount :one
-SELECT COUNT(*) AS reply_count
-FROM posts
-WHERE root_post_id = ?
-`
-
-func (q *Queries) GetPostRepliesCount(ctx context.Context, rootPostID sql.NullString) (int64, error) {
-	row := q.db.QueryRowContext(ctx, getPostRepliesCount, rootPostID)
-	var reply_count int64
-	err := row.Scan(&reply_count)
-	return reply_count, err
-}
-
-const getPostReposts = `-- name: GetPostReposts :many
-SELECT u.id, u.username, u.display_name, r.is_quote_repost, r.additional_comment
-FROM reposts r
-JOIN users u ON r.user_id = u.id
-WHERE r.original_post_id = ?
-`
-
-type GetPostRepostsRow struct {
-	ID                string         `json:"id"`
-	Username          string         `json:"username"`
-	DisplayName       sql.NullString `json:"display_name"`
-	IsQuoteRepost     sql.NullBool   `json:"is_quote_repost"`
-	AdditionalComment sql.NullString `json:"additional_comment"`
-}
-
-func (q *Queries) GetPostReposts(ctx context.Context, originalPostID sql.NullString) ([]GetPostRepostsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getPostReposts, originalPostID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []GetPostRepostsRow
-	for rows.Next() {
-		var i GetPostRepostsRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.Username,
-			&i.DisplayName,
-			&i.IsQuoteRepost,
-			&i.AdditionalComment,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getReplyToID = `-- name: GetReplyToID :one
-SELECT reply_to_id
-FROM posts
-WHERE id = ?
-`
-
-func (q *Queries) GetReplyToID(ctx context.Context, id string) (sql.NullString, error) {
-	row := q.db.QueryRowContext(ctx, getReplyToID, id)
-	var reply_to_id sql.NullString
-	err := row.Scan(&reply_to_id)
-	return reply_to_id, err
-}
-
-const getUnreadNotifications = `-- name: GetUnreadNotifications :many
-SELECT id, user_id, type, message, created_at, is_read
-FROM notifications
-WHERE user_id = ? AND is_read = FALSE
-ORDER BY created_at DESC
-`
-
-func (q *Queries) GetUnreadNotifications(ctx context.Context, userID sql.NullString) ([]Notification, error) {
-	rows, err := q.db.QueryContext(ctx, getUnreadNotifications, userID)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []Notification
-	for rows.Next() {
-		var i Notification
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Type,
-			&i.Message,
-			&i.CreatedAt,
-			&i.IsRead,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
 }
 
 const getUser = `-- name: GetUser :one
@@ -1069,102 +359,6 @@ func (q *Queries) GetUser(ctx context.Context, id string) (GetUserRow, error) {
 	return i, err
 }
 
-const getUserLikes = `-- name: GetUserLikes :many
-SELECT post_id
-FROM likes
-WHERE user_id = ?
-ORDER BY created_at DESC
-LIMIT ?
-`
-
-type GetUserLikesParams struct {
-	UserID sql.NullString `json:"user_id"`
-	Limit  int32          `json:"limit"`
-}
-
-func (q *Queries) GetUserLikes(ctx context.Context, arg GetUserLikesParams) ([]sql.NullString, error) {
-	rows, err := q.db.QueryContext(ctx, getUserLikes, arg.UserID, arg.Limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []sql.NullString
-	for rows.Next() {
-		var post_id sql.NullString
-		if err := rows.Scan(&post_id); err != nil {
-			return nil, err
-		}
-		items = append(items, post_id)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const getUserStats = `-- name: GetUserStats :one
-SELECT
-    u.id,
-    u.username,
-    u.followers_count,
-    u.following_count,
-    u.posts_count,
-    COUNT(DISTINCT l.id) AS total_likes_received
-FROM users u
-LEFT JOIN posts p ON u.id = p.user_id
-LEFT JOIN likes l ON p.id = l.postId
-WHERE u.id = ?
-GROUP BY u.id
-`
-
-type GetUserStatsRow struct {
-	ID                 string        `json:"id"`
-	Username           string        `json:"username"`
-	FollowersCount     sql.NullInt32 `json:"followers_count"`
-	FollowingCount     sql.NullInt32 `json:"following_count"`
-	PostsCount         sql.NullInt32 `json:"posts_count"`
-	TotalLikesReceived int64         `json:"total_likes_received"`
-}
-
-func (q *Queries) GetUserStats(ctx context.Context, id string) (GetUserStatsRow, error) {
-	row := q.db.QueryRowContext(ctx, getUserStats, id)
-	var i GetUserStatsRow
-	err := row.Scan(
-		&i.ID,
-		&i.Username,
-		&i.FollowersCount,
-		&i.FollowingCount,
-		&i.PostsCount,
-		&i.TotalLikesReceived,
-	)
-	return i, err
-}
-
-const incrementLikesCount = `-- name: IncrementLikesCount :exec
-UPDATE posts
-SET likes_count = likes_count + 1
-WHERE id = ?
-`
-
-func (q *Queries) IncrementLikesCount(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, incrementLikesCount, id)
-	return err
-}
-
-const incrementReplyCount = `-- name: IncrementReplyCount :exec
-UPDATE posts
-SET replies_count = replies_count + 1
-WHERE id = ?
-`
-
-func (q *Queries) IncrementReplyCount(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, incrementReplyCount, id)
-	return err
-}
-
 const removeFollow = `-- name: RemoveFollow :execresult
 DELETE FROM follows
 WHERE follower_id = ? AND following_id = ?
@@ -1175,33 +369,9 @@ type RemoveFollowParams struct {
 	FollowingID sql.NullString `json:"following_id"`
 }
 
+// 実装済み
 func (q *Queries) RemoveFollow(ctx context.Context, arg RemoveFollowParams) (sql.Result, error) {
 	return q.db.ExecContext(ctx, removeFollow, arg.FollowerID, arg.FollowingID)
-}
-
-const removeLike = `-- name: RemoveLike :exec
-DELETE FROM likes
-WHERE user_id = ? AND post_id = ?
-`
-
-type RemoveLikeParams struct {
-	UserID sql.NullString `json:"user_id"`
-	PostID sql.NullString `json:"post_id"`
-}
-
-func (q *Queries) RemoveLike(ctx context.Context, arg RemoveLikeParams) error {
-	_, err := q.db.ExecContext(ctx, removeLike, arg.UserID, arg.PostID)
-	return err
-}
-
-const restorePost = `-- name: RestorePost :execresult
-UPDATE posts
-SET is_deleted = false
-WHERE id = ? AND is_deleted = true AND TIMESTAMPDIFF(MINUTE, updated_at, NOW()) <= 20
-`
-
-func (q *Queries) RestorePost(ctx context.Context, id string) (sql.Result, error) {
-	return q.db.ExecContext(ctx, restorePost, id)
 }
 
 const saveResetToken = `-- name: SaveResetToken :exec
@@ -1218,109 +388,6 @@ type SaveResetTokenParams struct {
 // 実装済み
 func (q *Queries) SaveResetToken(ctx context.Context, arg SaveResetTokenParams) error {
 	_, err := q.db.ExecContext(ctx, saveResetToken, arg.Email, arg.Token, arg.Expiry)
-	return err
-}
-
-const searchPosts = `-- name: SearchPosts :many
-SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
-FROM posts p
-JOIN users u ON p.user_id = u.id
-WHERE p.content LIKE ?
-ORDER BY p.created_at DESC
-LIMIT ?
-`
-
-type SearchPostsParams struct {
-	Content sql.NullString `json:"content"`
-	Limit   int32          `json:"limit"`
-}
-
-type SearchPostsRow struct {
-	ID             string          `json:"id"`
-	UserID         sql.NullString  `json:"user_id"`
-	Content        sql.NullString  `json:"content"`
-	CreatedAt      sql.NullTime    `json:"created_at"`
-	UpdatedAt      sql.NullTime    `json:"updated_at"`
-	IsRepost       sql.NullBool    `json:"is_repost"`
-	OriginalPostID sql.NullString  `json:"original_post_id"`
-	ReplyToID      sql.NullString  `json:"reply_to_id"`
-	RootPostID     sql.NullString  `json:"root_post_id"`
-	IsReply        sql.NullBool    `json:"is_reply"`
-	MediaUrls      json.RawMessage `json:"media_urls"`
-	LikesCount     sql.NullInt32   `json:"likes_count"`
-	RepostsCount   sql.NullInt32   `json:"reposts_count"`
-	RepliesCount   sql.NullInt32   `json:"replies_count"`
-	ViewsCount     sql.NullInt32   `json:"views_count"`
-	Visibility     sql.NullString  `json:"visibility"`
-	IsPinned       sql.NullBool    `json:"is_pinned"`
-	IsDeleted      sql.NullBool    `json:"is_deleted"`
-	Username       string          `json:"username"`
-	DisplayName    sql.NullString  `json:"display_name"`
-}
-
-func (q *Queries) SearchPosts(ctx context.Context, arg SearchPostsParams) ([]SearchPostsRow, error) {
-	rows, err := q.db.QueryContext(ctx, searchPosts, arg.Content, arg.Limit)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []SearchPostsRow
-	for rows.Next() {
-		var i SearchPostsRow
-		if err := rows.Scan(
-			&i.ID,
-			&i.UserID,
-			&i.Content,
-			&i.CreatedAt,
-			&i.UpdatedAt,
-			&i.IsRepost,
-			&i.OriginalPostID,
-			&i.ReplyToID,
-			&i.RootPostID,
-			&i.IsReply,
-			&i.MediaUrls,
-			&i.LikesCount,
-			&i.RepostsCount,
-			&i.RepliesCount,
-			&i.ViewsCount,
-			&i.Visibility,
-			&i.IsPinned,
-			&i.IsDeleted,
-			&i.Username,
-			&i.DisplayName,
-		); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const sendDM = `-- name: SendDM :exec
-INSERT INTO dms (id, sender_id, receiver_id, content)
-VALUES (?, ?, ?, ?)
-`
-
-type SendDMParams struct {
-	ID         string         `json:"id"`
-	SenderID   sql.NullString `json:"sender_id"`
-	ReceiverID sql.NullString `json:"receiver_id"`
-	Content    sql.NullString `json:"content"`
-}
-
-func (q *Queries) SendDM(ctx context.Context, arg SendDMParams) error {
-	_, err := q.db.ExecContext(ctx, sendDM,
-		arg.ID,
-		arg.SenderID,
-		arg.ReceiverID,
-		arg.Content,
-	)
 	return err
 }
 
@@ -1349,6 +416,7 @@ SET followers_count = (
 WHERE users.id = ?
 `
 
+// 実装済み
 func (q *Queries) UpdateFollowersCount(ctx context.Context, id string) (sql.Result, error) {
 	return q.db.ExecContext(ctx, updateFollowersCount, id)
 }
@@ -1361,13 +429,17 @@ SET following_count = (
 WHERE users.id = ?
 `
 
+// 実装済み
 func (q *Queries) UpdateFollowingsCount(ctx context.Context, id string) (sql.Result, error) {
 	return q.db.ExecContext(ctx, updateFollowingsCount, id)
 }
 
 const updatePassword = `-- name: UpdatePassword :exec
 UPDATE users
-SET password_hash = ?, last_password_change = NOW()
+SET 
+    password_hash = ?,
+    last_password_change = NOW(),
+    updated_at = CURRENT_TIMESTAMP
 WHERE email = ?
 `
 
@@ -1379,19 +451,6 @@ type UpdatePasswordParams struct {
 // 実装済み
 func (q *Queries) UpdatePassword(ctx context.Context, arg UpdatePasswordParams) error {
 	_, err := q.db.ExecContext(ctx, updatePassword, arg.PasswordHash, arg.Email)
-	return err
-}
-
-const updatePostLikesCount = `-- name: UpdatePostLikesCount :exec
-UPDATE posts
-SET likes_count = (
-    SELECT COUNT(*) FROM likes WHERE post_id = posts.id
-)
-WHERE posts.id = ?
-`
-
-func (q *Queries) UpdatePostLikesCount(ctx context.Context, id string) error {
-	_, err := q.db.ExecContext(ctx, updatePostLikesCount, id)
 	return err
 }
 
@@ -1415,7 +474,6 @@ func (q *Queries) UpdateUserBanStatus(ctx context.Context, arg UpdateUserBanStat
 }
 
 const updateUserEmail = `-- name: UpdateUserEmail :exec
-
 UPDATE users
 SET
     email = ?,
@@ -1428,6 +486,7 @@ type UpdateUserEmailParams struct {
 	ID    string `json:"id"`
 }
 
+// 実装済み
 func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {
 	_, err := q.db.ExecContext(ctx, updateUserEmail, arg.Email, arg.ID)
 	return err
