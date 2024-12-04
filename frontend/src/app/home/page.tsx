@@ -1,9 +1,8 @@
 "use client";
 
-import { Home, Search, Bell, Mail, User, Hash } from "lucide-react";
+import { Home, Search, Bell, Mail, User} from "lucide-react";
 import { Timeline } from "@/components/timeline";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
 export default function HomePage() {
