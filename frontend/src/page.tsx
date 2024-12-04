@@ -1,9 +1,12 @@
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
+import { Apple, Chrome } from 'lucide-react'
 import Image from "next/image"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 
 export default function LoginPage() {
+  const router = useRouter()
   return (
     <div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
       <Card className="w-full max-w-md bg-black border-none text-white">
@@ -22,12 +25,32 @@ export default function LoginPage() {
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
+          <Button 
+            variant="outline" 
+            className="w-full bg-transparent text-white border-[#536471] hover:bg-white/10"
+          >
+            <Chrome className="mr-2 h-4 w-4" />
+            大倉 でログイン
+          </Button>
+          <Button 
+            variant="outline" 
+            className="w-full bg-transparent text-white border-[#536471] hover:bg-white/10"
+          >
+            <Apple className="mr-2 h-4 w-4" />
+            Appleのアカウントで登録
+          </Button>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <span className="w-full border-t border-[#536471]" />
             </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-black px-2 text-[#536471]">または</span>
+            </div>
           </div>
-          <Button className="w-full bg-[#1d9bf0] hover:bg-[#1a8cd8]">
+          <Button 
+            className="w-full bg-[#1d9bf0] hover:bg-[#1a8cd8]"
+            onClick={() => router.push('/signup')}
+          >
             アカウントを作成
           </Button>
           <p className="text-xs text-[#536471] text-center">
