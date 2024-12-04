@@ -8,7 +8,7 @@ INSERT INTO posts (
 -- name: DeletePost :exec
 UPDATE posts
 SET 
-    is_deleted = TRUE,
+    is_deleted = TRUE
 WHERE id = ?;
 
 -- name: CheckPostExists :one

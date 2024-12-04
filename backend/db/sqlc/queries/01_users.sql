@@ -40,7 +40,7 @@ SET
     profile_image_url = COALESCE(?, profile_image_url),
     bio = COALESCE(?, bio),
     location = COALESCE(?, location),
-    website = COALESCE(?, website),
+    website = COALESCE(?, website)
 WHERE id = ?;
 
 -- name: UpdateUserSettings :exec
@@ -48,37 +48,37 @@ UPDATE users
 SET 
     display_name = COALESCE(?, display_name),
     birth_date = COALESCE(?, birth_date),
-    language = COALESCE(?, language),
+    language = COALESCE(?, language)
 WHERE id = ?;
 
 -- name: UpdateUserNotifications :exec
 UPDATE users
 SET
-    notification_settings = ?,
+    notification_settings = ?
 WHERE id = ?;
 
 -- name: UpdateUserPrivacy :exec
 UPDATE users
 SET
-    is_private = ?,
+    is_private = ?
 WHERE id = ?;
 
 -- name: UpdateUserBanStatus :exec
 UPDATE users
 SET
-    is_banned = ?,
+    is_banned = ?
 WHERE id = ?;
 
 -- name: UpdateUserName :exec
 UPDATE users
 SET
-    username = ?,
+    username = ?
 WHERE id = ?;
 
 -- name: UpdateUserEmail :exec
 UPDATE users
 SET
-    email = ?,
+    email = ?
 WHERE id = ?;
 
 -- name: GetIDfromFirebaseUID :one

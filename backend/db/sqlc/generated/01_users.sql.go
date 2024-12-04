@@ -8,11 +8,12 @@ package sqlc
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 )
 
 const createUser = `-- name: CreateUser :execresult
-INSERT INTO users (id, firebase_uid, email, password_hash, username, display_name, created_at)
-VALUES (?, ?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+INSERT INTO users (id, firebase_uid, email, password_hash, username, display_name)
+VALUES (?, ?, ?, ?, ?, ?)
 `
 
 type CreateUserParams struct {
@@ -54,6 +55,17 @@ func (q *Queries) GetEmailFromUsername(ctx context.Context, username string) (st
 	var email string
 	err := row.Scan(&email)
 	return email, err
+}
+
+const getIDfromFirebaseUID = `-- name: GetIDfromFirebaseUID :one
+SELECT id FROM users WHERE firebase_uid = ?
+`
+
+func (q *Queries) GetIDfromFirebaseUID(ctx context.Context, firebaseUid string) (string, error) {
+	row := q.db.QueryRowContext(ctx, getIDfromFirebaseUID, firebaseUid)
+	var id string
+	err := row.Scan(&id)
+	return id, err
 }
 
 const getUser = `-- name: GetUser :one
@@ -147,4 +159,144 @@ func (q *Queries) GetUserStats(ctx context.Context, id string) (GetUserStatsRow,
 		&i.TotalLikesReceived,
 	)
 	return i, err
+}
+
+const updateUserBanStatus = `-- name: UpdateUserBanStatus :exec
+UPDATE users
+SET
+    is_banned = ?
+WHERE id = ?
+`
+
+type UpdateUserBanStatusParams struct {
+	IsBanned sql.NullBool `json:"is_banned"`
+	ID       string       `json:"id"`
+}
+
+func (q *Queries) UpdateUserBanStatus(ctx context.Context, arg UpdateUserBanStatusParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserBanStatus, arg.IsBanned, arg.ID)
+	return err
+}
+
+const updateUserEmail = `-- name: UpdateUserEmail :exec
+UPDATE users
+SET
+    email = ?
+WHERE id = ?
+`
+
+type UpdateUserEmailParams struct {
+	Email string `json:"email"`
+	ID    string `json:"id"`
+}
+
+func (q *Queries) UpdateUserEmail(ctx context.Context, arg UpdateUserEmailParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserEmail, arg.Email, arg.ID)
+	return err
+}
+
+const updateUserName = `-- name: UpdateUserName :exec
+UPDATE users
+SET
+    username = ?
+WHERE id = ?
+`
+
+type UpdateUserNameParams struct {
+	Username string `json:"username"`
+	ID       string `json:"id"`
+}
+
+func (q *Queries) UpdateUserName(ctx context.Context, arg UpdateUserNameParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserName, arg.Username, arg.ID)
+	return err
+}
+
+const updateUserNotifications = `-- name: UpdateUserNotifications :exec
+UPDATE users
+SET
+    notification_settings = ?
+WHERE id = ?
+`
+
+type UpdateUserNotificationsParams struct {
+	NotificationSettings json.RawMessage `json:"notification_settings"`
+	ID                   string          `json:"id"`
+}
+
+func (q *Queries) UpdateUserNotifications(ctx context.Context, arg UpdateUserNotificationsParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserNotifications, arg.NotificationSettings, arg.ID)
+	return err
+}
+
+const updateUserPrivacy = `-- name: UpdateUserPrivacy :exec
+UPDATE users
+SET
+    is_private = ?
+WHERE id = ?
+`
+
+type UpdateUserPrivacyParams struct {
+	IsPrivate sql.NullBool `json:"is_private"`
+	ID        string       `json:"id"`
+}
+
+func (q *Queries) UpdateUserPrivacy(ctx context.Context, arg UpdateUserPrivacyParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserPrivacy, arg.IsPrivate, arg.ID)
+	return err
+}
+
+const updateUserProfile = `-- name: UpdateUserProfile :exec
+UPDATE users
+SET 
+    profile_image_url = COALESCE(?, profile_image_url),
+    bio = COALESCE(?, bio),
+    location = COALESCE(?, location),
+    website = COALESCE(?, website)
+WHERE id = ?
+`
+
+type UpdateUserProfileParams struct {
+	ProfileImageUrl sql.NullString `json:"profile_image_url"`
+	Bio             sql.NullString `json:"bio"`
+	Location        sql.NullString `json:"location"`
+	Website         sql.NullString `json:"website"`
+	ID              string         `json:"id"`
+}
+
+func (q *Queries) UpdateUserProfile(ctx context.Context, arg UpdateUserProfileParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserProfile,
+		arg.ProfileImageUrl,
+		arg.Bio,
+		arg.Location,
+		arg.Website,
+		arg.ID,
+	)
+	return err
+}
+
+const updateUserSettings = `-- name: UpdateUserSettings :exec
+UPDATE users
+SET 
+    display_name = COALESCE(?, display_name),
+    birth_date = COALESCE(?, birth_date),
+    language = COALESCE(?, language)
+WHERE id = ?
+`
+
+type UpdateUserSettingsParams struct {
+	DisplayName sql.NullString `json:"display_name"`
+	BirthDate   sql.NullTime   `json:"birth_date"`
+	Language    sql.NullString `json:"language"`
+	ID          string         `json:"id"`
+}
+
+func (q *Queries) UpdateUserSettings(ctx context.Context, arg UpdateUserSettingsParams) error {
+	_, err := q.db.ExecContext(ctx, updateUserSettings,
+		arg.DisplayName,
+		arg.BirthDate,
+		arg.Language,
+		arg.ID,
+	)
+	return err
 }

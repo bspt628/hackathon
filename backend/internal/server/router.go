@@ -6,6 +6,7 @@ import (
 	"hackathon/internal/controller/user"
 	"hackathon/internal/controller/follow"
 	"hackathon/internal/controller/post"
+	"hackathon/internal/controller/like"
 	"github.com/gorilla/mux"
 )
 
@@ -15,7 +16,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// コントローラーの初期化
 	userController := usercontroller.NewUserController(dbConn)
 	postController := postcontroller.NewPostController(dbConn)
-	// likeController := controller.NewLikeController(dbConn)
+	likeController := likecontroller.NewLikeController(dbConn)
 	followController := followcontroller.NewFollowController(dbConn)
 	// notificationController := controller.NewNotificationController(dbConn)
 	// messageController := controller.NewMessageController(dbConn)
@@ -48,7 +49,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.HandleFunc("/users/notification-settings", userController.UpdateUserNotifications).Methods("PUT")
 	apiRouter.HandleFunc("/users/privacy", userController.UpdateUserPrivacy).Methods("PUT")
 	apiRouter.HandleFunc("/users/ban-status", userController.UpdateUserBanStatus).Methods("PUT")
-	apiRouter.HandleFunc("/users/username", userController.UpdateUserName).Methods("PUT")
+	apiRouter.HandleFunc("/users/username", userController.UpdateUserUsername).Methods("PUT")
 	apiRouter.HandleFunc("/users/email", userController.UpdateUserEmail).Methods("PUT")
 
 	// 投稿関連
@@ -56,13 +57,16 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// apiRouter.HandleFunc("/posts/{id}", postController.GetPost).Methods("GET")
 	apiRouter.HandleFunc("/posts/{id}", postController.DeletePost).Methods("DELETE")
 	apiRouter.HandleFunc("/posts/{id}/restore", postController.RestorePost).Methods("PUT")
+	apiRouter.HandleFunc("/posts/timeline/all", postController.GetAllPosts).Methods("GET")
+	apiRouter.HandleFunc("/posts/timeline/follow", postController.GetFollowingUsersPosts).Methods("GET")
 	// router.HandleFunc("/api/posts/recent", postController.GetRecentPosts).Methods("GET")
 	// router.HandleFunc("/api/posts/search", postController.SearchPostsByHashtag).Methods("GET")
 	// router.HandleFunc("/api/timeline", postController.GetUserTimeline).Methods("GET")
 
 	// // いいね機能
-	// router.HandleFunc("/api/posts/{id}/likes", likeController.AddLike).Methods("POST")
-	// router.HandleFunc("/api/posts/{id}/likes/count", likeController.UpdatePostLikesCount).Methods("PUT")
+	apiRouter.HandleFunc("/likes", likeController.CreateLike).Methods("POST")
+	apiRouter.HandleFunc("/likes", likeController.DeleteLike).Methods("DELETE")
+	// router.HandleFunc("/api/likes/{id}/count", likeController.UpdatePostLikesCount).Methods("PUT")
 
 	// // フォロー機能
 	apiRouter.HandleFunc("/follow/{id}", followController.AddFollow).Methods("POST")

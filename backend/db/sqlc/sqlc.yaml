@@ -15,7 +15,6 @@ sql:
       - "./migrations/11_create_password_reset_tokens.sql"
 
     queries:
-      - "./queries/query.sql"
       - "./queries/01_users.sql"
       - "./queries/02_posts.sql"
       - "./queries/03_reposts.sql"
