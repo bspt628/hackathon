@@ -64,7 +64,7 @@ JOIN users u ON p.user_id = u.id
 ORDER BY p.created_at DESC
 LIMIT ?;
 
--- name: GetFollowedPosts :many
+-- name: GetFollowingUsersPosts :many
 SELECT p.*, u.username, u.display_name
 FROM posts p
 JOIN users u ON p.user_id = u.id

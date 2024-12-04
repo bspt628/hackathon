@@ -175,7 +175,7 @@ func (q *Queries) GetAllPosts(ctx context.Context, limit int32) ([]GetAllPostsRo
 	return items, nil
 }
 
-const getFollowedPosts = `-- name: GetFollowedPosts :many
+const getFollowingUsersPosts = `-- name: GetFollowingUsersPosts :many
 SELECT p.id, p.user_id, p.content, p.created_at, p.updated_at, p.is_repost, p.original_post_id, p.reply_to_id, p.root_post_id, p.is_reply, p.media_urls, p.likes_count, p.reposts_count, p.replies_count, p.views_count, p.visibility, p.is_pinned, p.is_deleted, u.username, u.display_name
 FROM posts p
 JOIN users u ON p.user_id = u.id
@@ -188,12 +188,12 @@ ORDER BY p.created_at DESC
 LIMIT ?
 `
 
-type GetFollowedPostsParams struct {
+type GetFollowingUsersPostsParams struct {
 	FollowerID sql.NullString `json:"follower_id"`
 	Limit      int32          `json:"limit"`
 }
 
-type GetFollowedPostsRow struct {
+type GetFollowingUsersPostsRow struct {
 	ID             string          `json:"id"`
 	UserID         sql.NullString  `json:"user_id"`
 	Content        sql.NullString  `json:"content"`
@@ -216,15 +216,15 @@ type GetFollowedPostsRow struct {
 	DisplayName    sql.NullString  `json:"display_name"`
 }
 
-func (q *Queries) GetFollowedPosts(ctx context.Context, arg GetFollowedPostsParams) ([]GetFollowedPostsRow, error) {
-	rows, err := q.db.QueryContext(ctx, getFollowedPosts, arg.FollowerID, arg.Limit)
+func (q *Queries) GetFollowingUsersPosts(ctx context.Context, arg GetFollowingUsersPostsParams) ([]GetFollowingUsersPostsRow, error) {
+	rows, err := q.db.QueryContext(ctx, getFollowingUsersPosts, arg.FollowerID, arg.Limit)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetFollowedPostsRow
+	var items []GetFollowingUsersPostsRow
 	for rows.Next() {
-		var i GetFollowedPostsRow
+		var i GetFollowingUsersPostsRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,

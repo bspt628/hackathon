@@ -9,7 +9,7 @@ import (
 )
 
 // ユーザーのメールアドレスを更新
-func (dao *UserDAO) UpdateUserUsername(ctx context.Context, params sqlc.UpdateUserNameParams) error {
+func (dao *UserDAO) UpdateUserUsername(ctx context.Context, params sqlc.UpdateUserUsernameParams) error {
 	err := dao.queries.UpdateUserUsername(ctx, params)
 
 	if err != nil {
