@@ -10,6 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector"
+    "@firebasegen/default-connector": "file:dataconnect-generated/js/default-connector",
+    "shadcn-ui": "^0.9.3"
   }
 }
