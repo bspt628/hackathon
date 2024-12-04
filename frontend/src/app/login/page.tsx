@@ -1,6 +1,5 @@
 "use client";
 
-import { X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -35,7 +34,6 @@ export default function LoginPage() {
 					onClick={() => router.back()}
 					className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-full"
 				>
-					<X className="h-5 w-5" />
 				</button>
 
 				<div className="mb-8 text-center">
