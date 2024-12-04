@@ -1,5 +1,3 @@
-'use server'
-
 interface SignupData {
   email: string
   password: string
