@@ -20,9 +20,8 @@ func CORS(next http.Handler) http.Handler {
 		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 		}
-		// ヘッダーをコンソールに出力
-		fmt.Println("Request Headers: ", r.Header)
-		log.Println("Request Headers: ", r.Header)
+		// レスポンスヘッダーをコンソールに出力
+		log.Printf("Response Headers: %v", w.Header())
 
 		next.ServeHTTP(w, r)
 	})
