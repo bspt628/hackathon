@@ -48,7 +48,7 @@
         const password = document.getElementById("password").value;
 
         // バックエンドAPIからユーザー名に対応するメールアドレスを取得
-        fetch(`http://localhost:8080/api/users/email/${username}`)
+        fetch(`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/users/email/${username}`)
           .then(response => response.json())
           .then(data => {
             if (data.email) {
