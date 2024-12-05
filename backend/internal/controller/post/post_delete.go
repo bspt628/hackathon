@@ -22,7 +22,7 @@ func (pc *PostController) DeletePost(w http.ResponseWriter, r *http.Request) {
 	// フォローを実行
 	err := pc.postUsecase.DeletePost(context.Background(), postId)
 	if err != nil {
-		http.Error(w, fmt.Sprintf("Failed to remove follow: %v", err), http.StatusInternalServerError)
+		http.Error(w, fmt.Sprintf("Failed to remove post: %v", err), http.StatusInternalServerError)
 		return
 	}
 

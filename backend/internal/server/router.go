@@ -87,8 +87,8 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.HandleFunc("/follow/ff", followController.GetFollowersAndFollowings).Methods("GET")
 
 	// // リポスト機能
-	apiRouter.HandleFunc("/posts/repost", repostController.CreateRepost).Methods("POST")
-	apiRouter.HandleFunc("/posts/repost", repostController.DeleteRepost).Methods("DELETE")
+	apiRouter.HandleFunc("/repost", repostController.CreateRepost).Methods("POST")
+	apiRouter.HandleFunc("/repost", repostController.DeleteRepost).Methods("DELETE")
 
 	// // ブロック機能
 	// router.HandleFunc("/api/users/{id}/block", userController.AddBlock).Methods("POST")
