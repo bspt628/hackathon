@@ -2,13 +2,13 @@ package followcontroller
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"
 )
 
 
-func (fc *FollowController) UpdateAndGetFollowersCount(w http.ResponseWriter, r *http.Request) {
+func (fc *FollowController) GetFollowersCount(w http.ResponseWriter, r *http.Request) {
 	// FirebaseAuthMiddleware で設定された UserID を取得
 	firebaseUID := r.Header.Get("UserID")
 	if firebaseUID == "" {
@@ -23,7 +23,7 @@ func (fc *FollowController) UpdateAndGetFollowersCount(w http.ResponseWriter, r 
 	}
 
 	// Usecase層を呼び出してフォロワー数を更新・取得
-	followersCount, err := fc.followUsecase.UpdateAndGetFollowersCount(r.Context(), ID)
+	followersCount, err := fc.followUsecase.GetFollowersCount(r.Context(), ID)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return

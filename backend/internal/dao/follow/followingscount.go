@@ -5,7 +5,7 @@ import (
 	"fmt"
 )
 
-func (dao *FollowDAO) UpdateAndGetFollowingsCount(ctx context.Context, userID string) (int32, error) {
+func (dao *FollowDAO) GetFollowingsCount(ctx context.Context, userID string) (int32, error) {
 
 	tx, err := dao.db.BeginTx(ctx, nil)
 	if err != nil {
@@ -13,13 +13,6 @@ func (dao *FollowDAO) UpdateAndGetFollowingsCount(ctx context.Context, userID st
 	}
 	// トランザクション用クエリオブジェクトの作成
 	qtx := dao.queries.WithTx(tx)
-
-	// フォロワー数の更新
-	_, err = qtx.UpdateFollowingsCount(ctx, userID)
-	if err != nil {
-		tx.Rollback() // ロールバック
-		return 0, fmt.Errorf("failed to update following count: %w", err)
-	}
 
 	// 最新のフォロワー数を取得
 	nullCount, err := qtx.GetFollowingsCount(ctx, userID)

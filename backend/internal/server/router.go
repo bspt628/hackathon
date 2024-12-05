@@ -3,10 +3,11 @@ package server
 import (
 	"database/sql"
 	"hackathon/internal/auth"
-	"hackathon/internal/controller/user"
-	"hackathon/internal/controller/follow"
-	"hackathon/internal/controller/post"
-	"hackathon/internal/controller/like"
+	followcontroller "hackathon/internal/controller/follow"
+	likecontroller "hackathon/internal/controller/like"
+	postcontroller "hackathon/internal/controller/post"
+	usercontroller "hackathon/internal/controller/user"
+
 	"github.com/gorilla/mux"
 )
 
@@ -76,8 +77,8 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.HandleFunc("/follow/{id}", followController.AddFollow).Methods("POST")
 	apiRouter.HandleFunc("/follow/{id}", followController.RemoveFollow).Methods("DELETE")
 	apiRouter.HandleFunc("/follow/{id}/status", followController.GetFollowStatus).Methods("GET")
-	apiRouter.HandleFunc("/follow/followers/count", followController.UpdateAndGetFollowersCount).Methods("GET")
-	apiRouter.HandleFunc("/follow/followings/count", followController.UpdateAndGetFollowingsCount).Methods("GET")
+	apiRouter.HandleFunc("/follow/followers/count", followController.GetFollowersCount).Methods("GET")
+	apiRouter.HandleFunc("/follow/followings/count", followController.GetFollowingsCount).Methods("GET")
 
 	apiRouter.HandleFunc("/follow/followers/all", followController.GetFollowers).Methods("GET")
 	apiRouter.HandleFunc("/follow/followings/all", followController.GetFollowings).Methods("GET")
