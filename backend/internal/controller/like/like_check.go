@@ -26,8 +26,10 @@ func (lc LikeController)GetLikeStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	response := map[string]bool{"like_status": liked}
+
 	w.Header().Set("Content-Type", "application/json")
-	if err := json.NewEncoder(w).Encode(liked); err != nil {
+	if err := json.NewEncoder(w).Encode(response); err != nil {
 		http.Error(w, fmt.Sprintf("レスポンスのエンコードに失敗しました: %v", err), http.StatusInternalServerError)
 	}
 }
