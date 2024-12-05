@@ -3,6 +3,7 @@ package followdao
 import (
 	"context"
 	"fmt"
+	"log"
 )
 
 func (dao *FollowDAO) GetFollowingsCount(ctx context.Context, userID string) (int32, error) {
@@ -15,6 +16,7 @@ func (dao *FollowDAO) GetFollowingsCount(ctx context.Context, userID string) (in
 	qtx := dao.queries.WithTx(tx)
 
 	// 最新のフォロワー数を取得
+	log.Println("GetFollowingsCount: ", userID)
 	nullCount, err := qtx.GetFollowingsCount(ctx, userID)
 	if err != nil {
 		tx.Rollback() // ロールバック
