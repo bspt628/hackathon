@@ -5,6 +5,7 @@ CREATE TABLE reposts (
     reposted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     is_quote_repost BOOLEAN DEFAULT FALSE,
     additional_comment TEXT,
+    UNIQUE (user_id, original_post_id),
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     FOREIGN KEY (original_post_id) REFERENCES posts(id) ON DELETE CASCADE
 );

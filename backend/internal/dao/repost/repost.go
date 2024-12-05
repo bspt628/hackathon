@@ -43,6 +43,6 @@ func (dao *RepostDAO) CreateRepost(ctx context.Context, arg model.CreateRepostPa
 	}
 
 
-	return dao.queries.CreateRepost(ctx, argdao)
+	return nil
 }
 
