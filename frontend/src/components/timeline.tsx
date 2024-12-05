@@ -18,16 +18,19 @@ interface TimelinePost {
 export function Timeline() {
 	const [posts, setPosts] = useState<TimelinePost[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
 	const { idToken } = useAuth();
 
 	useEffect(() => {
 		async function fetchPosts() {
+			console.log("fetchPosts が呼び出されました"); // ここにログを追加
 			if (!idToken) return;
 
 			try {
 				const response = await fetch(
 					"https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/all",
 					{
+						method: "GET",
 						headers: {
 							Authorization: `Bearer ${idToken}`,
 						},
@@ -40,8 +43,10 @@ export function Timeline() {
 
 				const data = await response.json();
 				setPosts(data);
+				setError(null);
 			} catch (error) {
 				console.error("Error fetching timeline:", error);
+				setError("投稿の取得に失敗しました。");
 			} finally {
 				setIsLoading(false);
 			}
@@ -53,7 +58,14 @@ export function Timeline() {
 	if (isLoading) {
 		return <div className="p-4 text-center">読み込み中...</div>;
 	}
-	console.log(posts);
+
+	if (error) {
+		return <div className="p-4 text-center text-red-500">{error}</div>;
+	}
+
+	if (posts.length === 0) {
+		return <div className="p-4 text-center">投稿がありません。</div>;
+	}
 
 	return (
 		<div>
