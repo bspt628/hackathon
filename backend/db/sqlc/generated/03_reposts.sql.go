@@ -34,14 +34,15 @@ func (q *Queries) CreateRepost(ctx context.Context, arg CreateRepostParams) erro
 	return err
 }
 
-const decrementRepostsCount = `-- name: DecrementRepostsCount :execresult
+const decrementRepostsCount = `-- name: DecrementRepostsCount :exec
 UPDATE posts
 SET reposts_count = reposts_count - 1
 WHERE id = ?
 `
 
-func (q *Queries) DecrementRepostsCount(ctx context.Context, id string) (sql.Result, error) {
-	return q.db.ExecContext(ctx, decrementRepostsCount, id)
+func (q *Queries) DecrementRepostsCount(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, decrementRepostsCount, id)
+	return err
 }
 
 const deleteRepost = `-- name: DeleteRepost :exec
@@ -123,12 +124,13 @@ func (q *Queries) GetRepostStatus(ctx context.Context, arg GetRepostStatusParams
 	return reposting, err
 }
 
-const incrementRepostsCount = `-- name: IncrementRepostsCount :execresult
+const incrementRepostsCount = `-- name: IncrementRepostsCount :exec
 UPDATE posts
 SET reposts_count = reposts_count + 1
 WHERE id = ?
 `
 
-func (q *Queries) IncrementRepostsCount(ctx context.Context, id string) (sql.Result, error) {
-	return q.db.ExecContext(ctx, incrementRepostsCount, id)
+func (q *Queries) IncrementRepostsCount(ctx context.Context, id string) error {
+	_, err := q.db.ExecContext(ctx, incrementRepostsCount, id)
+	return err
 }

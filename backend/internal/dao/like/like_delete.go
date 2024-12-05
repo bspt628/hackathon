@@ -14,10 +14,10 @@ func (dao *LikeDAO) DeleteLike(ctx context.Context, arg sqlc.RemoveLikeParams) e
 	}
 	defer tx.Rollback()
 
-	argcheck := sqlc.GetLikeStatusParams(arg)
+	argdao := sqlc.GetLikeStatusParams(arg)
 
 	// いいねが存在するか確認
-	exists, err := dao.queries.GetLikeStatus(ctx, argcheck)
+	exists, err := dao.queries.GetLikeStatus(ctx, argdao)
 	if err != nil {
 		return errors.New("failed to check like exists")
 	}

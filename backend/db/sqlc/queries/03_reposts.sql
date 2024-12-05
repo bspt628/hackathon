@@ -6,12 +6,12 @@ VALUES (?, ?, ?, ?, ?);
 DELETE FROM reposts
 WHERE user_id = ? AND original_post_id = ?;
 
--- name: IncrementRepostsCount :execresult
+-- name: IncrementRepostsCount :exec
 UPDATE posts
 SET reposts_count = reposts_count + 1
 WHERE id = ?;
 
--- name: DecrementRepostsCount :execresult
+-- name: DecrementRepostsCount :exec
 UPDATE posts
 SET reposts_count = reposts_count - 1
 WHERE id = ?;

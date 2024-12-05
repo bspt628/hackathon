@@ -20,3 +20,13 @@ type CreateRepostParams struct {
 	IsQuoteRepost     bool
 	AdditionalComment string
 }
+
+type DeleteRepostParams struct {
+	UserID         string
+	OriginalPostID string
+}
+
+type CheckRepostParams struct {
+	UserID         string
+	OriginalPostID string
+}
