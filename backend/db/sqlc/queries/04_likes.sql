@@ -26,7 +26,7 @@ SET likes_count = (
 )
 WHERE posts.id = ?;
 
--- name: GetLikesCount :one
+-- name: GetPostLikesCount :one
 SELECT likes_count FROM posts WHERE id = ?;
 
 -- name: GetLikes :many
@@ -49,10 +49,3 @@ WHERE (id = ? AND likes_count > 0);
 SELECT id
 FROM likes
 WHERE user_id = ? AND post_id = ?;
-
--- name: CheckLikeExists :one
-SELECT EXISTS(
-    SELECT 1
-    FROM likes
-    WHERE user_id = ? AND post_id = ?
-) AS liked;

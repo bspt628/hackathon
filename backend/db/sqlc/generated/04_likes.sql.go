@@ -25,26 +25,6 @@ func (q *Queries) AddLike(ctx context.Context, arg AddLikeParams) (sql.Result, e
 	return q.db.ExecContext(ctx, addLike, arg.ID, arg.UserID, arg.PostID)
 }
 
-const checkLikeExists = `-- name: CheckLikeExists :one
-SELECT EXISTS(
-    SELECT 1
-    FROM likes
-    WHERE user_id = ? AND post_id = ?
-) AS liked
-`
-
-type CheckLikeExistsParams struct {
-	UserID sql.NullString `json:"user_id"`
-	PostID sql.NullString `json:"post_id"`
-}
-
-func (q *Queries) CheckLikeExists(ctx context.Context, arg CheckLikeExistsParams) (bool, error) {
-	row := q.db.QueryRowContext(ctx, checkLikeExists, arg.UserID, arg.PostID)
-	var liked bool
-	err := row.Scan(&liked)
-	return liked, err
-}
-
 const decrementLikesCount = `-- name: DecrementLikesCount :exec
 UPDATE posts
 SET likes_count = likes_count - 1
@@ -130,17 +110,6 @@ func (q *Queries) GetLikes(ctx context.Context, postID sql.NullString) ([]GetLik
 	return items, nil
 }
 
-const getLikesCount = `-- name: GetLikesCount :one
-SELECT likes_count FROM posts WHERE id = ?
-`
-
-func (q *Queries) GetLikesCount(ctx context.Context, id string) (sql.NullInt32, error) {
-	row := q.db.QueryRowContext(ctx, getLikesCount, id)
-	var likes_count sql.NullInt32
-	err := row.Scan(&likes_count)
-	return likes_count, err
-}
-
 const getPostLikes = `-- name: GetPostLikes :many
 SELECT u.id, u.username, u.display_name
 FROM likes l
@@ -175,6 +144,17 @@ func (q *Queries) GetPostLikes(ctx context.Context, postID sql.NullString) ([]Ge
 		return nil, err
 	}
 	return items, nil
+}
+
+const getPostLikesCount = `-- name: GetPostLikesCount :one
+SELECT likes_count FROM posts WHERE id = ?
+`
+
+func (q *Queries) GetPostLikesCount(ctx context.Context, id string) (sql.NullInt32, error) {
+	row := q.db.QueryRowContext(ctx, getPostLikesCount, id)
+	var likes_count sql.NullInt32
+	err := row.Scan(&likes_count)
+	return likes_count, err
 }
 
 const incrementLikesCount = `-- name: IncrementLikesCount :exec
