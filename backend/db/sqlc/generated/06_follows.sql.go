@@ -26,6 +26,26 @@ func (q *Queries) AddFollow(ctx context.Context, arg AddFollowParams) error {
 	return err
 }
 
+const decrementFollowersCount = `-- name: DecrementFollowersCount :execresult
+UPDATE users
+SET followers_count = followers_count - 1
+WHERE id = ?
+`
+
+func (q *Queries) DecrementFollowersCount(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, decrementFollowersCount, id)
+}
+
+const decrementFollowingsCount = `-- name: DecrementFollowingsCount :execresult
+UPDATE users
+SET following_count = following_count - 1
+WHERE id = ?
+`
+
+func (q *Queries) DecrementFollowingsCount(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, decrementFollowingsCount, id)
+}
+
 const getFollowStatus = `-- name: GetFollowStatus :one
 SELECT EXISTS(
     SELECT 1
@@ -187,6 +207,26 @@ func (q *Queries) GetFollowingsCount(ctx context.Context, id string) (sql.NullIn
 	var following_count sql.NullInt32
 	err := row.Scan(&following_count)
 	return following_count, err
+}
+
+const incrementFollowersCount = `-- name: IncrementFollowersCount :execresult
+UPDATE users
+SET followers_count = followers_count + 1
+WHERE id = ?
+`
+
+func (q *Queries) IncrementFollowersCount(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, incrementFollowersCount, id)
+}
+
+const incrementFollowingsCount = `-- name: IncrementFollowingsCount :execresult
+UPDATE users
+SET following_count = following_count + 1
+WHERE id = ?
+`
+
+func (q *Queries) IncrementFollowingsCount(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, incrementFollowingsCount, id)
 }
 
 const removeFollow = `-- name: RemoveFollow :execresult
