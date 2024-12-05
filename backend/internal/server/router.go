@@ -7,6 +7,7 @@ import (
 	likecontroller "hackathon/internal/controller/like"
 	postcontroller "hackathon/internal/controller/post"
 	usercontroller "hackathon/internal/controller/user"
+	repostcontroller "hackathon/internal/controller/repost"
 
 	"github.com/gorilla/mux"
 )
@@ -20,6 +21,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	postController := postcontroller.NewPostController(dbConn)
 	likeController := likecontroller.NewLikeController(dbConn)
 	followController := followcontroller.NewFollowController(dbConn)
+	repostController := repostcontroller.NewRepostController(dbConn)
 	// notificationController := controller.NewNotificationController(dbConn)
 	// messageController := controller.NewMessageController(dbConn)
 
@@ -85,7 +87,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.HandleFunc("/follow/ff", followController.GetFollowersAndFollowings).Methods("GET")
 
 	// // リポスト機能
-	// router.HandleFunc("/api/posts/{id}/repost", postController.CreateRepost).Methods("POST")
+	apiRouter.HandleFunc("/posts/{id}/repost", repostController.CreateRepost).Methods("POST")
 
 	// // ブロック機能
 	// router.HandleFunc("/api/users/{id}/block", userController.AddBlock).Methods("POST")

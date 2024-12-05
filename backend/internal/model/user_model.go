@@ -12,3 +12,11 @@ type UserCreate struct {
 	Email    string	`json:"email"`
 	DisplayName string `json:"display_name"`
 }
+
+type CreateRepostParams struct {
+	ID                string
+	UserID            string
+	OriginalPostID    string
+	IsQuoteRepost     bool
+	AdditionalComment string
+}

@@ -11,8 +11,8 @@ import (
 )
 
 const createRepost = `-- name: CreateRepost :exec
-INSERT INTO reposts (id, user_id, original_post_id, is_quote_repost, additional_comment, reposted_at)
-VALUES (?, ?, ?, ?, ?, CURRENT_TIMESTAMP)
+INSERT INTO reposts (id, user_id, original_post_id, is_quote_repost, additional_comment)
+VALUES (?, ?, ?, ?, ?)
 `
 
 type CreateRepostParams struct {
@@ -31,6 +31,31 @@ func (q *Queries) CreateRepost(ctx context.Context, arg CreateRepostParams) erro
 		arg.IsQuoteRepost,
 		arg.AdditionalComment,
 	)
+	return err
+}
+
+const decrementRepostsCount = `-- name: DecrementRepostsCount :execresult
+UPDATE posts
+SET reposts_count = reposts_count - 1
+WHERE id = ?
+`
+
+func (q *Queries) DecrementRepostsCount(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, decrementRepostsCount, id)
+}
+
+const deleteRepost = `-- name: DeleteRepost :exec
+DELETE FROM reposts
+WHERE user_id = ? AND original_post_id = ?
+`
+
+type DeleteRepostParams struct {
+	UserID         sql.NullString `json:"user_id"`
+	OriginalPostID sql.NullString `json:"original_post_id"`
+}
+
+func (q *Queries) DeleteRepost(ctx context.Context, arg DeleteRepostParams) error {
+	_, err := q.db.ExecContext(ctx, deleteRepost, arg.UserID, arg.OriginalPostID)
 	return err
 }
 
@@ -76,4 +101,34 @@ func (q *Queries) GetPostReposts(ctx context.Context, originalPostID sql.NullStr
 		return nil, err
 	}
 	return items, nil
+}
+
+const getRepostStatus = `-- name: GetRepostStatus :one
+SELECT EXISTS(
+    SELECT 1
+    FROM reposts
+    WHERE user_id = ? AND original_post_id = ?
+) AS reposting
+`
+
+type GetRepostStatusParams struct {
+	UserID         sql.NullString `json:"user_id"`
+	OriginalPostID sql.NullString `json:"original_post_id"`
+}
+
+func (q *Queries) GetRepostStatus(ctx context.Context, arg GetRepostStatusParams) (bool, error) {
+	row := q.db.QueryRowContext(ctx, getRepostStatus, arg.UserID, arg.OriginalPostID)
+	var reposting bool
+	err := row.Scan(&reposting)
+	return reposting, err
+}
+
+const incrementRepostsCount = `-- name: IncrementRepostsCount :execresult
+UPDATE posts
+SET reposts_count = reposts_count + 1
+WHERE id = ?
+`
+
+func (q *Queries) IncrementRepostsCount(ctx context.Context, id string) (sql.Result, error) {
+	return q.db.ExecContext(ctx, incrementRepostsCount, id)
 }
