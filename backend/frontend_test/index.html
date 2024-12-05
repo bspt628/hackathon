@@ -49,7 +49,8 @@
 
         // バックエンドAPIからユーザー名に対応するメールアドレスを取得
         fetch(`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/users/email/${username}`)
-          .then(response => response.json())
+          .then(
+            response => response.json())
           .then(data => {
             if (data.email) {
               // Firebase 認証

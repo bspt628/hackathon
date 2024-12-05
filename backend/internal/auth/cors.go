@@ -12,6 +12,7 @@ func CORS(next http.Handler) http.Handler {
 		fmt.Println("CORS middleware in use")
 		// 必要な CORS ヘッダーを設定
 		w.Header().Set("Access-Control-Allow-Origin", "https://hackathon-five-rho.vercel.app") // "*" は任意のオリジンを許可
+		w.Header().Set("Access-Control-Allow-Origin", "http://localhost:3000") // "*" は任意のオリジンを許可
 		w.Header().Set("Access-Control-Allow-Credentials", "true") // クッキーを許可
 		w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS") // 許可する HTTP メソッド
 		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization") // 許可するヘッダー

@@ -11,9 +11,21 @@ import (
 func InitDB() (*sql.DB, error) {
 	// DB接続のための準備
 	mysqlUser := os.Getenv("MYSQL_USER")
+	if mysqlUser == "" {
+		mysqlUser = "hackathon_user"
+	}
 	mysqlPwd := os.Getenv("MYSQL_PWD")
+	if mysqlPwd == "" {
+		mysqlPwd = "rootpassword"
+	}
 	mysqlHost := os.Getenv("MYSQL_HOST")
+	if mysqlHost == "" {
+		mysqlHost = "localhost:3308"
+	}
 	mysqlDatabase := os.Getenv("MYSQL_DATABASE")
+	if mysqlDatabase == ""{
+		mysqlDatabase = "hackathon"
+	}
 	
 	fmt.Println(mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
 	
