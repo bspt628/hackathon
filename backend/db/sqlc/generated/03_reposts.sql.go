@@ -45,7 +45,7 @@ func (q *Queries) DecrementRepostsCount(ctx context.Context, id string) error {
 	return err
 }
 
-const deleteRepost = `-- name: DeleteRepost :exec
+const deleteRepost = `-- name: DeleteRepost :execresult
 DELETE FROM reposts
 WHERE user_id = ? AND original_post_id = ?
 `
@@ -55,9 +55,8 @@ type DeleteRepostParams struct {
 	OriginalPostID sql.NullString `json:"original_post_id"`
 }
 
-func (q *Queries) DeleteRepost(ctx context.Context, arg DeleteRepostParams) error {
-	_, err := q.db.ExecContext(ctx, deleteRepost, arg.UserID, arg.OriginalPostID)
-	return err
+func (q *Queries) DeleteRepost(ctx context.Context, arg DeleteRepostParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, deleteRepost, arg.UserID, arg.OriginalPostID)
 }
 
 const getPostReposts = `-- name: GetPostReposts :many

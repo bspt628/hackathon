@@ -2,7 +2,7 @@
 INSERT INTO reposts (id, user_id, original_post_id, is_quote_repost, additional_comment)
 VALUES (?, ?, ?, ?, ?);
 
--- name: DeleteRepost :exec
+-- name: DeleteRepost :execresult
 DELETE FROM reposts
 WHERE user_id = ? AND original_post_id = ?;
 

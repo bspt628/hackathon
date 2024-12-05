@@ -8,7 +8,7 @@ WHERE l.post_id = ?;
 INSERT INTO likes (id, user_id, post_id)
 VALUES (?, ?, ?);
 
--- name: RemoveLike :exec
+-- name: RemoveLike :execresult
 DELETE FROM likes
 WHERE user_id = ? AND post_id = ?;
 

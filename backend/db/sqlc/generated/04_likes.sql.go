@@ -168,7 +168,7 @@ func (q *Queries) IncrementLikesCount(ctx context.Context, id string) error {
 	return err
 }
 
-const removeLike = `-- name: RemoveLike :exec
+const removeLike = `-- name: RemoveLike :execresult
 DELETE FROM likes
 WHERE user_id = ? AND post_id = ?
 `
@@ -178,9 +178,8 @@ type RemoveLikeParams struct {
 	PostID sql.NullString `json:"post_id"`
 }
 
-func (q *Queries) RemoveLike(ctx context.Context, arg RemoveLikeParams) error {
-	_, err := q.db.ExecContext(ctx, removeLike, arg.UserID, arg.PostID)
-	return err
+func (q *Queries) RemoveLike(ctx context.Context, arg RemoveLikeParams) (sql.Result, error) {
+	return q.db.ExecContext(ctx, removeLike, arg.UserID, arg.PostID)
 }
 
 const updateLikesCount = `-- name: UpdateLikesCount :execresult

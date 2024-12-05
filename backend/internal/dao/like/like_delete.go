@@ -14,20 +14,19 @@ func (dao *LikeDAO) DeleteLike(ctx context.Context, arg sqlc.RemoveLikeParams) e
 	}
 	defer tx.Rollback()
 
-	argdao := sqlc.GetLikeStatusParams(arg)
-
-	// いいねが存在するか確認
-	exists, err := dao.queries.GetLikeStatus(ctx, argdao)
-	if err != nil {
-		return errors.New("failed to check like exists")
-	}
-	if !exists {
-		return errors.New("like does not exist")
-	}
-
 	// いいねを削除
-	if err := dao.queries.RemoveLike(ctx, arg); err != nil {
+	result, err := dao.queries.RemoveLike(ctx, arg)
+	if err != nil {
 		return errors.New("failed to delete like")
+	}
+
+	// 削除された行数を確認
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return errors.New("failed to check affected rows")
+	}
+	if rowsAffected == 0 {
+		return errors.New("no like found")
 	}
 
 	// いいねのデクリメント

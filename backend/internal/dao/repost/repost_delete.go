@@ -18,19 +18,18 @@ func (dao *RepostDAO) DeleteRepost(ctx context.Context, params model.DeleteRepos
 	}
 	defer tx.Rollback()
 
-	// リポストが存在するか確認
-	argcheck := model.ConvertGetRepostStatusParamsToRepost(params)
-	exists, err := dao.queries.GetRepostStatus(ctx, argcheck)
-	if err != nil {
-		return errors.New("failed to check repost exists")
-	}
-	if !exists {
-		return errors.New("repost does not exist")
-	}
-
 	// リポストを削除
-	if err := dao.queries.DeleteRepost(ctx, argdao); err != nil {
+	result, err := dao.queries.DeleteRepost(ctx, argdao)
+	if err != nil {
 		return errors.New("failed to delete repost")
+	}
+	// 削除された行数を確認
+	rowsAffected, err := result.RowsAffected()
+	if err != nil {
+		return errors.New("failed to check affected rows")
+	}
+	if rowsAffected == 0 {
+		return errors.New("no repost found")
 	}
 
 	// リポスト数をデクリメント
