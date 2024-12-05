@@ -3,7 +3,7 @@ package likeusecase
 import (
 	"context"
 	"database/sql"
-	sqlc "hackathon/db/sqlc/generated"
+	"hackathon/db/sqlc/generated"
 )
 
 func (lc *LikeUsecase) GetLikeStatus(ctx context.Context, userID, postID string) (bool, error) {

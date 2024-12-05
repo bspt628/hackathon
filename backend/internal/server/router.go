@@ -30,7 +30,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	router.HandleFunc("/users/signup", userController.CreateUser).Methods("POST")
 	router.HandleFunc("/users/signin", userController.SignIn).Methods("POST")
 
-	apiRouter.HandleFunc("/users/get/{id}", userController.GetUser).Methods("GET")
+	apiRouter.HandleFunc("/users/{id}", userController.GetUser).Methods("GET")
 	apiRouter.HandleFunc("/users/delete", userController.DeleteUser).Methods("DELETE")
 	router.HandleFunc("/api/users/email/{username}", userController.GetUserEmailByUsername).Methods("GET")
 	
@@ -67,7 +67,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// // いいね機能
 	apiRouter.HandleFunc("/likes", likeController.CreateLike).Methods("POST")
 	apiRouter.HandleFunc("/likes", likeController.DeleteLike).Methods("DELETE")
-	apiRouter.HandleFunc("/likes/status", likeController.GetLikeStatus).Methods("GET")
+	apiRouter.HandleFunc("/likes/status/{id}", likeController.GetLikeStatus).Methods("GET")
 	apiRouter.HandleFunc("/likes/count/{id}", likeController.GetPostLikesCount).Methods("GET")
 
 	// router.HandleFunc("/api/likes/{id}/count", likeController.UpdatePostLikesCount).Methods("PUT")

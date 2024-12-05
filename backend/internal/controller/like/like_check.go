@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"github.com/gorilla/mux"
 )
 
 func (lc LikeController)GetLikeStatus(w http.ResponseWriter, r *http.Request) {
@@ -16,24 +17,10 @@ func (lc LikeController)GetLikeStatus(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// HTTPリクエストのjsonをdecodeしてパラメータ「likeID」を取得
-	var request struct {
-		PostID string `json:"post_id"`
-	}
+	vars := mux.Vars(r)
+	postID := vars["id"]
 
-	// リクエストのJSONデータを構造体にバインド
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, fmt.Sprintf("リクエストの解析に失敗しました: %v", err), http.StatusBadRequest)
-		return
-	}
-
-	// 必須パラメータをチェック
-	if request.PostID == "" {
-		http.Error(w, "PostID is required", http.StatusBadRequest)
-		return 
-	}
-
-	liked, err := lc.likeUsecase.GetLikeStatus(context.Background(), userID, request.PostID)
+	liked, err := lc.likeUsecase.GetLikeStatus(context.Background(), userID, postID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("いいねの存在確認に失敗しました: %v", err), http.StatusInternalServerError)
 		return
