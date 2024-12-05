@@ -12,7 +12,7 @@ func InitDB() (*sql.DB, error) {
 	// DB接続のための準備
 	mysqlUser := os.Getenv("MYSQL_USER")
 	if mysqlUser == "" {
-		mysqlUser = "hackathon_user"
+		mysqlUser = "root"
 	}
 	mysqlPwd := os.Getenv("MYSQL_PWD")
 	if mysqlPwd == "" {
@@ -20,7 +20,7 @@ func InitDB() (*sql.DB, error) {
 	}
 	mysqlHost := os.Getenv("MYSQL_HOST")
 	if mysqlHost == "" {
-		mysqlHost = "localhost:3308"
+		mysqlHost = "tcp(localhost:3308)"
 	}
 	mysqlDatabase := os.Getenv("MYSQL_DATABASE")
 	if mysqlDatabase == ""{
@@ -28,9 +28,10 @@ func InitDB() (*sql.DB, error) {
 	}
 	
 	fmt.Println(mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
-	
+
 
 	connStr := fmt.Sprintf("%s:%s@%s/%s?parseTime=true&loc=Asia%%2FTokyo", mysqlUser, mysqlPwd, mysqlHost, mysqlDatabase)
+	fmt.Println(connStr)
 	db, err := sql.Open("mysql", connStr)
 	if err != nil {
 		return nil, fmt.Errorf("データベースの初期化に失敗: %v", err)
