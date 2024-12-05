@@ -23,17 +23,17 @@ func (fc *FollowController) GetFollowStatus(w http.ResponseWriter, r *http.Reque
 	}
 	// URLパスからパラメータ「username」を取得
 	vars := mux.Vars(r)
-	followingid := vars["id"]
+	followingID := vars["id"]
 
 	// 必須パラメータをチェック
-	if followingid == "" {
+	if followingID == "" {
 		http.Error(w, "followingid is required", http.StatusBadRequest)
 		return 
 	}
 
 
 	// フォローを実行
-	result, err := fc.followUsecase.GetFollowStatus(context.Background(), followingid, followerID)
+	result, err := fc.followUsecase.GetFollowStatus(context.Background(), followingID, followerID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to get follow status: %v", err), http.StatusInternalServerError)
 		return
