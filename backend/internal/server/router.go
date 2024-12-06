@@ -8,13 +8,14 @@ import (
 	postcontroller "hackathon/internal/controller/post"
 	usercontroller "hackathon/internal/controller/user"
 	repostcontroller "hackathon/internal/controller/repost"
+	notificationcontroller "hackathon/internal/controller/notification"
 
 	"github.com/gorilla/mux"
 )
 
 func NewRouter(dbConn *sql.DB) *mux.Router {
 	router := mux.NewRouter()
-	router.Use(auth.CORS)
+	// router.Use(auth.CORS)
 
 	// コントローラーの初期化
 	userController := usercontroller.NewUserController(dbConn)
@@ -22,7 +23,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	likeController := likecontroller.NewLikeController(dbConn)
 	followController := followcontroller.NewFollowController(dbConn)
 	repostController := repostcontroller.NewRepostController(dbConn)
-	// notificationController := controller.NewNotificationController(dbConn)
+	notificationController := notificationcontroller.NewNotificationController(dbConn)
 	// messageController := controller.NewMessageController(dbConn)
 
 	// 認証ミドルウェアを適用するルートグループ
@@ -70,8 +71,8 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// // いいね機能
 	apiRouter.HandleFunc("/likes", likeController.CreateLike).Methods("POST")
 	apiRouter.HandleFunc("/likes", likeController.DeleteLike).Methods("DELETE")
-	apiRouter.HandleFunc("/likes/status/{id}", likeController.GetLikeStatus).Methods("GET")
-	apiRouter.HandleFunc("/likes/count/{id}", likeController.GetPostLikesCount).Methods("GET")
+	apiRouter.HandleFunc("/likes/{id}/status", likeController.GetLikeStatus).Methods("GET")
+	apiRouter.HandleFunc("/likes/{id}/count", likeController.GetPostLikesCount).Methods("GET")
 
 	// router.HandleFunc("/api/likes/{id}/count", likeController.UpdatePostLikesCount).Methods("PUT")
 
@@ -89,6 +90,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// // リポスト機能
 	apiRouter.HandleFunc("/repost", repostController.CreateRepost).Methods("POST")
 	apiRouter.HandleFunc("/repost", repostController.DeleteRepost).Methods("DELETE")
+	apiRouter.HandleFunc("/repost/{id}/status", repostController.GetRepostStatus).Methods("GET")
 
 	// // ブロック機能
 	// router.HandleFunc("/api/users/{id}/block", userController.AddBlock).Methods("POST")
@@ -98,8 +100,8 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// router.HandleFunc("/api/messages/{userId}", messageController.GetDMConversation).Methods("GET")
 
 	// // 通知機能
-	// router.HandleFunc("/api/notifications", notificationController.CreateNotification).Methods("POST")
-	// router.HandleFunc("/api/notifications/unread", notificationController.GetUnreadNotifications).Methods("GET")
+	apiRouter.HandleFunc("/notifications", notificationController.CreateNotifications).Methods("POST")
+	apiRouter.HandleFunc("/api/notifications/count", notificationController.CountUnreadNotifications).Methods("GET")
 
 	return router
 }

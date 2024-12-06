@@ -26,7 +26,14 @@ type DeleteRepostParams struct {
 	OriginalPostID string
 }
 
-type CheckRepostParams struct {
+type GetRepostStatusParams struct {
 	UserID         string
 	OriginalPostID string
+}
+
+type CreateNotificationParams struct {
+	ID      string         
+	UserID  string 
+	Type    string 
+	Message string 
 }

@@ -22,9 +22,18 @@ func ConvertDeleteRepostParamsToRepost(arg DeleteRepostParams) sqlc.DeleteRepost
 	}
 }
 
-func ConvertGetRepostStatusParamsToRepost(arg DeleteRepostParams) sqlc.GetRepostStatusParams {
+func ConvertGetRepostStatusParamsToRepost(arg GetRepostStatusParams) sqlc.GetRepostStatusParams {
 	return sqlc.GetRepostStatusParams{
 		UserID: sql.NullString{String: arg.UserID, Valid: true},
 		OriginalPostID: sql.NullString{String: arg.OriginalPostID, Valid: true},
+	}
+}
+
+func ConvertCreateNotificationsToNotification(arg CreateNotificationParams) sqlc.CreateNotificationParams {
+	return sqlc.CreateNotificationParams{
+		ID: arg.ID,
+		UserID: sql.NullString{String: arg.UserID, Valid: true},
+		Type: sql.NullString{String: arg.Type, Valid: true},
+		Message: sql.NullString{String: arg.Message, Valid: true},
 	}
 }

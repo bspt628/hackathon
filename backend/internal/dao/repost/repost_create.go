@@ -34,7 +34,6 @@ func (dao *RepostDAO) CreateRepost(ctx context.Context, arg model.CreateRepostPa
 		return errors.New("failed to commit transaction")
 	}
 
-
 	return nil
 }
 
