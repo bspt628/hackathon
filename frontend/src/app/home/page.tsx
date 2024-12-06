@@ -83,7 +83,9 @@ export default function HomePage() {
 						<YouTubeSearch onVideoSelect={setCurrentVideoId} />
 					</div>
 					{currentVideoId && <AudioPlayer videoId={currentVideoId} />}
-					<AuthProvider> {showTimeline && <Timeline />} </AuthProvider>
+					<AuthProvider>
+						{showTimeline && <Timeline showTimeline={showTimeline} />}
+					</AuthProvider>
 					
 				</main>
 
