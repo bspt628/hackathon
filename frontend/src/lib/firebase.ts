@@ -1,5 +1,5 @@
 import { initializeApp, getApps } from 'firebase/app';
-import { getAuth } from 'firebase/auth';
+import { getAuth, signOut as firebaseSignOut } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
@@ -13,7 +13,6 @@ const firebaseConfig = {
 
 // Initialize Firebase only if it hasn't been initialized already
 const app = !getApps().length ? initializeApp(firebaseConfig) : getApps()[0];
-console.log(app)
 
 // Log any initialization errors
 if (!app) {
@@ -22,3 +21,5 @@ if (!app) {
 
 export const auth = getAuth(app);
 
+// Export signOut method for use in other parts of the app
+export const signOut = firebaseSignOut;

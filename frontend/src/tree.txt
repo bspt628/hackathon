@@ -1,0 +1,43 @@
+.
+├── app
+│   ├── actions
+│   │   ├── login.ts
+│   │   └── signup.ts
+│   ├── api
+│   │   └── youtube-search
+│   │       └── route.ts
+│   ├── favicon.ico
+│   ├── fonts
+│   │   ├── GeistMonoVF.woff
+│   │   └── GeistVF.woff
+│   ├── globals.css
+│   ├── home
+│   │   └── page.tsx
+│   ├── layout.tsx
+│   ├── login
+│   │   └── page.tsx
+│   ├── page.tsx
+│   └── signup
+│       ├── layout.tsx
+│       └── page.tsx
+├── components
+│   ├── audio-player.tsx
+│   ├── post.tsx
+│   ├── protected-route.tsx
+│   ├── timeline.tsx
+│   ├── ui
+│   │   ├── button.tsx
+│   │   ├── card.tsx
+│   │   ├── input.tsx
+│   │   └── label.tsx
+│   └── youtube-search.tsx
+├── contexts
+│   └── auth-context.tsx
+├── lib
+│   ├── firebase.ts
+│   └── utils.ts
+├── tree.txt
+└── types
+    └── youtube.d.ts
+
+14 directories, 27 files

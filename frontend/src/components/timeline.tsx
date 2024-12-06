@@ -27,9 +27,9 @@ export function Timeline({ showTimeline }: TimelineProps) {
 
 	const idTokenRef = useRef(idToken);
 
-	useEffect(() => {
-		idTokenRef.current = idToken;
-	}, [idToken]);
+	// useEffect(() => {
+	// 	idTokenRef.current = idToken;
+	// }, [idToken]);
 
 	async function fetchPosts() {
 		console.log("fetchPosts ... ");

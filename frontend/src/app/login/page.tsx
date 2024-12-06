@@ -6,9 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { loginUser } from "../actions/login";
+import { useAuth } from "@/contexts/auth-context"; // useAuthをインポート
 
 export default function LoginPage() {
 	const router = useRouter();
+	const { setCurrentUser, setIdToken } = useAuth(); // setCurrentUserとsetIdTokenを取得
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -16,14 +18,25 @@ export default function LoginPage() {
 		event.preventDefault();
 		setIsLoading(true);
 		setError(null);
+		console.log("User is logging in...");
 
-		const result = await loginUser(new FormData(event.currentTarget));
+		const formData = new FormData(event.currentTarget);
+		const result = await loginUser(formData); // サーバーサイドのloginUserを呼び出す
 
+		// ログイン処理の結果に基づいてユーザー情報を更新
 		if (result.success) {
-			router.push("/home"); // Redirect to home page after successful login
+			console.log("User logged in successfully:");
+
+			// AuthContextのuserとidTokenを更新
+			setCurrentUser(JSON.parse(result.user)); // userを更新
+			setIdToken(result.id_token); // IDトークンを更新
+			console.log("ID token:", result.id_token);
+
+			router.push("/home"); // ログイン成功時にホームページにリダイレクト
 		} else {
 			setError(result.error ?? "ログインに失敗しました。");
 		}
+
 		setIsLoading(false);
 	}
 
@@ -33,8 +46,7 @@ export default function LoginPage() {
 				<button
 					onClick={() => router.back()}
 					className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-full"
-				>
-				</button>
+				></button>
 
 				<div className="mb-8 text-center">
 					<h1 className="text-2xl font-bold mb-2">ログイン</h1>
