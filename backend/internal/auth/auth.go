@@ -3,7 +3,6 @@ package auth
 import (
 	"context"
 	"fmt"
-	"io"
 	"log"
 	// "os"
 
@@ -25,7 +24,7 @@ var BucketName = "term6-hiroto-uchida.firebasestorage.app" // バケット名を
 func InitFirebase() error {
 	log.Println("Firebase initializing")
 
-	payload, err := AccessSecret(nil, "projects/241499864821/secrets/FirebaseAdminSDK")
+	payload, _ := AccessSecret("projects/241499864821/secrets/FirebaseAdminSDK")
 
 	// Firebaseの設定
 	config := &firebase.Config{
@@ -110,7 +109,7 @@ func VerifyIDToken(idToken string) (*auth.Token, error) {
 }
 
 // AccessSecret retrieves the latest version of a secret's payload from Secret Manager.
-func AccessSecret(w io.Writer, name string) (string, error) {
+func AccessSecret(name string) (string, error) {
 	// Create the client.
 	ctx := context.Background()
 	client, err := secretmanager.NewClient(ctx)
