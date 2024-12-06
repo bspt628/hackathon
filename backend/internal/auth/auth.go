@@ -1,4 +1,3 @@
-// firebaseの認証処理をまとめる
 package auth
 
 import (
@@ -6,28 +5,58 @@ import (
 	"fmt"
 	"firebase.google.com/go"
 	"firebase.google.com/go/auth"
+	"cloud.google.com/go/storage"
 	"google.golang.org/api/option"
+	"log"
 )
 
-var firebaseAuthClient *auth.Client
+var FirebaseAuthClient *auth.Client
+var StorageClient *storage.Client
+var StorageBucket *storage.BucketHandle
+var BucketName = "term6-hiroto-uchida.firebasestorage.app" // バケット名を変数で保持
 
 // Firebase Admin SDKの初期化
 func InitFirebase() error {
-	opt := option.WithCredentialsFile("FirebaseAdminSDK.json")
-	app, err := firebase.NewApp(context.Background(), nil, opt)
+	log.Println("Firebase initializing")
+
+	// Firebaseの設定
+	config := &firebase.Config{
+		StorageBucket: "gs://" + BucketName, // バケット名
+	}
+	opt := option.WithCredentialsFile("FirebaseAdminSDK.json") // サービスアカウントのJSONキー
+
+	// Firebaseアプリを初期化
+	app, err := firebase.NewApp(context.Background(), config, opt)
 	if err != nil {
 		return fmt.Errorf("error initializing app: %v", err)
 	}
-	fmt.Println("Firebase initialized")
 
-	client, err := app.Auth(context.Background())
+	// Firebase認証クライアントを取得
+	authClient, err := app.Auth(context.Background())
 	if err != nil {
 		return fmt.Errorf("error getting Auth client: %v", err)
 	}
 
-	firebaseAuthClient = client
+	// Google Cloud Storageクライアントを初期化
+	StorageClient, err = storage.NewClient(context.Background(), opt)
+	if err != nil {
+		return fmt.Errorf("error initializing storage client: %v", err)
+	}
+
+	// デフォルトのバケットを取得
+	StorageBucket = StorageClient.Bucket(BucketName)
+
+	// 認証クライアントをグローバル変数として保持
+	FirebaseAuthClient = authClient
+	log.Println("Firebase initialized")
 	return nil
 }
+
+// StorageBucketのバケット名を返すメソッドを追加
+func GetBucketName() string {
+	return BucketName
+}
+
 
 // Firebaseにユーザーを作成
 func CreateFirebaseUser(email, password, username, displayName string) (string, error) {
@@ -37,7 +66,7 @@ func CreateFirebaseUser(email, password, username, displayName string) (string, 
 		DisplayName(displayName).
 		Disabled(false)
 
-	userRecord, err := firebaseAuthClient.CreateUser(context.Background(), params)
+	userRecord, err := FirebaseAuthClient.CreateUser(context.Background(), params)
 	if err != nil {
 		return "", fmt.Errorf("error creating user: %v", err)
 	}
@@ -47,7 +76,7 @@ func CreateFirebaseUser(email, password, username, displayName string) (string, 
 }
 
 func DeleteFirebaseUser(uid string) error {
-	err := firebaseAuthClient.DeleteUser(context.Background(), uid)
+	err := FirebaseAuthClient.DeleteUser(context.Background(), uid)
 	if err != nil {
 		return fmt.Errorf("failed to delete Firebase user: %v", err)
 	}
@@ -56,7 +85,7 @@ func DeleteFirebaseUser(uid string) error {
 
 // Firebase認証を使ってユーザー情報を取得
 func GetUserInfo(uid string) (*auth.UserRecord, error) {
-	userRecord, err := firebaseAuthClient.GetUser(context.Background(), uid)
+	userRecord, err := FirebaseAuthClient.GetUser(context.Background(), uid)
 	if err != nil {
 		return nil, fmt.Errorf("error getting user: %v", err)
 	}
@@ -65,7 +94,7 @@ func GetUserInfo(uid string) (*auth.UserRecord, error) {
 
 // FirebaseのIDトークンを検証し、UIDを取得する
 func VerifyIDToken(idToken string) (*auth.Token, error) {
-	token, err := firebaseAuthClient.VerifyIDToken(context.Background(), idToken)
+	token, err := FirebaseAuthClient.VerifyIDToken(context.Background(), idToken)
 	if err != nil {
 		return nil, fmt.Errorf("error verifying ID token: %v", err)
 	}
