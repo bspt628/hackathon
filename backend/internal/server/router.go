@@ -37,6 +37,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.HandleFunc("/users/{id}", userController.GetUser).Methods("GET")
 	apiRouter.HandleFunc("/users/delete", userController.DeleteUser).Methods("DELETE")
 	router.HandleFunc("/api/users/email/{username}", userController.GetUserEmailByUsername).Methods("GET")
+	apiRouter.HandleFunc("/users/firebase/", userController.GetUserIDByFirebaseUID).Methods("GET")
 	
 	apiRouter.HandleFunc("/users/password-reset/request", userController.PasswordResetRequest).Methods("POST") 
 	apiRouter.HandleFunc("/users/password-reset/reset", userController.ResetPassword).Methods("POST")  
@@ -56,6 +57,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	apiRouter.HandleFunc("/users/ban-status", userController.UpdateUserBanStatus).Methods("PUT")
 	apiRouter.HandleFunc("/users/username", userController.UpdateUserUsername).Methods("PUT")
 	apiRouter.HandleFunc("/users/email", userController.UpdateUserEmail).Methods("PUT")
+	
 
 	// 投稿関連
 	apiRouter.HandleFunc("/posts", postController.CreatePost).Methods("POST")
