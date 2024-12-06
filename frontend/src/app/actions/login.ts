@@ -12,7 +12,9 @@ export async function loginUser(formData: FormData) {
     const emailResponse = await fetch(
       `https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/users/email/${username}`
     )
+    console.log('fetch request completed')
     
+
     if (!emailResponse.ok) {
       throw new Error('Failed to fetch email')
     }
@@ -22,6 +24,7 @@ export async function loginUser(formData: FormData) {
     if (!emailData.email) {
       throw new Error('Email not found for username')
     }
+    console.log('Email found:', emailData.email)
 
     // Then sign in with Firebase
     const userCredential = await signInWithEmailAndPassword(auth, emailData.email, password)
