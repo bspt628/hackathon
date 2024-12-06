@@ -53,7 +53,10 @@ export default function HomePage() {
 									variant="outline"
 									size="sm"
 									className="text-[#1d9bf0] border-[#1d9bf0] hover:bg-[#1d9bf0]/10"
-									onClick={() => setShowTimeline(!showTimeline)}
+									onClick={() => {
+										setShowTimeline(!showTimeline)
+										console.log("showTimeline: ", showTimeline)
+									}}
 								>
 									<List className="w-5 h-5 mr-2" />
 									{showTimeline ? "タイムラインを隠す" : "タイムラインを表示"}

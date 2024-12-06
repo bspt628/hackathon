@@ -4,7 +4,9 @@ import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Post } from "./post";
 
-
+interface TimelineProps {
+	showTimeline: boolean;
+}
 
 interface TimelinePost {
 	id: string;
@@ -17,7 +19,7 @@ interface TimelinePost {
 	likes_count: number;
 }
 
-export function Timeline() {
+export function Timeline({ showTimeline }: TimelineProps) {
 	const { idToken } = useAuth();
 	const [posts, setPosts] = useState<TimelinePost[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
@@ -59,9 +61,12 @@ export function Timeline() {
 		}
 	}
 
+	// showTimeline の変化を監視して fetchPosts を実行
 	useEffect(() => {
-		fetchPosts();
-	}, []);
+		if (showTimeline) {
+			fetchPosts();
+		}
+	}, [showTimeline]);
 
 	if (isLoading) {
 		return <div className="p-4 text-center">読み込み中...</div>;
