@@ -12,3 +12,7 @@ func (uc *PostUsecase) GetAllPosts(ctx context.Context, limit int32) ([]model.Po
 func (uc *PostUsecase) GetFollowingUsersPosts(ctx context.Context, userID string, limit int32) ([]model.PostAll, error) {
     return uc.dao.GetFollowingUsersPosts(ctx, userID, limit)
 }
+
+func (uc *PostUsecase) GetPostByID(ctx context.Context, postID string) (model.PostAll, error) {
+	return uc.dao.GetPostByID(ctx, postID)
+}

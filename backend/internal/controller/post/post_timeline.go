@@ -6,6 +6,7 @@ import (
 	"context"
 	"fmt"
 	"encoding/json"
+	"github.com/gorilla/mux"
 )
 
 func (pc *PostController) GetAllPosts(w http.ResponseWriter, r *http.Request) {
@@ -56,6 +57,26 @@ func (pc *PostController) GetFollowingUsersPosts(w http.ResponseWriter, r *http.
 
     w.Header().Set("Content-Type", "application/json")
 	if err := json.NewEncoder(w).Encode(posts); err != nil {
+		http.Error(w, fmt.Sprintf("レスポンスのエンコードに失敗しました: %v", err), http.StatusInternalServerError)
+	}
+}
+
+func (pc *PostController) GetPostByID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	postID := vars["id"]
+	if postID == "" {
+		http.Error(w, "IDパラメータが指定されていません", http.StatusBadRequest)
+		return
+	}
+
+	post, err := pc.postUsecase.GetPostByID(context.Background(), postID)
+	if err != nil {
+		http.Error(w, fmt.Sprintf("投稿の取得に失敗しました: %v", err), http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Set("Content-Type", "application/json")
+	if err := json.NewEncoder(w).Encode(post); err != nil {
 		http.Error(w, fmt.Sprintf("レスポンスのエンコードに失敗しました: %v", err), http.StatusInternalServerError)
 	}
 }
