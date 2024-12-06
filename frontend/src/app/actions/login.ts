@@ -27,9 +27,7 @@ export async function loginUser(formData: FormData) {
     const userCredential = await signInWithEmailAndPassword(auth, emailData.email, password)
     const idToken = await userCredential.user.getIdToken()
     // ログイン成功後に、idTokenを返す
-      .then((idToken) => {
-        console.log('User signed in:', userCredential.user, idToken)
-      })
+    console.log('User signed in:', userCredential.user, idToken)
 
     return { success: true, idToken }
   } catch (error) {

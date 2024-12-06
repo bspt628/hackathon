@@ -30,6 +30,7 @@ export function Timeline() {
 	}, [idToken]);
 
 	async function fetchPosts() {
+		console.log("fetchPosts ... ");
 		setIsLoading(true);
 		try {
 			const response = await fetch(
@@ -41,6 +42,7 @@ export function Timeline() {
 					},
 				}
 			);
+			console.log("response", response);
 
 			if (!response.ok) {
 				throw new Error("Failed to fetch posts");
