@@ -34,10 +34,10 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	router.HandleFunc("/users/signup", userController.CreateUser).Methods("POST")
 	router.HandleFunc("/users/signin", userController.SignIn).Methods("POST")
 
-	apiRouter.HandleFunc("/users/{id}", userController.GetUser).Methods("GET")
+	apiRouter.HandleFunc("/users/user/{id}", userController.GetUser).Methods("GET")
 	apiRouter.HandleFunc("/users/delete", userController.DeleteUser).Methods("DELETE")
 	router.HandleFunc("/api/users/email/{username}", userController.GetUserEmailByUsername).Methods("GET")
-	apiRouter.HandleFunc("/users/firebase", userController.GetUserIDByFirebaseUID).Methods("GET")
+	apiRouter.HandleFunc("/users/firebase/{id}", userController.GetUserIDByFirebaseUID).Methods("GET")
 	
 	apiRouter.HandleFunc("/users/password-reset/request", userController.PasswordResetRequest).Methods("POST") 
 	apiRouter.HandleFunc("/users/password-reset/reset", userController.ResetPassword).Methods("POST")  

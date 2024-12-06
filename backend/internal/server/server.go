@@ -22,7 +22,7 @@ func Start() error {
 
 	// CORSミドルウェアを設定
 	c := cors.New(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:5500", "http://127.0.0.1:5500", "https://hackathon-five-rho.vercel.app"}, // 許可するオリジン
+		AllowedOrigins:   []string{"http://localhost:3000", "http://127.0.0.1:3000", "http://localhost:3001", "http://127.0.0.1:3001", "http://localhost:5500", "http://127.0.0.1:5500", "https://hackathon-five-rho.vercel.app"}, // 許可するオリジン
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH", "HEAD"},
 		AllowedHeaders:   []string{"Origin", "Content-Type", "Authorization"},
 		AllowCredentials: true,
