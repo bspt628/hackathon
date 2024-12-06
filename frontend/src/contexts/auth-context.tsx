@@ -29,6 +29,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
       setUser(user)
       if (user) {
+        console.log('Getting ID token for user:', user)
         const token = await user.getIdToken()
         setIdToken(token)
       } else {
@@ -41,6 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const getIdToken = async () => {
     if (user) {
+      console.log('Getting ID token for user:', user)
       const token = await user.getIdToken(true)
       setIdToken(token)
       return token
