@@ -10,6 +10,19 @@ import (
 	"database/sql"
 )
 
+const countAllNotifications = `-- name: CountAllNotifications :one
+SELECT COUNT(*)
+FROM notifications
+WHERE user_id = ?
+`
+
+func (q *Queries) CountAllNotifications(ctx context.Context, userID sql.NullString) (int64, error) {
+	row := q.db.QueryRowContext(ctx, countAllNotifications, userID)
+	var count int64
+	err := row.Scan(&count)
+	return count, err
+}
+
 const countUnreadNotifications = `-- name: CountUnreadNotifications :one
 SELECT COUNT(*)
 FROM notifications

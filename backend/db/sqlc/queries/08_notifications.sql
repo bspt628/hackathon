@@ -30,6 +30,11 @@ SELECT COUNT(*)
 FROM notifications
 WHERE user_id = ? AND is_read = FALSE;
 
+-- name: CountAllNotifications :one
+SELECT COUNT(*)
+FROM notifications
+WHERE user_id = ?;
+
 -- name: GetNotificationByID :one
 SELECT *
 FROM notifications
