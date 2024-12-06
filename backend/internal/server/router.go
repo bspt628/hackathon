@@ -102,6 +102,7 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	// // 通知機能
 	apiRouter.HandleFunc("/notifications", notificationController.CreateNotifications).Methods("POST")
 	apiRouter.HandleFunc("/notifications/count/unread", notificationController.CountUnreadNotifications).Methods("GET")
+	apiRouter.HandleFunc("/notifications/count/all", notificationController.CountAllNotifications).Methods("GET")
 
 	return router
 }
