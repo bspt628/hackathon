@@ -3,11 +3,17 @@ package auth
 import (
 	"context"
 	"fmt"
+	"io"
+	"log"
+	// "os"
+
+	"cloud.google.com/go/storage"
 	"firebase.google.com/go"
 	"firebase.google.com/go/auth"
-	"cloud.google.com/go/storage"
 	"google.golang.org/api/option"
-	"log"
+
+	secretmanager "cloud.google.com/go/secretmanager/apiv1"
+	"cloud.google.com/go/secretmanager/apiv1/secretmanagerpb"
 )
 
 var FirebaseAuthClient *auth.Client
@@ -19,11 +25,13 @@ var BucketName = "term6-hiroto-uchida.firebasestorage.app" // バケット名を
 func InitFirebase() error {
 	log.Println("Firebase initializing")
 
+	payload, err := AccessSecret(nil, "projects/241499864821/secrets/FirebaseAdminSDK")
+
 	// Firebaseの設定
 	config := &firebase.Config{
 		StorageBucket: "gs://" + BucketName, // バケット名
 	}
-	opt := option.WithCredentialsFile("FirebaseAdminSDK.json") // サービスアカウントのJSONキー
+	opt := option.WithCredentialsJSON([]byte(payload))
 
 	// Firebaseアプリを初期化
 	app, err := firebase.NewApp(context.Background(), config, opt)
@@ -99,4 +107,32 @@ func VerifyIDToken(idToken string) (*auth.Token, error) {
 		return nil, fmt.Errorf("error verifying ID token: %v", err)
 	}
 	return token, nil
+}
+
+// AccessSecret retrieves the latest version of a secret's payload from Secret Manager.
+func AccessSecret(w io.Writer, name string) (string, error) {
+	// Create the client.
+	ctx := context.Background()
+	client, err := secretmanager.NewClient(ctx)
+	if err != nil {
+		return "", fmt.Errorf("failed to create secretmanager client: %w", err)
+	}
+	defer client.Close()
+
+	// Build the request for accessing the latest version of the secret.
+	req := &secretmanagerpb.AccessSecretVersionRequest{
+		Name: fmt.Sprintf("%s/versions/latest", name),
+	}
+
+	// Call the API to access the secret version.
+	result, err := client.AccessSecretVersion(ctx, req)
+	if err != nil {
+		return "", fmt.Errorf("failed to access secret version: %w", err)
+	}
+
+	// Retrieve the secret payload.
+	// The payload data is in binary format and needs to be converted to a string if it's text-based.
+	payload := string(result.Payload.Data)
+	// fmt.Fprintf(w, "Retrieved secret payload: %s\n", payload)
+	return payload, nil
 }
