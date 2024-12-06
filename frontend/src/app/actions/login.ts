@@ -3,11 +3,6 @@
 import { auth } from '@/lib/firebase'
 import { signInWithEmailAndPassword } from 'firebase/auth'
 
-interface LoginData {
-  username: string
-  password: string
-}
-
 export async function loginUser(formData: FormData) {
   const username = formData.get('username') as string
   const password = formData.get('password') as string

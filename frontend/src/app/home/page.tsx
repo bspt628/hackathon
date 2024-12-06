@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Home, Search, Bell, Mail, User, List, Key } from "lucide-react";
+import { Home, Search, Bell, Mail, User, List} from "lucide-react";
 import { Timeline } from "@/components/timeline";
 import { YouTubeSearch } from "@/components/youtube-search";
 import { AudioPlayer } from "@/components/audio-player";
@@ -13,11 +13,8 @@ import { useAuth, AuthProvider } from "@/contexts/auth-context";
 export default function HomePage() {
 	const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
 	const [showTimeline, setShowTimeline] = useState(false);
-	const { idToken, setIdToken} = useAuth();
+	const { idToken } = useAuth();
 
-	const handleGetIdToken = async () => {
-		await getIdToken();
-	};
 
 	return (
 		<div className="min-h-screen bg-black text-white">
@@ -60,15 +57,6 @@ export default function HomePage() {
 								>
 									<List className="w-5 h-5 mr-2" />
 									{showTimeline ? "タイムラインを隠す" : "タイムラインを表示"}
-								</Button>
-								<Button
-									variant="outline"
-									size="sm"
-									className="text-[#1d9bf0] border-[#1d9bf0] hover:bg-[#1d9bf0]/10"
-									onClick={handleGetIdToken}
-								>
-									<Key className="w-5 h-5 mr-2" />
-									IDトークンを取得
 								</Button>
 							</div>
 						</div>
