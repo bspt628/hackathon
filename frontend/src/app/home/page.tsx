@@ -14,7 +14,7 @@ import { useRouter } from "next/navigation";
 export default function HomePage() {
 	const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
 	const [showTimeline, setShowTimeline] = useState(false);
-	const { user, idToken, logout } = useAuth(); // signOutを取得
+	const { user, logout } = useAuth(); // signOutを取得
 	
 	const router = useRouter();
 
