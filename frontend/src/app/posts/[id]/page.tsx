@@ -6,6 +6,8 @@ import { ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Post } from "@/components/post";
 import { useAuth } from "@/contexts/auth-context";
+import { use } from 'react';
+
 
 interface PostDetail {
 	id: string;
@@ -18,7 +20,8 @@ interface PostDetail {
 	likes_count: number;
 }
 
-export default function PostDetailPage({ params }: { params: { id: string } }) {
+export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = use(params);
 	const router = useRouter();
 	const { idToken } = useAuth();
 	const [post, setPost] = useState<PostDetail | null>(null);
@@ -32,7 +35,7 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
 			setIsLoading(true);
 			try {
 				const response = await fetch(
-					`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/one/${params.id}`,
+					`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/one/${id}`,
 					{
 						headers: {
 							Authorization: `Bearer ${idToken}`,
@@ -56,7 +59,7 @@ export default function PostDetailPage({ params }: { params: { id: string } }) {
 		}
 
 		fetchPost();
-	}, [idToken, params.id]);
+	}, [idToken, id]);
 
 	if (isLoading) {
 		return <div className="p-4 text-center">読み込み中...</div>;
