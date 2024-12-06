@@ -5,12 +5,12 @@ import (
 	"database/sql"
 	"fmt"
 	"hackathon/db/sqlc/generated"
-	"hackathon/domain"
+	"hackathon/internal/model"
 	"encoding/json"
 	"github.com/google/uuid"
 )
 
-func (uc *PostUsecase) CreatePost(ctx context.Context, request domain.CreatePostRequest) (*domain.Post, error) {
+func (uc *PostUsecase) CreatePost(ctx context.Context, request model.CreatePostRequest) (*model.Post, error) {
 	// 必須フィールドのバリデーション
 	if request.UserID == "" || request.Content == "" {
 		return nil, fmt.Errorf("ユーザーIDとコンテンツは必須です")
@@ -64,7 +64,7 @@ func (uc *PostUsecase) CreatePost(ctx context.Context, request domain.CreatePost
 		}
 	}
 
-	return &domain.Post{
+	return &model.Post{
 		ID:         postID,
 		UserID:     request.UserID,
 		Content:    request.Content,
@@ -73,7 +73,7 @@ func (uc *PostUsecase) CreatePost(ctx context.Context, request domain.CreatePost
 	}, nil
 }
 
-func (uc *PostUsecase) validateRepost(ctx context.Context, request domain.CreatePostRequest) (sql.NullString, error) {
+func (uc *PostUsecase) validateRepost(ctx context.Context, request model.CreatePostRequest) (sql.NullString, error) {
 	if request.IsRepost {
 		if request.OriginalPostID == nil || *request.OriginalPostID == "" {
 			return sql.NullString{}, fmt.Errorf("original_post_id が空です")
@@ -94,7 +94,7 @@ func (uc *PostUsecase) validateRepost(ctx context.Context, request domain.Create
 	return sql.NullString{String: "", Valid: false}, nil
 }
 
-func (uc *PostUsecase) validateReply(ctx context.Context, request domain.CreatePostRequest) (sql.NullString, sql.NullString, error) {
+func (uc *PostUsecase) validateReply(ctx context.Context, request model.CreatePostRequest) (sql.NullString, sql.NullString, error) {
 	if request.IsReply {
 		if request.ReplyToID == nil || *request.ReplyToID == "" {
 			return sql.NullString{}, sql.NullString{}, fmt.Errorf("reply_to_id が空です")

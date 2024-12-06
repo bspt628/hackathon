@@ -4,18 +4,18 @@ import (
 	"context"
 	"database/sql"
 	"hackathon/db/sqlc/generated"
-	"hackathon/domain"
+	"hackathon/internal/model"
 	"hackathon/internal/utils"
 )
 
 
-func (dao *PostDAO) GetAllPosts(ctx context.Context, limit int32) ([]domain.PostAll, error) {
+func (dao *PostDAO) GetAllPosts(ctx context.Context, limit int32) ([]model.PostAll, error) {
     rows, err := dao.queries.GetAllPosts(ctx, limit)
 	if err != nil {
 		return nil, err
 	}
 
-	var posts []domain.PostAll
+	var posts []model.PostAll
 	for _, row := range rows {
 		posts = append(posts, convertGetAllPostsRowToPostAll(row))
 	}
@@ -23,7 +23,7 @@ func (dao *PostDAO) GetAllPosts(ctx context.Context, limit int32) ([]domain.Post
 	return posts, nil
 }
 
-func (dao *PostDAO) GetFollowingUsersPosts(ctx context.Context, userID string, limit int32)([]domain.PostAll, error) {
+func (dao *PostDAO) GetFollowingUsersPosts(ctx context.Context, userID string, limit int32)([]model.PostAll, error) {
     rows, err := dao.queries.GetFollowingUsersPosts(ctx, sqlc.GetFollowingUsersPostsParams{
         FollowerID: sql.NullString{String: userID, Valid: true},
         Limit:      limit,
@@ -32,7 +32,7 @@ func (dao *PostDAO) GetFollowingUsersPosts(ctx context.Context, userID string, l
 		return nil, err
 	}
 
-	var posts []domain.PostAll
+	var posts []model.PostAll
 	for _, row := range rows {
 		posts = append(posts, convertGetFollowedUsersPostsRowToPostAll(row))
 	}
@@ -40,8 +40,8 @@ func (dao *PostDAO) GetFollowingUsersPosts(ctx context.Context, userID string, l
 	return posts, nil
 }
 
-func convertGetFollowedUsersPostsRowToPostAll(row sqlc.GetFollowingUsersPostsRow) domain.PostAll {
-	return domain.PostAll{
+func convertGetFollowedUsersPostsRowToPostAll(row sqlc.GetFollowingUsersPostsRow) model.PostAll {
+	return model.PostAll{
 		ID:             row.ID,
 		UserID:         utils.ConvertNullString(row.UserID),
 		Content:        utils.ConvertNullString(row.Content),
@@ -66,8 +66,8 @@ func convertGetFollowedUsersPostsRowToPostAll(row sqlc.GetFollowingUsersPostsRow
 }
 
 
-func convertGetAllPostsRowToPostAll(row sqlc.GetAllPostsRow) domain.PostAll {
-	return domain.PostAll{
+func convertGetAllPostsRowToPostAll(row sqlc.GetAllPostsRow) model.PostAll {
+	return model.PostAll{
 		ID:             row.ID,
 		UserID:         utils.ConvertNullString(row.UserID),
 		Content:        utils.ConvertNullString(row.Content),
