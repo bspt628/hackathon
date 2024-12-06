@@ -16,7 +16,7 @@ export async function createPost(content: string, idToken: string) {
 	try {
 		// First, get the user ID from the token
 		const userResponse = await fetch(
-			"https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/users/me",
+            `https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/users/firebase`,
 			{
 				headers: {
 					Authorization: `Bearer ${idToken}`,
