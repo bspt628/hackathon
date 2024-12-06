@@ -18,19 +18,16 @@ export default function LoginPage() {
 		event.preventDefault();
 		setIsLoading(true);
 		setError(null);
-		console.log("User is logging in...");
 
 		const formData = new FormData(event.currentTarget);
 		const result = await loginUser(formData); // サーバーサイドのloginUserを呼び出す
 
 		// ログイン処理の結果に基づいてユーザー情報を更新
 		if (result.success) {
-			console.log("User logged in successfully:");
 
 			// AuthContextのuserとidTokenを更新
 			setCurrentUser(JSON.parse(result.user)); // userを更新
 			setIdToken(result.id_token); // IDトークンを更新
-			console.log("ID token:", result.id_token);
 
 			router.push("/home"); // ログイン成功時にホームページにリダイレクト
 		} else {

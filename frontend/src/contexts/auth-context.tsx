@@ -34,8 +34,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const token = await user.getIdToken();
         setCurrentUser(user); // ユーザー情報を更新
         setIdToken(token); // IDトークンを更新
-        console.log("User updated:", user);
-        console.log("ID token updated:", token);
       } else {
         setCurrentUser(null); // ユーザーがログアウトした場合、nullを設定
         setIdToken(null); // IDトークンもnullに設定

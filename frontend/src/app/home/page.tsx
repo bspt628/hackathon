@@ -98,12 +98,12 @@ export default function HomePage() {
 							</button>
 						</div>
 					</div>
-					{ 
+					{/* { 
 						<div className="p-4 border-b border-[#2f3336] break-all">
 							<h2 className="font-bold mb-2">IDトークン:</h2>
 							<p className="text-sm">{idToken}</p>
 						</div>
-					}
+					} */}
 					<div className="p-4 border-b border-[#2f3336]">
 						<YouTubeSearch onVideoSelect={setCurrentVideoId} />
 					</div>
