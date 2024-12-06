@@ -1,8 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useAuth } from "@/app/contexts/auth-context";
+import { useAuth } from "@/contexts/auth-context";
 import { Post } from "./post";
+
+
 
 interface TimelinePost {
 	id: string;
@@ -16,16 +18,16 @@ interface TimelinePost {
 }
 
 export function Timeline() {
+	const { idToken } = useAuth();
 	const [posts, setPosts] = useState<TimelinePost[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const { idToken } = useAuth();
 
 	useEffect(() => {
 		async function fetchPosts() {
-			console.log("fetchPosts が呼び出されました"); // ここにログを追加
-			if (!idToken) return;
+			// if (!idToken) return;
 
+			setIsLoading(true);
 			try {
 				const response = await fetch(
 					"https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/all",

@@ -1,35 +1,44 @@
 'use server'
 
+import { auth } from '@/lib/firebase'
+import { signInWithEmailAndPassword } from 'firebase/auth'
+
 interface LoginData {
   username: string
   password: string
 }
 
 export async function loginUser(formData: FormData) {
-  const data: LoginData = {
-    username: formData.get('username') as string,
-    password: formData.get('password') as string,
-  }
+  const username = formData.get('username') as string
+  const password = formData.get('password') as string
 
   try {
-    const response = await fetch(
-      'https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/users/signin',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      }
+    // First, fetch the email for the username
+    const emailResponse = await fetch(
+      `https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/users/email/${username}`
     )
-
-    if (!response.ok) {
-      throw new Error('Login failed')
+    
+    if (!emailResponse.ok) {
+      throw new Error('Failed to fetch email')
     }
 
-    return { success: true }
+    const emailData = await emailResponse.json()
+    
+    if (!emailData.email) {
+      throw new Error('Email not found for username')
+    }
+
+    // Then sign in with Firebase
+    const userCredential = await signInWithEmailAndPassword(auth, emailData.email, password)
+    const idToken = await userCredential.user.getIdToken()
+
+    return { success: true, idToken }
   } catch (error) {
-    console.error('Login error:', error);
-    return { success: false, error: error instanceof Error ? error.message : 'ログインに失敗しました。' }
+    console.error('Login error:', error)
+    return { 
+      success: false, 
+      error: error instanceof Error ? error.message : 'ログインに失敗しました。'
+    }
   }
 }
+

@@ -1,3 +1,5 @@
+"use server";
+
 interface SignupData {
 	email: string;
 	password: string;
@@ -12,13 +14,10 @@ export async function signupUser(formData: FormData) {
 		username: formData.get("username") as string,
 		display_name: formData.get("display_name") as string,
 	};
-	// コンソールに表示されるデータを確認する
-	console.log(data);
 
 	try {
 		const response = await fetch(
-            "https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/users/signup",
-            
+			"https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/users/signup",
 			{
 				method: "POST",
 				headers: {
