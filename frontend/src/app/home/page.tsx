@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Home, Search, Bell, Mail, User, List, LogOut } from "lucide-react"; // ログアウトアイコンを追加
+import { Home, Search, Bell, Mail, User, LogOut } from "lucide-react"; // ログアウトアイコンを追加
 import { Timeline } from "@/components/timeline";
 import { YouTubeSearch } from "@/components/youtube-search";
 import { AudioPlayer } from "@/components/audio-player";
@@ -13,7 +13,7 @@ import { useRouter } from "next/navigation";
 
 export default function HomePage() {
 	const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
-	const [showTimeline, setShowTimeline] = useState(false);
+	// const [showTimeline, setShowTimeline] = useState(false);
 	const { user, logout } = useAuth(); // signOutを取得
 	
 	const router = useRouter();
@@ -70,16 +70,6 @@ export default function HomePage() {
 								<Button
 									variant="outline"
 									size="sm"
-									className="text-[#1d9bf0] border-[#1d9bf0] hover:bg-[#1d9bf0]/10"
-									onClick={() => setShowTimeline(!showTimeline)}
-								>
-									<List className="w-5 h-5 mr-2" />
-									{showTimeline ? "タイムラインを隠す" : "タイムラインを表示"}
-								</Button>
-								{/* ログアウトボタン */}
-								<Button
-									variant="outline"
-									size="sm"
 									className="text-red-500 border-red-500 hover:bg-red-500/10"
 									onClick={handleSignOut}
 								>
@@ -98,17 +88,11 @@ export default function HomePage() {
 							</button>
 						</div>
 					</div>
-					{/* { 
-						<div className="p-4 border-b border-[#2f3336] break-all">
-							<h2 className="font-bold mb-2">IDトークン:</h2>
-							<p className="text-sm">{idToken}</p>
-						</div>
-					} */}
 					<div className="p-4 border-b border-[#2f3336]">
 						<YouTubeSearch onVideoSelect={setCurrentVideoId} />
 					</div>
 					{currentVideoId && <AudioPlayer videoId={currentVideoId} />}
-					{showTimeline && <Timeline showTimeline={showTimeline} />}
+					<Timeline />
 				</main>
 
 				{/* Right Sidebar */}

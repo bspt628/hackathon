@@ -1,12 +1,8 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Post } from "./post";
-
-interface TimelineProps {
-	showTimeline: boolean;
-}
 
 interface TimelinePost {
 	id: string;
@@ -19,17 +15,13 @@ interface TimelinePost {
 	likes_count: number;
 }
 
-export function Timeline({ showTimeline }: TimelineProps) {
+export function Timeline() {
 	const { idToken } = useAuth();
 	const [posts, setPosts] = useState<TimelinePost[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
 	const idTokenRef = useRef(idToken);
-
-	// useEffect(() => {
-	// 	idTokenRef.current = idToken;
-	// }, [idToken]);
 
 	async function fetchPosts() {
 		console.log("fetchPosts ... ");
@@ -52,6 +44,7 @@ export function Timeline({ showTimeline }: TimelineProps) {
 
 			const data = await response.json();
 			setPosts(data);
+			console.log("data", data);
 			setError(null);
 		} catch (error) {
 			console.error("Error fetching timeline:", error);
@@ -61,12 +54,9 @@ export function Timeline({ showTimeline }: TimelineProps) {
 		}
 	}
 
-	// showTimeline の変化を監視して fetchPosts を実行
 	useEffect(() => {
-		if (showTimeline) {
-			fetchPosts();
-		}
-	}, [showTimeline]);
+		fetchPosts();
+	}, []);
 
 	if (isLoading) {
 		return <div className="p-4 text-center">読み込み中...</div>;
