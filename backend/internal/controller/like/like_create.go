@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"net/http"
-	"encoding/json"
+	"github.com/gorilla/mux"
 )
 
 func (lc *LikeController) CreateLike(w http.ResponseWriter, r *http.Request) {
@@ -20,20 +20,12 @@ func (lc *LikeController) CreateLike(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, fmt.Sprintf("いいねするユーザーIDの取得に失敗しました: %v", err), http.StatusInternalServerError)
 		return
 	}
-	
-	// HTTPリクエストのjsonをdecodeしてパラメータ「likeID」を取得
-	var request struct {
-		PostID string `json:"post_id"`
-	}
 
-	// リクエストのJSONデータを構造体にバインド
-	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
-		http.Error(w, fmt.Sprintf("リクエストの解析に失敗しました: %v", err), http.StatusBadRequest)
-		return
-	}
+	vars := mux.Vars(r)
+	postID := vars["id"]
 
 	// 必須パラメータをチェック
-	if request.PostID == "" {
+	if postID == "" {
 		http.Error(w, "PostID is required", http.StatusBadRequest)
 		return 
 	}
@@ -41,7 +33,7 @@ func (lc *LikeController) CreateLike(w http.ResponseWriter, r *http.Request) {
 
 
 	// いいねを実行
-	err = lc.likeUsecase.CreateLike(context.Background(), request.PostID, userID)
+	err = lc.likeUsecase.CreateLike(context.Background(), postID, userID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to like: %v", err), http.StatusInternalServerError)
 		return
