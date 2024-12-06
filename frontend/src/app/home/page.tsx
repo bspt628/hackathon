@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { Home, Search, Bell, Mail, User, LogOut } from "lucide-react"; // ログアウトアイコンを追加
 import { Timeline } from "@/components/timeline";
 import { YouTubeSearch } from "@/components/youtube-search";
+import { CreatePost } from '@/components/create-post'
 import { AudioPlayer } from "@/components/audio-player";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -88,6 +89,7 @@ export default function HomePage() {
 							</button>
 						</div>
 					</div>
+					<CreatePost />
 					<div className="p-4 border-b border-[#2f3336]">
 						<YouTubeSearch onVideoSelect={setCurrentVideoId} />
 					</div>
@@ -105,7 +107,7 @@ export default function HomePage() {
 								className="pl-10 bg-[#202327] border-transparent focus:border-[#1d9bf0] text-white"
 							/>
 						</div>
-						<div className="mt-4 bg-[#16181c] rounded-2xl p-4">
+						{/* <div className="mt-4 bg-[#16181c] rounded-2xl p-4">
 							<h2 className="text-xl font-bold mb-4">トレンド</h2>
 							<div className="space-y-4">
 								<div className="hover:bg-white/[0.03] cursor-pointer">
@@ -114,7 +116,7 @@ export default function HomePage() {
 									<div className="text-sm text-[#71767b]">1,234 posts</div>
 								</div>
 							</div>
-						</div>
+						</div> */}
 					</div>
 				</div>
 			</div>
