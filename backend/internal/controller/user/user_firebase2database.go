@@ -5,16 +5,17 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
-
-	"github.com/gorilla/mux"
 )
 
 func (uc *UserController) GetUserIDByFirebaseUID(w http.ResponseWriter, r *http.Request) {
 	// リクエストボディをパース
-	vars := mux.Vars(r)
-	FirebaseUID := vars["id"]
+	firebaseUID := r.Header.Get("UserID")
+	if firebaseUID == "" {
+		http.Error(w, "UserID missing in request context", http.StatusUnauthorized)
+		return
+	}
 
-	userID, err := uc.userUsecase.GetUserIDByFirebaseUID(context.Background(), FirebaseUID)
+	userID, err := uc.userUsecase.GetUserIDByFirebaseUID(context.Background(), firebaseUID)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("Failed to get user ID: %v", err), http.StatusInternalServerError)
 		return

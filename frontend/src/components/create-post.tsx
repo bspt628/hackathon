@@ -12,15 +12,16 @@ export function CreatePost() {
 	const [isLoading, setIsLoading] = useState(false);
 	const { idToken } = useAuth();
 
-    const handleSubmit = async () => {
-        console.log("idToken", idToken);
+	const handleSubmit = async () => {
+		console.log("idToken", idToken);
 		if (!content.trim() || !idToken) return;
 
 		setIsLoading(true);
-        try {
-            console.log("createPost ... ");
-            console.log("idToken", idToken);
-			const result = await createPost(content, idToken);
+		try {
+			console.log("createPost ... ");
+			console.log("idToken", idToken);
+            const result = await createPost(content, idToken);
+            console.log("result", result);
 			if (result.success) {
 				setContent("");
 				// You might want to refresh the timeline here
@@ -89,9 +90,11 @@ export function CreatePost() {
 						<Button
 							onClick={handleSubmit}
 							disabled={!content.trim() || isLoading}
-							className="rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] px-4"
+							className="rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8]/10 px-4"
 						>
-                            {isLoading ? "投稿中..." : "ポストする"}
+							{isLoading ? "投稿中..." : "ポストする"}
+							{!content.trim() && " (内容なし)"}
+							{isLoading && " (ローディング中)"}
 						</Button>
 					</div>
 				</div>
