@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Post } from "./post";
 
@@ -21,42 +21,39 @@ export function Timeline() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 
-	const idTokenRef = useRef(idToken);
-
-	async function fetchPosts() {
-		console.log("fetchPosts ... ");
-		setIsLoading(true);
-		try {
-			const response = await fetch(
-				"https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/all",
-				{
-					method: "GET",
-					headers: {
-						Authorization: `Bearer ${idTokenRef.current}`,
-					},
-				}
-			);
-			console.log("response", response);
-
-			if (!response.ok) {
-				throw new Error("Failed to fetch posts");
-			}
-
-			const data = await response.json();
-			setPosts(data);
-			console.log("data", data);
-			setError(null);
-		} catch (error) {
-			console.error("Error fetching timeline:", error);
-			setError("投稿の取得に失敗しました。");
-		} finally {
-			setIsLoading(false);
-		}
-	}
-
 	useEffect(() => {
+		async function fetchPosts() {
+			if (!idToken) return;
+
+			setIsLoading(true);
+			try {
+				const response = await fetch(
+					"https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/all",
+					{
+						method: "GET",
+						headers: {
+							Authorization: `Bearer ${idToken}`,
+						},
+					}
+				);
+
+				if (!response.ok) {
+					throw new Error("Failed to fetch posts");
+				}
+
+				const data = await response.json();
+				setPosts(data);
+				setError(null);
+			} catch (error) {
+				console.error("Error fetching timeline:", error);
+				setError("投稿の取得に失敗しました。");
+			} finally {
+				setIsLoading(false);
+			}
+		}
+
 		fetchPosts();
-	}, []);
+	}, [idToken]);
 
 	if (isLoading) {
 		return <div className="p-4 text-center">読み込み中...</div>;

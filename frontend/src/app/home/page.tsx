@@ -107,16 +107,6 @@ export default function HomePage() {
 								className="pl-10 bg-[#202327] border-transparent focus:border-[#1d9bf0] text-white"
 							/>
 						</div>
-						{/* <div className="mt-4 bg-[#16181c] rounded-2xl p-4">
-							<h2 className="text-xl font-bold mb-4">トレンド</h2>
-							<div className="space-y-4">
-								<div className="hover:bg-white/[0.03] cursor-pointer">
-									<div className="text-sm text-[#71767b]">トレンド</div>
-									<div className="font-bold">インナーカラー</div>
-									<div className="text-sm text-[#71767b]">1,234 posts</div>
-								</div>
-							</div>
-						</div> */}
 					</div>
 				</div>
 			</div>
