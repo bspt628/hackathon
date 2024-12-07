@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, Fragment } from "react";
 import { MessageSquare, Repeat2, Heart } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
@@ -83,7 +83,14 @@ export function Post({
 							<span className="text-[#71767b]">·</span>
 							<span className="text-[#71767b]">{timeAgo}</span>
 						</div>
-						<p className="mt-2 break-words">{content}</p>
+						<p className="mt-2 break-words whitespace-pre-wrap">
+							{content.split("\n").map((line, index) => (
+								<React.Fragment key={index}>
+									{line}
+									{index < content.split("\n").length - 1 && <br />}
+								</React.Fragment>
+							))}
+						</p>
 						<div className="flex justify-between mt-4 max-w-md text-[#71767b]">
 							<button
 								className="flex items-center gap-2 hover:text-[#1d9bf0]"

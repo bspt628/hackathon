@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -9,15 +9,20 @@ import { createPost } from "@/app/actions/create-post";
 
 interface CreatePostProps {
 	onPostSuccess?: () => void;
+	initialContent?: string;
 }
 
-export function CreatePost({ onPostSuccess }: CreatePostProps) {
-	const [content, setContent] = useState("");
+export function CreatePost({ onPostSuccess, initialContent="" }: CreatePostProps) {
+	const [content, setContent] = useState(initialContent);
 	const [isLoading, setIsLoading] = useState(false);
 	const { idToken } = useAuth();
 
+	useEffect(() => {
+		setContent(initialContent);
+	},	[initialContent]);
+
 	const handleSubmit = async () => {
-		if (!content.trim() || !idToken) return;
+		if (!content || !idToken) return;
 
 		setIsLoading(true);
 		try {
@@ -43,6 +48,7 @@ export function CreatePost({ onPostSuccess }: CreatePostProps) {
 						onChange={(e) => setContent(e.target.value)}
 						placeholder="いまどうしてる？"
 						className="min-h-[80px] w-full resize-none bg-transparent border-none p-0 placeholder:text-[#71767b] focus-visible:ring-0"
+						rows={4}
 					/>
 					<div className="flex items-center justify-between mt-4">
 						<div className="flex -ml-2">
@@ -89,7 +95,7 @@ export function CreatePost({ onPostSuccess }: CreatePostProps) {
 						</div>
 						<Button
 							onClick={handleSubmit}
-							disabled={!content.trim() || isLoading}
+							disabled={!content || isLoading}
 							className="rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8]/10 px-4"
 						>
 							{isLoading ? "投稿中..." : "ポストする"}

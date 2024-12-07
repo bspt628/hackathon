@@ -20,6 +20,7 @@ export default function HomePage() {
 	const router = useRouter();
 	const [refreshTrigger, setRefreshTrigger] = useState(0);
 	const [isLoading, setIsLoading] = useState(true);
+	const [postContent, setPostContent] = useState("");
 
 	useEffect(() => {
 		if (idToken === null && !localStorage.getItem("idToken")) {
@@ -37,11 +38,16 @@ export default function HomePage() {
 
 	const hundlePostSuccess = () => {
 		setRefreshTrigger((prev) => prev + 1);
+		setPostContent("");
 	};
 
 	const handleVideoSelect = (videoId: string) => {
 		setCurrentVideoId(videoId);
 	};
+
+	const handleCopy = (text: string) => {
+		setPostContent(text);
+	}
 
 	const handleCloseAudioPlayer = () => {
 		setCurrentVideoId(null);
@@ -109,7 +115,7 @@ export default function HomePage() {
 							</button>
 						</div>
 					</div>
-					<CreatePost onPostSuccess={hundlePostSuccess} />
+					<CreatePost onPostSuccess={hundlePostSuccess} initialContent={postContent} />
 					<Timeline refreshTrigger={refreshTrigger} />
 				</main>
 
@@ -128,7 +134,7 @@ export default function HomePage() {
 					{/* ここに他の右サイドバーのコンテンツを追加できます */}
 				</div>
 			</div>
-			<AudioPlayer videoId={currentVideoId} onClose={handleCloseAudioPlayer} />
+			<AudioPlayer videoId={currentVideoId} onClose={handleCloseAudioPlayer} onCopy={handleCopy} />
 		</div>
 	);
 }

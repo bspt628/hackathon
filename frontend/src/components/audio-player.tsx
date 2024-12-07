@@ -1,16 +1,18 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { X, Play, Pause, Loader2 } from "lucide-react";
+import { X, Play, Pause, Loader2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Slider } from "@/components/ui/slider";
+import { useAuth } from "@/contexts/auth-context";
 
 interface AudioPlayerProps {
 	videoId: string | null;
 	onClose: () => void;
+	onCopy: (text: string) => void;
 }
 
-export function AudioPlayer({ videoId, onClose }: AudioPlayerProps) {
+export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 	const playerRef = useRef<YT.Player | null>(null);
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [title, setTitle] = useState("");
@@ -18,6 +20,7 @@ export function AudioPlayer({ videoId, onClose }: AudioPlayerProps) {
 	const [currentTime, setCurrentTime] = useState(0);
 	const [isLoading, setIsLoading] = useState(true);
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
+	const { user } = useAuth();
 
 	useEffect(() => {
 		if (typeof window !== "undefined" && !window.YT) {
@@ -61,8 +64,8 @@ export function AudioPlayer({ videoId, onClose }: AudioPlayerProps) {
 						setDuration(player.getDuration());
 						startTimeUpdate();
 						setIsLoading(false);
-						player.playVideo(); // Automatically start playback
-						setIsPlaying(true); // Update playing state
+						player.playVideo();
+						setIsPlaying(true);
 					},
 					onStateChange: (event: YT.OnStateChangeEvent) => {
 						const newState = event.data;
@@ -121,6 +124,26 @@ export function AudioPlayer({ videoId, onClose }: AudioPlayerProps) {
 		return `${minutes}:${seconds.toString().padStart(2, "0")}`;
 	};
 
+	const handleCopy = () => {
+		if (playerRef.current && user) {
+			const currentTime = playerRef.current.getCurrentTime();
+			const formattedTime = formatTime(currentTime);
+			const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+			const copyText = `${user.displayName} is playing ${title} ${formattedTime} \n see from here \n (${videoUrl})`;
+
+			navigator.clipboard
+				.writeText(copyText)
+				.then(() => {
+					console.log("Text copied to clipboard");
+				})
+				.catch((err) => {
+					console.error("Failed to copy text: ", err);
+				});
+
+			onCopy(copyText);
+		}
+	};
+
 	if (!videoId) return null;
 
 	return (
@@ -151,9 +174,14 @@ export function AudioPlayer({ videoId, onClose }: AudioPlayerProps) {
 						</>
 					)}
 				</div>
-				<Button onClick={onClose} variant="ghost" size="icon">
-					<X className="h-4 w-4" />
-				</Button>
+				<div className="flex items-center space-x-2">
+					<Button onClick={handleCopy} variant="ghost" size="icon">
+						<Copy className="h-4 w-4" />
+					</Button>
+					<Button onClick={onClose} variant="ghost" size="icon">
+						<X className="h-4 w-4" />
+					</Button>
+				</div>
 			</div>
 			{!isLoading && (
 				<Slider
