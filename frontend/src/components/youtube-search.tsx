@@ -4,6 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2 } from "lucide-react";
+import { useYouTube } from "@/contexts/youtube-context";
 
 interface YouTubeSearchResultItem {
 	id: {
@@ -35,7 +36,7 @@ export function YouTubeSearch({
 	onVideoSelect: (videoId: string) => void;
 }) {
 	const [query, setQuery] = useState("");
-	const [results, setResults] = useState<SearchResult[]>([]);
+	const { searchResults, setSearchResults, setCurrentVideoId } = useYouTube();
 	const [isSearching, setIsSearching] = useState(false);
 
 	const handleSearch = async () => {
@@ -50,7 +51,7 @@ export function YouTubeSearch({
 			}
 
 			const data: YouTubeSearchResponse = await response.json();
-			setResults(
+			setSearchResults(
 				data.items.map((item) => ({
 					id: item.id.videoId,
 					title: item.snippet.title,
@@ -74,7 +75,11 @@ export function YouTubeSearch({
 					onChange={(e) => setQuery(e.target.value)}
 					className="flex-grow"
 				/>
-				<Button onClick={handleSearch} disabled={isSearching}>
+				<Button
+					onClick={handleSearch}
+					disabled={isSearching}
+					className="bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white"
+				>
 					{isSearching ? (
 						<>
 							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -86,10 +91,10 @@ export function YouTubeSearch({
 				</Button>
 			</div>
 			<div className="grid grid-cols-2 gap-4">
-				{results.map((result) => (
+				{searchResults.map((result) => (
 					<div
 						key={result.id}
-						className="cursor-pointer hover:bg-gray-800 p-2 rounded"
+						className="cursor-pointer hover:bg-[#1d9bf0]/10 p-2 rounded"
 						onClick={() => onVideoSelect(result.id)}
 					>
 						<img src={result.thumbnail} alt={result.title} className="w-full" />

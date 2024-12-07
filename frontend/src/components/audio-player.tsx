@@ -23,17 +23,38 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 	const { user } = useAuth();
 
 	useEffect(() => {
-		if (typeof window !== "undefined" && !window.YT) {
-			const tag = document.createElement("script");
-			tag.src = "https://www.youtube.com/iframe_api";
-			const firstScriptTag = document.getElementsByTagName("script")[0];
-			firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
+		const loadYouTubeAPI = () => {
+			if (typeof window !== "undefined" && !window.YT) {
+				const tag = document.createElement("script");
+				tag.src = "https://www.youtube.com/iframe_api";
+				const firstScriptTag = document.getElementsByTagName("script")[0];
+				firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
-			window.onYouTubeIframeAPIReady = initPlayer;
-		} else if (videoId) {
-			setIsPlaying(false);
+				return new Promise<void>((resolve) => {
+					window.onYouTubeIframeAPIReady = () => {
+						resolve();
+					};
+				});
+			}
+			return Promise.resolve();
+		};
+
+		const initializePlayer = async () => {
 			setIsLoading(true);
-			initPlayer();
+			try {
+				await loadYouTubeAPI();
+				if (playerRef.current) {
+					playerRef.current.destroy();
+				}
+				initPlayer();
+			} catch (error) {
+				console.error("Failed to initialize player:", error);
+				setIsLoading(false);
+			}
+		};
+
+		if (videoId) {
+			initializePlayer();
 		}
 
 		return () => {
@@ -48,26 +69,27 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 
 	function initPlayer() {
 		if (typeof window.YT !== "undefined" && window.YT.Player && videoId) {
-			setIsLoading(true);
+			console.log("Initializing YouTube player with video ID:", videoId);
 			playerRef.current = new window.YT.Player("youtube-audio-player", {
 				height: "0",
 				width: "0",
 				videoId: videoId,
 				playerVars: {
-					autoplay: 0,
+					autoplay: 1,
 					controls: 0,
 				},
 				events: {
 					onReady: (event: YT.OnReadyEvent) => {
+						console.log("YouTube player is ready");
 						const player = event.target;
 						setTitle(player.getVideoData().title);
 						setDuration(player.getDuration());
 						startTimeUpdate();
 						setIsLoading(false);
-						player.playVideo();
 						setIsPlaying(true);
 					},
 					onStateChange: (event: YT.OnStateChangeEvent) => {
+						console.log("YouTube player state changed:", event.data);
 						const newState = event.data;
 						setIsPlaying(
 							newState === YT.PlayerState.PLAYING ||
@@ -82,15 +104,26 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 							stopTimeUpdate();
 						}
 					},
+					onError: (event: YT.OnErrorEvent) => {
+						console.error("YouTube player error:", event.data);
+						setIsLoading(false);
+						setIsPlaying(false);
+					},
 				},
 			});
+		} else {
+			console.error("YouTube API is not loaded or videoId is missing");
+			setIsLoading(false);
 		}
 	}
 
 	const startTimeUpdate = () => {
 		if (intervalRef.current) clearInterval(intervalRef.current);
 		intervalRef.current = setInterval(() => {
-			if (playerRef.current) {
+			if (
+				playerRef.current &&
+				typeof playerRef.current.getCurrentTime === "function"
+			) {
 				setCurrentTime(playerRef.current.getCurrentTime());
 			}
 		}, 1000);
@@ -125,11 +158,15 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 	};
 
 	const handleCopy = () => {
-		if (playerRef.current && user) {
+		if (
+			playerRef.current &&
+			user &&
+			typeof playerRef.current.getCurrentTime === "function"
+		) {
 			const currentTime = playerRef.current.getCurrentTime();
 			const formattedTime = formatTime(currentTime);
 			const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
-			const copyText = `${user.displayName} is playing ${title} ${formattedTime} \n see from here \n (${videoUrl})`;
+			const copyText = `${user.displayName} is playing ${title} ${formattedTime} (${videoUrl})`;
 
 			navigator.clipboard
 				.writeText(copyText)
@@ -191,6 +228,12 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 					onValueChange={handleSeek}
 					className="w-full"
 				/>
+			)}
+			{isLoading && (
+				<div className="text-xs text-gray-400 mt-2">
+					Debug: Loading... Player state:{" "}
+					{playerRef.current ? "Initialized" : "Not initialized"}
+				</div>
 			)}
 		</div>
 	);

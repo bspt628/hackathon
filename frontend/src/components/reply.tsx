@@ -52,7 +52,7 @@ export function Reply({
 						value={replyContent}
 						onChange={(e) => setReplyContent(e.target.value)}
 						className="w-full bg-transparent border-none resize-none focus:ring-0 placeholder:text-[#71767b]"
-						rows={4}
+						rows={6}
 					/>
 					<div className="flex justify-end mt-2 space-x-2">
 						<Button variant="ghost" onClick={onClose}>

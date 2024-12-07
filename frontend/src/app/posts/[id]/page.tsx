@@ -1,14 +1,17 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Post } from "@/components/post";
 import { Repost } from "@/components/repost";
 import { Reply } from "@/components/reply";
+import { YouTubeSearch } from "@/components/youtube-search";
 import { useAuth } from "@/contexts/auth-context";
-import { use } from "react";
+import { useYouTube } from "@/contexts/youtube-context";
+
 
 interface PostDetail {
 	id: string;
@@ -24,14 +27,11 @@ interface PostDetail {
 	replies?: PostDetail[];
 }
 
-export default function PostDetailPage({
-	params,
-}: {
-	params: Promise<{ id: string }>;
-}) {
-	const { id } = use(params);
+export default function PostDetailPage({ params }: {params: Promise<{ id: string }>;}) {
 	const router = useRouter();
 	const { idToken } = useAuth();
+	const { id } = use(params);
+	const { setCurrentVideoId, isEnabled: isYouTubeEnabled } = useYouTube();
 	const [post, setPost] = useState<PostDetail | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
@@ -42,8 +42,6 @@ export default function PostDetailPage({
 
 		setIsLoading(true);
 		try {
-			// params.idの取得
-			const id = (await params).id;
 			const response = await fetch(
 				`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/one/${id}`,
 				{
@@ -73,7 +71,7 @@ export default function PostDetailPage({
 	}, [idToken, id]);
 
 	const handleReplySuccess = () => {
-		fetchPost(); // Refetch the post to update replies
+		fetchPost();
 		setReplyingTo(null);
 	};
 
@@ -114,31 +112,49 @@ export default function PostDetailPage({
 
 	return (
 		<div className="min-h-screen bg-black text-white">
-			<div className="max-w-2xl mx-auto">
-				<div className="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-[#2f3336]">
-					<div className="flex items-center gap-4 px-4 py-3">
-						<Button
-							variant="ghost"
-							size="icon"
-							className="rounded-full hover:bg-white/10"
-							onClick={() => router.back()}
-						>
-							<ArrowLeft className="h-5 w-5" />
-						</Button>
-						<h1 className="text-xl font-bold">ポスト</h1>
+			<div className="flex mx-auto max-w-7xl">
+				<div className="flex-1 min-h-screen border-r border-[#2f3336] mr-80">
+					<div className="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-[#2f3336]">
+						<div className="flex items-center gap-4 px-4 py-3">
+							<Button
+								variant="ghost"
+								size="icon"
+								className="rounded-full hover:bg-white/10"
+								onClick={() => router.back()}
+							>
+								<ArrowLeft className="h-5 w-5" />
+							</Button>
+							<h1 className="text-xl font-bold">ポスト</h1>
+						</div>
+					</div>
+
+					{renderPost(post)}
+
+					<div className="flex justify-around border-y border-[#2f3336] py-2">
+						<Reply
+							postId={post.id}
+							username={post.username}
+							onReplySuccess={handleReplySuccess}
+						/>
+						<Repost postId={post.id} username={post.username} />
 					</div>
 				</div>
 
-				{renderPost(post)}
-
-				<div className="flex justify-around border-y border-[#2f3336] py-">
-					<Reply
-						postId={post.id}
-						username={post.username}
-						onReplySuccess={handleReplySuccess}
-					/>
-					<Repost postId={post.id} username={post.username} />
-				</div>
+				{/* Right Sidebar */}
+				{isYouTubeEnabled && (
+					<div className="w-80 fixed right-0 h-screen overflow-y-auto p-4">
+						<div className="sticky top-0 bg-black pb-4">
+							<div className="relative mb-4">
+								<Search className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
+								<Input
+									placeholder="検索"
+									className="pl-10 bg-[#202327] border-transparent focus:border-[#1d9bf0] text-white"
+								/>
+							</div>
+							<YouTubeSearch onVideoSelect={setCurrentVideoId} />
+						</div>
+					</div>
+				)}
 			</div>
 		</div>
 	);

@@ -43,7 +43,7 @@ export async function createPost(content: string, idToken: string) {
 			is_reply: false,
 		};
 
-		if (content.length > 140) {
+		if (content.length > 280) {
 			throw new Error("Post content is too long");
 		}
 

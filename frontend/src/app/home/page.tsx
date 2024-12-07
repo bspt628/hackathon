@@ -1,29 +1,34 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Home, Search, Bell, Mail, User, LogOut } from "lucide-react"; // ログアウトアイコンを追加
+import { Home, Search, Bell, Mail, User, LogOut } from "lucide-react";
 import { Timeline } from "@/components/timeline";
-import { YouTubeSearch } from "@/components/youtube-search";
 import { CreatePost } from "@/components/create-post";
+import { YouTubeSearch } from "@/components/youtube-search";
 import { AudioPlayer } from "@/components/audio-player";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/auth-context"; // useAuthをインポート
+import { useAuth } from "@/contexts/auth-context";
+import { useYouTube } from "@/contexts/youtube-context";
 import { useRouter } from "next/navigation";
 
 export default function HomePage() {
-	const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
-	// const [showTimeline, setShowTimeline] = useState(false);
-	const { user, logout, idToken } = useAuth(); // signOutを取得
-
-	const router = useRouter();
 	const [refreshTrigger, setRefreshTrigger] = useState(0);
 	const [isLoading, setIsLoading] = useState(true);
 	const [postContent, setPostContent] = useState("");
 
+	const { user, idToken, logout } = useAuth();
+	const {
+		currentVideoId,
+		setCurrentVideoId,
+		copiedText,
+		isEnabled: isYouTubeEnabled,
+	} = useYouTube();
+	const router = useRouter();
+
 	useEffect(() => {
-		if (idToken === null && !localStorage.getItem("idToken")) {
+		if (idToken === "" && !localStorage.getItem("idToken")) {
 			router.push("/login");
 		} else {
 			setIsLoading(false);
@@ -41,17 +46,11 @@ export default function HomePage() {
 		setPostContent("");
 	};
 
-	const handleVideoSelect = (videoId: string) => {
-		setCurrentVideoId(videoId);
-	};
-
-	const handleCopy = (text: string) => {
-		setPostContent(text);
-	}
-
-	const handleCloseAudioPlayer = () => {
-		setCurrentVideoId(null);
-	};
+	useEffect(() => {
+		if (copiedText) {
+			setPostContent(copiedText);
+		}
+	}, [copiedText]);
 
 	if (isLoading) {
 		return (
@@ -115,26 +114,36 @@ export default function HomePage() {
 							</button>
 						</div>
 					</div>
-					<CreatePost onPostSuccess={hundlePostSuccess} initialContent={postContent} />
+					<CreatePost
+						onPostSuccess={hundlePostSuccess}
+						initialContent={postContent}
+					/>
 					<Timeline refreshTrigger={refreshTrigger} />
 				</main>
 
 				{/* Right Sidebar */}
-				<div className="w-80 fixed right-0 h-screen overflow-y-auto p-4">
-					<div className="sticky top-0 bg-black pb-4">
-						<div className="relative mb-4">
-							<Search className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
-							<Input
-								placeholder="検索"
-								className="pl-10 bg-[#202327] border-transparent focus:border-[#1d9bf0] text-white"
-							/>
+				{isYouTubeEnabled && (
+					<div className="w-80 fixed right-0 h-screen overflow-y-auto p-4">
+						<div className="sticky top-0 bg-black pb-4">
+							<div className="relative mb-4">
+								<Search className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
+								<Input
+									placeholder="検索"
+									className="pl-10 bg-[#202327] border-transparent focus:border-[#1d9bf0] text-white"
+								/>
+							</div>
+							<YouTubeSearch onVideoSelect={setCurrentVideoId} />
 						</div>
-						<YouTubeSearch onVideoSelect={handleVideoSelect} />
 					</div>
-					{/* ここに他の右サイドバーのコンテンツを追加できます */}
-				</div>
+				)}
 			</div>
-			<AudioPlayer videoId={currentVideoId} onClose={handleCloseAudioPlayer} onCopy={handleCopy} />
+			{isYouTubeEnabled && currentVideoId && (
+				<AudioPlayer
+					videoId={currentVideoId}
+					onClose={() => setCurrentVideoId(null)}
+					onCopy={(text) => setPostContent(text)}
+				/>
+			)}
 		</div>
 	);
 }

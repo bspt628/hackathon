@@ -48,7 +48,7 @@ export function CreatePost({ onPostSuccess, initialContent="" }: CreatePostProps
 						onChange={(e) => setContent(e.target.value)}
 						placeholder="いまどうしてる？"
 						className="min-h-[80px] w-full resize-none bg-transparent border-none p-0 placeholder:text-[#71767b] focus-visible:ring-0"
-						rows={4}
+						rows={6}
 					/>
 					<div className="flex items-center justify-between mt-4">
 						<div className="flex -ml-2">
@@ -96,7 +96,7 @@ export function CreatePost({ onPostSuccess, initialContent="" }: CreatePostProps
 						<Button
 							onClick={handleSubmit}
 							disabled={!content || isLoading}
-							className="rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8]/10 px-4"
+							className="rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white px-4"
 						>
 							{isLoading ? "投稿中..." : "ポストする"}
 						</Button>

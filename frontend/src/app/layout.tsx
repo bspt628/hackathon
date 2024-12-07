@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
-import { AuthProvider } from "@/contexts/auth-context"; // AuthProvider のインポート
+import { AuthProvider } from "@/contexts/auth-context";
 import { LikesProvider } from "@/contexts/like-context";
+import { ConditionalYouTubeProvider } from "@/components/conditional-youtube-provider";
+import { AudioPlayerWrapper } from "@/components/audio-player-wrapper";
 import "./globals.css";
 
 const geistSans = localFont({
@@ -26,16 +28,19 @@ export default function RootLayout({
 	children: React.ReactNode;
 }>) {
 	return (
-		<AuthProvider>
-			<LikesProvider>
-				<html lang="en">
-					<body
-						className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-					>
-						{children}
-					</body>
-				</html>
-			</LikesProvider>
-		</AuthProvider>
+		<html lang="en">
+			<body
+				className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+			>
+				<AuthProvider>
+					<LikesProvider>
+						<ConditionalYouTubeProvider>
+							{children}
+							<AudioPlayerWrapper />
+						</ConditionalYouTubeProvider>
+					</LikesProvider>
+				</AuthProvider>
+			</body>
+		</html>
 	);
 }
