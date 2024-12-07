@@ -16,46 +16,50 @@ interface TimelinePost {
 	likes_count: number;
 }
 
-export function Timeline() {
+interface TimelineProps {
+	refreshTrigger: number;
+}
+
+export function Timeline({ refreshTrigger }: TimelineProps) {
 	const { idToken } = useAuth();
 	const [posts, setPosts] = useState<TimelinePost[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
 	const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
-	useEffect(() => {
-		async function fetchPosts() {
-			if (!idToken) return;
+	const fetchPosts = async () => {
+		if (!idToken) return;
 
-			setIsLoading(true);
-			try {
-				const response = await fetch(
-					"https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/all",
-					{
-						method: "GET",
-						headers: {
-							Authorization: `Bearer ${idToken}`,
-						},
-					}
-				);
-
-				if (!response.ok) {
-					throw new Error("Failed to fetch posts");
+		setIsLoading(true);
+		try {
+			const response = await fetch(
+				"https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/all",
+				{
+					method: "GET",
+					headers: {
+						Authorization: `Bearer ${idToken}`,
+					},
 				}
+			);
 
-				const data = await response.json();
-				setPosts(data);
-				setError(null);
-			} catch (error) {
-				console.error("Error fetching timeline:", error);
-				setError("投稿の取得に失敗しました。");
-			} finally {
-				setIsLoading(false);
+			if (!response.ok) {
+				throw new Error("Failed to fetch posts");
 			}
-		}
 
+			const data = await response.json();
+			setPosts(data);
+			setError(null);
+		} catch (error) {
+			console.error("Error fetching timeline:", error);
+			setError("投稿の取得に失敗しました。");
+		} finally {
+			setIsLoading(false);
+		}
+	};
+
+	useEffect(() => {
 		fetchPosts();
-	}, [idToken]);
+	}, [idToken, refreshTrigger]);
 
 	const handleReply = (postId: string) => {
 		setReplyingTo(postId);
@@ -92,6 +96,7 @@ export function Timeline() {
 							postId={post.id}
 							username={post.username}
 							onClose={() => setReplyingTo(null)}
+							onReplySuccess={fetchPosts}
 						/>
 					)}
 				</div>

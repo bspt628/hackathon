@@ -7,22 +7,24 @@ import { Textarea } from "@/components/ui/textarea";
 import { Image, SmilePlus, MapPin, Calendar, ListFilter } from "lucide-react";
 import { createPost } from "@/app/actions/create-post";
 
-export function CreatePost() {
+interface CreatePostProps {
+	onPostSuccess?: () => void;
+}
+
+export function CreatePost({ onPostSuccess }: CreatePostProps) {
 	const [content, setContent] = useState("");
 	const [isLoading, setIsLoading] = useState(false);
 	const { idToken } = useAuth();
 
 	const handleSubmit = async () => {
-		console.log("idToken", idToken);
 		if (!content.trim() || !idToken) return;
 
 		setIsLoading(true);
 		try {
-            const result = await createPost(content, idToken);
-            console.log("result", result);
+			const result = await createPost(content, idToken);
 			if (result.success) {
 				setContent("");
-				// You might want to refresh the timeline here
+				onPostSuccess?.();
 			}
 		} catch (error) {
 			console.error("Error creating post:", error);
@@ -91,8 +93,6 @@ export function CreatePost() {
 							className="rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8]/10 px-4"
 						>
 							{isLoading ? "投稿中..." : "ポストする"}
-							{!content.trim() && " (内容なし)"}
-							{isLoading && " (ローディング中)"}
 						</Button>
 					</div>
 				</div>

@@ -18,18 +18,17 @@ export default function HomePage() {
 	const { user, logout } = useAuth(); // signOutを取得
 	
 	const router = useRouter();
+	const [refreshTrigger, setRefreshTrigger] = useState(0);
 
 	
 	useEffect(() => {
-		console.log("User:", user);
 		if (!user) {
 			router.push("/login");
 		}
 	}, [user, router]);
 
 	if (!user) {
-		console.log("User not logged in. Redirecting to login page...");
-		return null
+		return null;
 	}
 
 	// ログアウト処理
@@ -37,6 +36,10 @@ export default function HomePage() {
 		await logout(); // signOutを呼び出してログアウト
 		router.push("/login"); // ログインページにリダイレクト
 	};
+
+	const hundlePostSuccess = () => {
+		setRefreshTrigger((prev) => prev + 1);
+	}
 
 	return (
 		<div className="min-h-screen bg-black text-white">
@@ -89,12 +92,12 @@ export default function HomePage() {
 							</button>
 						</div>
 					</div>
-					<CreatePost />
+					<CreatePost onPostSuccess={hundlePostSuccess} />
 					<div className="p-4 border-b border-[#2f3336]">
 						<YouTubeSearch onVideoSelect={setCurrentVideoId} />
 					</div>
 					{currentVideoId && <AudioPlayer videoId={currentVideoId} />}
-					<Timeline />
+					<Timeline refreshTrigger={refreshTrigger} />
 				</main>
 
 				{/* Right Sidebar */}

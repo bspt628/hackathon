@@ -8,9 +8,10 @@ interface ReplyProps {
 	postId: string;
 	username: string;
 	onClose?: () => void;
+	onReplySuccess?: () => void;
 }
 
-export function Reply({ postId, username, onClose }: ReplyProps) {
+export function Reply({ postId, username, onClose, onReplySuccess }: ReplyProps) {
 	const [replyContent, setReplyContent] = useState("");
 	const { idToken } = useAuth();
 
@@ -28,6 +29,7 @@ export function Reply({ postId, username, onClose }: ReplyProps) {
 			if (result.success) {
 				setReplyContent("");
 				onClose?.()
+				onReplySuccess?.();
 				console.log("Replied successfully");
 				// You might want to update the UI or show a success message here
 			}
