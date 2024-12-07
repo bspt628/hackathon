@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { X, Play, Pause, Loader2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Slider } from "@/components/ui/slider";
+import { Slider } from "@/components/ui/slider_a";
 import { useAuth } from "@/contexts/auth-context";
 
 interface AudioPlayerProps {
