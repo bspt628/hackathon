@@ -14,6 +14,9 @@ interface TimelinePost {
 	replies_count: number;
 	reposts_count: number;
 	likes_count: number;
+	reply_to_id: string;
+	original_post_id: string;
+	replies?: TimelinePost[];
 }
 
 interface TimelineProps {
@@ -25,7 +28,7 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 	const [posts, setPosts] = useState<TimelinePost[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
-	const [replyingTo, setReplyingTo] = useState<string | null>(null);
+	const [replyingTo, setReplyingTo] = useState<string>("");
 
 	const fetchPosts = async () => {
 		if (!idToken) return;
@@ -47,7 +50,11 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 			}
 
 			const data = await response.json();
-			setPosts(data);
+			console.log("Fetched data:", data);
+
+			const threadedPosts = organizeThreads(data);
+			console.log("Threaded posts:", threadedPosts);
+			setPosts(threadedPosts);
 			setError(null);
 		} catch (error) {
 			console.error("Error fetching timeline:", error);
@@ -55,6 +62,48 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 		} finally {
 			setIsLoading(false);
 		}
+	};
+
+	const organizeThreads = (posts: TimelinePost[]): TimelinePost[] => {
+		if (!Array.isArray(posts)) {
+			console.error("Expected posts to be an array, but got:", posts);
+			return [];
+		}
+
+		const threads: { [key: string]: TimelinePost[] } = {};
+		const rootPosts: TimelinePost[] = [];
+
+		posts.forEach((post) => {
+			if (post.reply_to_id) {
+				if (!threads[post.reply_to_id]) {
+					threads[post.reply_to_id] = [];
+				}
+				threads[post.reply_to_id].push(post);
+			} else if (post.original_post_id === "") {
+				rootPosts.push(post);
+			}
+		});
+
+		const buildReplyTree = (post: TimelinePost): TimelinePost => {
+			const replies = threads[post.id] || [];
+			return {
+				...post,
+				replies: replies
+					.map(buildReplyTree)
+					.sort(
+						(a, b) =>
+							new Date(a.created_at).getTime() -
+							new Date(b.created_at).getTime()
+					),
+			};
+		};
+
+		const threaded = rootPosts.map(buildReplyTree);
+
+		return threaded.sort(
+			(a, b) =>
+				new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+		);
 	};
 
 	useEffect(() => {
@@ -66,7 +115,6 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 	};
 
 	const handleRepostClick = (postId: string) => {
-		// Implement repost functionality
 		console.log("Repost clicked for post:", postId);
 	};
 
@@ -78,29 +126,48 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 		return <div className="p-4 text-center text-red-500">{error}</div>;
 	}
 
+	console.log("Rendering posts:", posts);
+
 	if (posts.length === 0) {
-		return <div className="p-4 text-center">投稿がありません。</div>;
+		return (
+			<div className="p-4 text-center">
+				<p>投稿がありません。</p>
+				<details>
+					<summary>デバッグ情報</summary>
+					<pre>
+						{JSON.stringify(
+							{ postsLength: posts.length, isLoading, error },
+							null,
+							2
+						)}
+					</pre>
+				</details>
+			</div>
+		);
 	}
 
-	return (
-		<div>
-			{posts.map((post) => (
-				<div key={post.id}>
-					<Post
-						{...post}
-						onReplyClick={() => handleReply(post.id)}
-						onRepostClick={() => handleRepostClick(post.id)}
+	const renderPost = (post: TimelinePost, isReplyTo: boolean = false) => {
+		return (
+			<div key={post.id}>
+				<Post
+					{...post}
+					isReplyTo={isReplyTo}
+					hasReplies={!!post.replies && post.replies.length > 0}
+					onReplyClick={() => handleReply(post.id)}
+					onRepostClick={() => handleRepostClick(post.id)}
+				/>
+				{replyingTo === post.id && (
+					<Reply
+						postId={post.id}
+						username={post.username}
+						onClose={() => setReplyingTo("")}
+						onReplySuccess={fetchPosts}
 					/>
-					{replyingTo === post.id && (
-						<Reply
-							postId={post.id}
-							username={post.username}
-							onClose={() => setReplyingTo(null)}
-							onReplySuccess={fetchPosts}
-						/>
-					)}
-				</div>
-			))}
-		</div>
-	);
+				)}
+				{post.replies?.map((reply) => renderPost(reply, true))}
+			</div>
+		);
+	};
+
+	return <div>{posts.map((post) => renderPost(post))}</div>;
 }
