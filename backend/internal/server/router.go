@@ -9,6 +9,7 @@ import (
 	usercontroller "hackathon/internal/controller/user"
 	repostcontroller "hackathon/internal/controller/repost"
 	notificationcontroller "hackathon/internal/controller/notification"
+	"hackathon/internal/gemini"
 
 	"github.com/gorilla/mux"
 )
@@ -41,6 +42,9 @@ func NewRouter(dbConn *sql.DB) *mux.Router {
 	
 	apiRouter.HandleFunc("/users/password-reset/request", userController.PasswordResetRequest).Methods("POST") 
 	apiRouter.HandleFunc("/users/password-reset/reset", userController.ResetPassword).Methods("POST")  
+
+	apiRouter.HandleFunc("/generate-content", gemini.GenerateContentHandler).Methods("POST")
+
 
 	// apiRouter.HandleFunc("/users/profile/{id}", userController.GetUserProfile).Methods("GET")
 	// apiRouter.HandleFunc("/users/settings/{id}", userController.GetUserSettings).Methods("GET")

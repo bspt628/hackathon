@@ -18,12 +18,12 @@ func FirebaseAuthMiddleware(next http.Handler) http.Handler {
 			http.Error(w, "Authorization header missing", http.StatusUnauthorized)
 			return
 		}
-		log.Println("auth header: ", authHeader)
+		// log.Println("auth header: ", authHeader)
 
 		// "Bearer "の部分を削除してトークンを取得
 		token := strings.TrimPrefix(authHeader, "Bearer ")
 
-		log.Println("trim token: ", token)
+		// log.Println("trim token: ", token)
 
 		// FirebaseのIDトークンを検証してUIDを取得
 		firebasetoken, err := VerifyIDToken(token)
