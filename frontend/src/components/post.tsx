@@ -4,7 +4,6 @@ import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useRouter } from "next/navigation";
 import { useLikes } from "@/contexts/like-context";
-import { cn } from "@/lib/utils";
 
 interface PostProps {
 	id: string;
