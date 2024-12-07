@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
-import { ArrowLeft } from 'lucide-react'
-import { Button } from '@/components/ui/button'
-import { Post } from '@/components/post'
-import { Repost } from '@/components/repost'
-import { Reply } from '@/components/reply'
-import { useAuth } from '@/contexts/auth-context'
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Post } from "@/components/post";
+import { Repost } from "@/components/repost";
+import { Reply } from "@/components/reply";
+import { useAuth } from "@/contexts/auth-context";
 import { use } from "react";
 
 interface PostDetail {
@@ -18,8 +18,10 @@ interface PostDetail {
 	content: string;
 	replies_count: number;
 	reposts_count: number;
-    likes_count: number;
-    is_liked: boolean;
+	likes_count: number;
+	is_liked: boolean;
+	reply_to_id: string | null;
+	replies?: PostDetail[];
 }
 
 export default function PostDetailPage({
@@ -33,39 +35,49 @@ export default function PostDetailPage({
 	const [post, setPost] = useState<PostDetail | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
+	const [replyingTo, setReplyingTo] = useState<string | null>(null);
+
+	const fetchPost = async () => {
+		if (!idToken) return;
+
+		setIsLoading(true);
+		try {
+			// params.idの取得
+			const id = (await params).id;
+			console.log("id:", id);
+			console.log(`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/${id}`);
+			const response = await fetch(
+				`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/one/${id}`,
+				{
+					headers: {
+						Authorization: `Bearer ${idToken}`,
+					},
+				}
+			);
+
+			if (!response.ok) {
+				throw new Error("Failed to fetch post");
+			}
+
+			const data = await response.json();
+			setPost(data);
+			setError(null);
+		} catch (error) {
+			console.error("Error fetching post:", error);
+			setError("投稿の取得に失敗しました。");
+		} finally {
+			setIsLoading(false);
+		}
+	};
 
 	useEffect(() => {
-		async function fetchPost() {
-			if (!idToken) return;
-
-			setIsLoading(true);
-			try {
-				const response = await fetch(
-					`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/one/${id}`,
-					{
-						headers: {
-							Authorization: `Bearer ${idToken}`,
-						},
-					}
-				);
-
-				if (!response.ok) {
-					throw new Error("Failed to fetch post");
-				}
-
-				const data = await response.json();
-				setPost(data);
-				setError(null);
-			} catch (error) {
-				console.error("Error fetching post:", error);
-				setError("投稿の取得に失敗しました。");
-			} finally {
-				setIsLoading(false);
-			}
-		}
-
 		fetchPost();
 	}, [idToken, id]);
+
+	const handleReplySuccess = () => {
+		fetchPost(); // Refetch the post to update replies
+		setReplyingTo(null);
+	};
 
 	if (isLoading) {
 		return <div className="p-4 text-center">読み込み中...</div>;
@@ -78,6 +90,29 @@ export default function PostDetailPage({
 	if (!post) {
 		return <div className="p-4 text-center">投稿が見つかりません。</div>;
 	}
+
+	const renderPost = (post: PostDetail, isReplyTo: boolean = false) => {
+		return (
+			<div key={post.id}>
+				<Post
+					{...post}
+					isReplyTo={isReplyTo}
+					hasReplies={!!post.replies && post.replies.length > 0}
+					onReplyClick={() => setReplyingTo(post.id)}
+					onRepostClick={() => {}} // Implement repost functionality if needed
+				/>
+				{replyingTo === post.id && (
+					<Reply
+						postId={post.id}
+						username={post.username}
+						onClose={() => setReplyingTo(null)}
+						onReplySuccess={handleReplySuccess}
+					/>
+				)}
+				{post.replies?.map((reply) => renderPost(reply, true))}
+			</div>
+		);
+	};
 
 	return (
 		<div className="min-h-screen bg-black text-white">
@@ -96,29 +131,15 @@ export default function PostDetailPage({
 					</div>
 				</div>
 
-				<Post {...post} onReplyClick={() => { } } onRepostClick={() => { } }  />
+				{renderPost(post)}
 
-				<div className="flex justify-around border-y border-[#2f3336] py-2">
-					<Reply postId={post.id} username={post.username} />
+				<div className="flex justify-around border-y border-[#2f3336] py-">
+					<Reply
+						postId={post.id}
+						username={post.username}
+						onReplySuccess={handleReplySuccess}
+					/>
 					<Repost postId={post.id} username={post.username} />
-				</div>
-
-				<div className="p-4 border-b border-[#2f3336]">
-					<div className="flex gap-4">
-						<div className="w-10 h-10 rounded-full bg-[#2f3336]" />
-						<div className="flex-1">
-							<textarea
-								placeholder="返信をポスト"
-								className="w-full bg-transparent border-none resize-none focus:ring-0 placeholder:text-[#71767b]"
-								rows={4}
-							/>
-							<div className="flex justify-end mt-2">
-								<Button className="rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] px-4">
-									返信
-								</Button>
-							</div>
-						</div>
-					</div>
 				</div>
 			</div>
 		</div>

@@ -11,30 +11,34 @@ interface ReplyProps {
 	onReplySuccess?: () => void;
 }
 
-export function Reply({ postId, username, onClose, onReplySuccess }: ReplyProps) {
+export function Reply({
+	postId,
+	username,
+	onClose,
+	onReplySuccess,
+}: ReplyProps) {
 	const [replyContent, setReplyContent] = useState("");
+	const [isSubmitting, setIsSubmitting] = useState(false);
 	const { idToken } = useAuth();
 
 	const handleReply = async () => {
-		console.log("Replying to post:", postId, replyContent);
-		if (!idToken || !replyContent.trim()) {
-			console.error("Invalid reply content or idToken");
-			return;
-		}
+		if (!idToken || !replyContent.trim()) return;
 
+		setIsSubmitting(true);
 		try {
-			console.log("Replying create start");
 			const result = await replyToPost(postId, replyContent, idToken);
-			console.log("result", result);
 			if (result.success) {
 				setReplyContent("");
-				onClose?.()
+				onClose?.();
 				onReplySuccess?.();
-				console.log("Replied successfully");
-				// You might want to update the UI or show a success message here
+			} else {
+				// Handle error
+				console.error("Failed to reply:", result.error);
 			}
 		} catch (error) {
 			console.error("Error replying:", error);
+		} finally {
+			setIsSubmitting(false);
 		}
 	};
 
@@ -51,15 +55,15 @@ export function Reply({ postId, username, onClose, onReplySuccess }: ReplyProps)
 						rows={4}
 					/>
 					<div className="flex justify-end mt-2 space-x-2">
-						<Button variant="ghost" onClick={() => onClose?.()}>
+						<Button variant="ghost" onClick={onClose}>
 							キャンセル
 						</Button>
 						<Button
 							onClick={handleReply}
-							disabled={!replyContent.trim()}
+							disabled={!replyContent.trim() || isSubmitting}
 							className="rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] px-4"
 						>
-							返信を送信
+							{isSubmitting ? "送信中..." : "返信"}
 						</Button>
 					</div>
 				</div>
