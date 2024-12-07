@@ -50,10 +50,8 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 			}
 
 			const data = await response.json();
-			console.log("Fetched data:", data);
 
 			const threadedPosts = organizeThreads(data);
-			console.log("Threaded posts:", threadedPosts);
 			setPosts(threadedPosts);
 			setError(null);
 		} catch (error) {
@@ -115,7 +113,6 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 	};
 
 	const handleRepostClick = (postId: string) => {
-		console.log("Repost clicked for post:", postId);
 	};
 
 	if (isLoading) {
@@ -126,7 +123,6 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 		return <div className="p-4 text-center text-red-500">{error}</div>;
 	}
 
-	console.log("Rendering posts:", posts);
 
 	if (posts.length === 0) {
 		return (

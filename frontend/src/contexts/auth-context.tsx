@@ -65,7 +65,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 				email,
 				password
 			);
-			console.log("User signed in:", userCredential.user);
 			const token = await userCredential.user.getIdToken();
 			setIdToken(token);
 			localStorage.setItem("idToken", token);

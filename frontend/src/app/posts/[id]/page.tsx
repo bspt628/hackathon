@@ -44,8 +44,6 @@ export default function PostDetailPage({
 		try {
 			// params.idの取得
 			const id = (await params).id;
-			console.log("id:", id);
-			console.log(`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/${id}`);
 			const response = await fetch(
 				`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/one/${id}`,
 				{

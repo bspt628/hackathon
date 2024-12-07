@@ -39,6 +39,14 @@ export default function HomePage() {
 		setRefreshTrigger((prev) => prev + 1);
 	};
 
+	const handleVideoSelect = (videoId: string) => {
+		setCurrentVideoId(videoId);
+	};
+
+	const handleCloseAudioPlayer = () => {
+		setCurrentVideoId(null);
+	};
+
 	if (isLoading) {
 		return (
 			<div className="min-h-screen bg-black text-white flex items-center justify-center">
@@ -102,26 +110,25 @@ export default function HomePage() {
 						</div>
 					</div>
 					<CreatePost onPostSuccess={hundlePostSuccess} />
-					<div className="p-4 border-b border-[#2f3336]">
-						<YouTubeSearch onVideoSelect={setCurrentVideoId} />
-					</div>
-					{currentVideoId && <AudioPlayer videoId={currentVideoId} />}
 					<Timeline refreshTrigger={refreshTrigger} />
 				</main>
 
 				{/* Right Sidebar */}
-				<div className="w-80 fixed right-0 h-screen p-4">
-					<div className="sticky top-0">
-						<div className="relative">
+				<div className="w-80 fixed right-0 h-screen overflow-y-auto p-4">
+					<div className="sticky top-0 bg-black pb-4">
+						<div className="relative mb-4">
 							<Search className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
 							<Input
 								placeholder="検索"
 								className="pl-10 bg-[#202327] border-transparent focus:border-[#1d9bf0] text-white"
 							/>
 						</div>
+						<YouTubeSearch onVideoSelect={handleVideoSelect} />
 					</div>
+					{/* ここに他の右サイドバーのコンテンツを追加できます */}
 				</div>
 			</div>
+			<AudioPlayer videoId={currentVideoId} onClose={handleCloseAudioPlayer} />
 		</div>
 	);
 }

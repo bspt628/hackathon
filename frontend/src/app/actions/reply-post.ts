@@ -15,7 +15,6 @@ interface CreatePostRequest {
 export async function replyToPost(postId: string, content: string, idToken: string) {
 	try {
 		// First, get the user ID from the token
-		console.log("idToken", idToken);
 		const userResponse = await fetch(
             `https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/users/firebase`,
 			{
@@ -31,12 +30,6 @@ export async function replyToPost(postId: string, content: string, idToken: stri
 
 		const userData = await userResponse.json();
 		const userId = userData.user_id;
-		console.log("userId", userId);
-
-		console.log("reply to postId", postId);
-
-		
-		
 		// post_idの元ポストのIDを取得する
 		const originalPostResponse = await fetch(
 			`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts/timeline/one/${postId}`,
@@ -50,11 +43,7 @@ export async function replyToPost(postId: string, content: string, idToken: stri
 			throw new Error("Failed to fetch original post data");
 		}
 		const originalPostData = await originalPostResponse.json();
-		console.log("originalPostData", originalPostData);
-
 		const rootPostId = (originalPostData.root_post_id == "") ? postId : originalPostData.root_post_id;
-		console.log("rootPostId", rootPostId);
-			
 		const postData: CreatePostRequest = {
 			user_id: userId,
 			content,

@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Loader2 } from "lucide-react";
 
 interface YouTubeSearchResultItem {
 	id: {
@@ -35,8 +36,11 @@ export function YouTubeSearch({
 }) {
 	const [query, setQuery] = useState("");
 	const [results, setResults] = useState<SearchResult[]>([]);
+	const [isSearching, setIsSearching] = useState(false);
 
 	const handleSearch = async () => {
+		console.log("Searching YouTube for:", query);
+		setIsSearching(true);
 		try {
 			const response = await fetch(
 				`/api/youtube-search?q=${encodeURIComponent(query)}`
@@ -55,6 +59,8 @@ export function YouTubeSearch({
 			);
 		} catch (error) {
 			console.error("Error searching YouTube:", error);
+		} finally {
+			setIsSearching(false);
 		}
 	};
 
@@ -68,7 +74,16 @@ export function YouTubeSearch({
 					onChange={(e) => setQuery(e.target.value)}
 					className="flex-grow"
 				/>
-				<Button onClick={handleSearch}>Search</Button>
+				<Button onClick={handleSearch} disabled={isSearching}>
+					{isSearching ? (
+						<>
+							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+							検索中...
+						</>
+					) : (
+						"検索"
+					)}
+				</Button>
 			</div>
 			<div className="grid grid-cols-2 gap-4">
 				{results.map((result) => (
