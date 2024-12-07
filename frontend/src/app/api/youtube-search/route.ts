@@ -13,7 +13,7 @@ export async function GET(request: Request) {
   const response = await fetch(
     `https://www.googleapis.com/youtube/v3/search?part=snippet&q=${encodeURIComponent(
       query
-    )}&key=${YOUTUBE_API_KEY}&type=video&maxResults=20`
+    )}&key=${NEXT_PUBLIC_YOUTUBE_API_KEY}&type=video&maxResults=20`
   )
 
   const data = await response.json()
