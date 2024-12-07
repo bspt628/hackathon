@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/auth-context";
 interface AudioPlayerProps {
 	videoId: string | null;
 	onClose: () => void;
-	onCopy: (text: string) => void;
+	onCopy?: (text: string) => void;
 }
 
 export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
@@ -90,7 +90,7 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 				width: "0",
 				videoId: videoId.includes("youtube.com") ? undefined : videoId,
 				playerVars: {
-					autoplay: 0,
+					autoplay: 1,
 					controls: 0,
 					...(videoId.includes("youtube.com")
 						? { origin: window.location.origin }
@@ -214,7 +214,7 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 					console.error("Failed to copy text: ", err);
 				});
 
-			onCopy(copyText);
+			onCopy?.(copyText);
 		}
 	};
 

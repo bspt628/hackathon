@@ -19,7 +19,7 @@ export default function HomePage() {
 	const [postContent, setPostContent] = useState("");
 	const [currentVideoId, setCurrentVideoId] = useState<string | null>(null); // Update 1
 
-	const { user, idToken, logout } = useAuth();
+	const { idToken, logout } = useAuth();
 	const { copiedText } = useYouTube();
 	const router = useRouter();
 

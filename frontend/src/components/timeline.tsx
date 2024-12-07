@@ -112,7 +112,7 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 		setReplyingTo(postId);
 	};
 
-	const handleRepostClick = (postId: string) => {
+	const handleRepostClick = () => {
 	};
 
 	if (isLoading) {
@@ -152,7 +152,7 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 					isReplyTo={isReplyTo}
 					hasReplies={!!post.replies && post.replies.length > 0}
 					onReplyClick={() => handleReply(post.id)}
-					onRepostClick={() => handleRepostClick(post.id)}
+					onRepostClick={() => handleRepostClick()}
 				/>
 				{replyingTo === post.id && (
 					<Reply

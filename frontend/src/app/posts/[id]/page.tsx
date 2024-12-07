@@ -2,16 +2,13 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft, Search } from "lucide-react";
+import { ArrowLeft} from 'lucide-react';
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { Post } from "@/components/post";
 import { Repost } from "@/components/repost";
 import { Reply } from "@/components/reply";
-import { YouTubeSearch } from "@/components/youtube-search";
 import { AudioPlayer } from "@/components/audio-player";
 import { useAuth } from "@/contexts/auth-context";
-import { useYouTube } from "@/contexts/youtube-context";
 
 interface PostDetail {
 	id: string;
@@ -31,13 +28,11 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 	const { id } = use(params);
 	const router = useRouter();
 	const { idToken } = useAuth();
-	const { isEnabled: isYouTubeEnabled } = useYouTube();
 	const [post, setPost] = useState<PostDetail | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [replyingTo, setReplyingTo] = useState<string | null>(null);
 	const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
-	const [postContent, setPostContent] = useState("");
 
 	const fetchPost = async () => {
 		if (!idToken) return;
@@ -143,7 +138,7 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 				</div>
 
 				{/* Right Sidebar */}
-				{isYouTubeEnabled && (
+				{/*isYouTubeEnabled && (
 					<div className="w-80 fixed right-0 h-screen overflow-y-auto p-4">
 						<div className="sticky top-0 bg-black pb-4">
 							<div className="relative mb-4">
@@ -156,16 +151,16 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 							<YouTubeSearch onVideoSelect={setCurrentVideoId} />
 						</div>
 					</div>
-				)}
+				)*/}
 			</div>
 			{currentVideoId && (
 				<AudioPlayer
 					key={currentVideoId}
 					videoId={currentVideoId}
 					onClose={() => setCurrentVideoId(null)}
-					onCopy={(text) => setPostContent(text)}
 				/>
 			)}
 		</div>
 	);
 }
+

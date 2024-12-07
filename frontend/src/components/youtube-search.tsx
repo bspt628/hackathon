@@ -24,19 +24,13 @@ interface YouTubeSearchResponse {
 	items: YouTubeSearchResultItem[];
 }
 
-interface SearchResult {
-	id: string;
-	title: string;
-	thumbnail: string;
-}
-
 export function YouTubeSearch({
 	onVideoSelect,
 }: {
 	onVideoSelect: (videoId: string) => void;
 }) {
 	const [query, setQuery] = useState("");
-	const { searchResults, setSearchResults, setCurrentVideoId } = useYouTube();
+	const { searchResults, setSearchResults } = useYouTube();
 	const [isSearching, setIsSearching] = useState(false);
 
 	const handleSearch = async () => {
@@ -52,7 +46,7 @@ export function YouTubeSearch({
 
 			const data: YouTubeSearchResponse = await response.json();
 			setSearchResults(
-				data.items.map((item) => ({
+				data.items.map((item: YouTubeSearchResultItem) => ({
 					id: item.id.videoId,
 					title: item.snippet.title,
 					thumbnail: item.snippet.thumbnails.default.url,
@@ -73,7 +67,7 @@ export function YouTubeSearch({
 					placeholder="Search YouTube"
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
-					className="flex-grow"
+					className="flex-grow text-white placeholder-gray-400"
 				/>
 				<Button
 					onClick={handleSearch}
@@ -98,7 +92,7 @@ export function YouTubeSearch({
 						onClick={() => onVideoSelect(result.id)}
 					>
 						<img src={result.thumbnail} alt={result.title} className="w-full" />
-						<p className="mt-2 text-sm">{result.title}</p>
+						<p className="mt-2 text-sm text-white">{result.title}</p>
 					</div>
 				))}
 			</div>

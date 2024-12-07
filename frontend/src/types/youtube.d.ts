@@ -71,7 +71,9 @@ declare namespace YT {
     target: Player;
   }
 
-  interface OnReadyEvent extends PlayerEvent {}
+  interface OnReadyEvent extends PlayerEvent {
+    data: number;
+  }
   interface OnStateChangeEvent extends PlayerEvent {
     data: number;
   }
@@ -84,7 +86,9 @@ declare namespace YT {
   interface OnErrorEvent extends PlayerEvent {
     data: number;
   }
-  interface OnApiChangeEvent extends PlayerEvent {}
+  interface OnApiChangeEvent extends PlayerEvent {
+    data: number;
+  }
 
   interface Events {
     OnReady: OnReadyEvent;

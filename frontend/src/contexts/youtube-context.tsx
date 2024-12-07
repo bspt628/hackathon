@@ -2,24 +2,30 @@
 
 import React, { createContext, useContext, useState } from 'react'
 
+interface SearchResult {
+  id: string;
+  title: string;
+  thumbnail: string;
+}
+
 interface YouTubeContextType {
-  currentVideoId: string | null
-  setCurrentVideoId: (id: string | null) => void
-  searchResults: any[]
-  setSearchResults: (results: any[]) => void
-  copiedText: string
-  setCopiedText: (text: string) => void
-  isEnabled: boolean
+  currentVideoId: string | null;
+  setCurrentVideoId: (id: string | null) => void;
+  searchResults: SearchResult[];
+  setSearchResults: (results: SearchResult[]) => void;
+  copiedText: string;
+  setCopiedText: (text: string) => void;
+  isEnabled: boolean;
 }
 
 const YouTubeContext = createContext<YouTubeContextType | undefined>(undefined)
 
 export function YouTubeProvider({ children, isEnabled = true }: { children: React.ReactNode, isEnabled?: boolean }) {
   const [currentVideoId, setCurrentVideoId] = useState<string | null>(null)
-  const [searchResults, setSearchResults] = useState<any[]>([])
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([])
   const [copiedText, setCopiedText] = useState<string>('')
 
-  const contextValue = {
+  const contextValue: YouTubeContextType = {
     currentVideoId,
     setCurrentVideoId: isEnabled ? setCurrentVideoId : () => {},
     searchResults,
