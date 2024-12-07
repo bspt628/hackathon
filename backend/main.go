@@ -1,7 +1,6 @@
 package main
 
 import (
-	// "github.com/joho/godotenv"
 	"hackathon/internal/auth"
 	"hackathon/internal/server"
 	"log"
@@ -13,6 +12,7 @@ func main() {
     if err != nil {
         log.Fatalf("Firebase initialization failed: %v", err)
     }
+
 	
 	// サーバーのセットアップと起動
 	if err := server.Start(); err != nil {
