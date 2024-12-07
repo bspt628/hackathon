@@ -13,7 +13,7 @@ func (pc *PostController) GetAllPosts(w http.ResponseWriter, r *http.Request) {
 	limitStr := r.URL.Query().Get("limit")
 	limit, err := strconv.Atoi(limitStr)
 	if err != nil || limit <= 0 {
-		limit = 10 // デフォルト値
+		limit = 100 // デフォルト値
 	}
 
     posts, err := pc.postUsecase.GetAllPosts(context.Background(), int32(limit))
