@@ -1,13 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Post } from "@/components/post";
-import { useAuth } from "@/contexts/auth-context";
-import { use } from 'react';
-
+import { useEffect, useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { ArrowLeft } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { Post } from '@/components/post'
+import { Repost } from '@/components/repost'
+import { Reply } from '@/components/reply'
+import { useAuth } from '@/contexts/auth-context'
+import { use } from "react";
 
 interface PostDetail {
 	id: string;
@@ -17,11 +18,16 @@ interface PostDetail {
 	content: string;
 	replies_count: number;
 	reposts_count: number;
-	likes_count: number;
+    likes_count: number;
+    is_liked: boolean;
 }
 
-export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
-    const { id } = use(params);
+export default function PostDetailPage({
+	params,
+}: {
+	params: Promise<{ id: string }>;
+}) {
+	const { id } = use(params);
 	const router = useRouter();
 	const { idToken } = useAuth();
 	const [post, setPost] = useState<PostDetail | null>(null);
@@ -86,11 +92,16 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 						>
 							<ArrowLeft className="h-5 w-5" />
 						</Button>
-						<h1 className="text-xl font-bold">ポストする</h1>
+						<h1 className="text-xl font-bold">ポスト</h1>
 					</div>
 				</div>
 
-				<Post {...post} />
+				<Post {...post} onReplyClick={() => { } } onRepostClick={() => { } }  />
+
+				<div className="flex justify-around border-y border-[#2f3336] py-2">
+					<Reply postId={post.id} username={post.username} />
+					<Repost postId={post.id} username={post.username} />
+				</div>
 
 				<div className="p-4 border-b border-[#2f3336]">
 					<div className="flex gap-4">

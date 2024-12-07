@@ -18,8 +18,6 @@ export function CreatePost() {
 
 		setIsLoading(true);
 		try {
-			console.log("createPost ... ");
-			console.log("idToken", idToken);
             const result = await createPost(content, idToken);
             console.log("result", result);
 			if (result.success) {

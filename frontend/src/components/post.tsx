@@ -1,7 +1,9 @@
+import React, { useEffect, useState } from 'react'
 import { MessageSquare, Repeat2, Heart } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { ja } from "date-fns/locale";
 import { useRouter } from "next/navigation";
+import { useLikes } from "@/contexts/like-context";
 
 interface PostProps {
 	id: string;
@@ -12,6 +14,8 @@ interface PostProps {
 	replies_count: number;
 	reposts_count: number;
 	likes_count: number;
+	onReplyClick?: () => void;
+	onRepostClick?: () => void;
 }
 
 export function Post({
@@ -22,9 +26,20 @@ export function Post({
 	content,
 	replies_count,
 	reposts_count,
-	likes_count,
+	likes_count: initialLikesCount,
+	onReplyClick,
+	onRepostClick,
 }: PostProps) {
 	const router = useRouter();
+	const { toggleLike, isLiked, fetchLikeStatus } = useLikes();
+	const [liked, setLiked] = useState(isLiked(id));
+	const [likesCount, setLikesCount] = useState(initialLikesCount);
+
+	useEffect(() => {
+		fetchLikeStatus(id).then(() => {
+			setLiked(isLiked(id));
+		});
+	}, [id, fetchLikeStatus, isLiked]);
 	const timeAgo = formatDistanceToNow(new Date(created_at), {
 		addSuffix: true,
 		locale: ja,
@@ -36,6 +51,13 @@ export function Post({
 			return;
 		}
 		router.push(`/posts/${id}`);
+	};
+	const handleLikeToggle = async (e: React.MouseEvent) => {
+		e.stopPropagation();
+		await toggleLike(id);
+		const newLikedState = !liked;
+		setLiked(newLikedState);
+		setLikesCount((prev) => (newLikedState ? prev + 1 : prev - 1));
 	};
 
 	return (
@@ -58,7 +80,7 @@ export function Post({
 							className="flex items-center gap-2 hover:text-[#1d9bf0]"
 							onClick={(e) => {
 								e.stopPropagation();
-								// Handle reply
+								onReplyClick?.();
 							}}
 						>
 							<MessageSquare className="w-5 h-5" />
@@ -68,21 +90,20 @@ export function Post({
 							className="flex items-center gap-2 hover:text-[#00ba7c]"
 							onClick={(e) => {
 								e.stopPropagation();
-								// Handle repost
+								onRepostClick?.();
 							}}
 						>
 							<Repeat2 className="w-5 h-5" />
 							<span>{reposts_count}</span>
 						</button>
 						<button
-							className="flex items-center gap-2 hover:text-[#f91880]"
-							onClick={(e) => {
-								e.stopPropagation();
-								// Handle like
-							}}
+							className={`flex items-center gap-2 hover:text-[#f91880] ${
+								liked ? "text-[#f91880]" : ""
+							}`}
+							onClick={handleLikeToggle}
 						>
-							<Heart className="w-5 h-5" />
-							<span>{likes_count}</span>
+							<Heart className={`w-5 h-5 ${liked ? "fill-current" : ""}`} />
+							<span>{likesCount}</span>
 						</button>
 					</div>
 				</div>

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Post } from "./post";
+import { Reply } from "./reply";
 
 interface TimelinePost {
 	id: string;
@@ -20,6 +21,7 @@ export function Timeline() {
 	const [posts, setPosts] = useState<TimelinePost[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const [replyingTo, setReplyingTo] = useState<string | null>(null);
 
 	useEffect(() => {
 		async function fetchPosts() {
@@ -55,6 +57,15 @@ export function Timeline() {
 		fetchPosts();
 	}, [idToken]);
 
+	const handleReply = (postId: string) => {
+		setReplyingTo(postId);
+	};
+
+	const handleRepostClick = (postId: string) => {
+		// Implement repost functionality
+		console.log("Repost clicked for post:", postId);
+	};
+
 	if (isLoading) {
 		return <div className="p-4 text-center">読み込み中...</div>;
 	}
@@ -70,7 +81,20 @@ export function Timeline() {
 	return (
 		<div>
 			{posts.map((post) => (
-				<Post key={post.id} {...post} />
+				<div key={post.id}>
+					<Post
+						{...post}
+						onReplyClick={() => handleReply(post.id)}
+						onRepostClick={() => handleRepostClick(post.id)}
+					/>
+					{replyingTo === post.id && (
+						<Reply
+							postId={post.id}
+							username={post.username}
+							onClose={() => setReplyingTo(null)}
+						/>
+					)}
+				</div>
 			))}
 		</div>
 	);
