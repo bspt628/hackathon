@@ -1,67 +1,93 @@
 "use client";
 
 import { createContext, useContext, useEffect, useState } from "react";
-import { auth, signOut } from "@/lib/firebase";
-import { User } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+import { User, signInWithEmailAndPassword, signOut } from "firebase/auth";
+import { useRouter } from "next/navigation";
 
 interface AuthContextType {
-  user: User | null;
-  idToken: string | null;
-  logout: () => Promise<void>;
-  setCurrentUser: React.Dispatch<React.SetStateAction<User | null>>; // 追加
-  setIdToken: React.Dispatch<React.SetStateAction<string | null>>; // 追加
+	user: User | null;
+	idToken: string | null;
+	getIdToken: () => Promise<string | null>;
+	login: (email: string, password: string) => Promise<void>;
+	logout: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType>({
-  user: null,
-  idToken: null,
-  logout: async () => {
-    throw new Error("logout function must be overridden in the provider.");
-  },
-  setCurrentUser: () => {}, // 初期値は空の関数
-  setIdToken: () => {}, // 初期値は空の関数
+	user: null,
+	idToken: null,
+	getIdToken: async () => null,
+	login: async () => {},
+	logout: async () => {},
 });
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
-  const [idToken, setIdToken] = useState<string | null>(null);
+	const [user, setUser] = useState<User | null>(null);
+	const [idToken, setIdToken] = useState<string | null>(null);
+	const router = useRouter();
 
-  useEffect(() => {
-    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-      console.log("User state changed:");
-      console.log(user);
-      if (user) {
-        const token = await user.getIdToken();
-        setCurrentUser(user); // ユーザー情報を更新
-        setIdToken(token); // IDトークンを更新
-      } else {
-        setCurrentUser(null); // ユーザーがログアウトした場合、nullを設定
-        setIdToken(null); // IDトークンもnullに設定
-      }
-    });
+	useEffect(() => {
+		const unsubscribe = auth.onAuthStateChanged(async (user) => {
+			setUser(user);
+			if (user) {
+				const token = await user.getIdToken();
+				setIdToken(token);
+				localStorage.setItem("idToken", token);
+			} else {
+				setIdToken(null);
+				localStorage.removeItem("idToken");
+			}
+		});
 
-    return () => unsubscribe(); // クリーンアップ
-  }, []);
+		// ページロード時にローカルストレージからトークンを復元
+		const storedToken = localStorage.getItem("idToken");
+		if (storedToken) {
+			setIdToken(storedToken);
+		}
 
-  // ログアウト関数
-  const logout = async () => {
-    try {
-      await signOut(auth); // FirebaseのsignOutを呼び出してログアウト
-      setCurrentUser(null); // ユーザー情報をnullに設定
-      setIdToken(null); // IDトークンをnullに設定
-      console.log("User logged out successfully");
-    } catch (error) {
-      console.error("Error logging out: ", error);
-    }
-  };
+		return () => unsubscribe();
+	}, []);
 
-  return (
-    <AuthContext.Provider
-      value={{ user: currentUser, idToken, logout, setCurrentUser, setIdToken }}
-    >
-      {children}
-    </AuthContext.Provider>
-  );
+	const getIdToken = async () => {
+		if (user) {
+			const token = await user.getIdToken(true);
+			setIdToken(token);
+			localStorage.setItem("idToken", token);
+			return token;
+		}
+		return null;
+	};
+
+	const login = async (email: string, password: string) => {
+		try {
+			const userCredential = await signInWithEmailAndPassword(
+				auth,
+				email,
+				password
+			);
+			console.log("User signed in:", userCredential.user);
+			const token = await userCredential.user.getIdToken();
+			setIdToken(token);
+			localStorage.setItem("idToken", token);
+			router.push("/home");
+		} catch (error) {
+			console.error("Login error:", error);
+			throw error;
+		}
+	};
+
+	const logout = async () => {
+		await signOut(auth);
+		setIdToken(null);
+		localStorage.removeItem("idToken");
+		router.push("/login");
+	};
+
+	return (
+		<AuthContext.Provider value={{ user, idToken, getIdToken, login, logout }}>
+			{children}
+		</AuthContext.Provider>
+	);
 }
 
 export const useAuth = () => useContext(AuthContext);

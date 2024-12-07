@@ -5,12 +5,11 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { loginUser } from "../actions/login";
-import { useAuth } from "@/contexts/auth-context"; // useAuthをインポート
+import { useAuth } from "@/contexts/auth-context";
 
 export default function LoginPage() {
 	const router = useRouter();
-	const { setCurrentUser, setIdToken } = useAuth(); // setCurrentUserとsetIdTokenを取得
+	const { login } = useAuth();
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(false);
 
@@ -20,21 +19,36 @@ export default function LoginPage() {
 		setError(null);
 
 		const formData = new FormData(event.currentTarget);
-		const result = await loginUser(formData); // サーバーサイドのloginUserを呼び出す
+		const username = formData.get("username") as string;
+		const password = formData.get("password") as string;
 
-		// ログイン処理の結果に基づいてユーザー情報を更新
-		if (result.success) {
+		try {
+			// First, fetch the email for the username
+			const emailResponse = await fetch(
+				`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/users/email/${username}`
+			);
 
-			// AuthContextのuserとidTokenを更新
-			setCurrentUser(JSON.parse(result.user)); // userを更新
-			setIdToken(result.id_token); // IDトークンを更新
+			if (!emailResponse.ok) {
+				throw new Error("Failed to fetch email");
+			}
 
-			router.push("/home"); // ログイン成功時にホームページにリダイレクト
-		} else {
-			setError(result.error ?? "ログインに失敗しました。");
+			const emailData = await emailResponse.json();
+
+			if (!emailData.email) {
+				throw new Error("Email not found for username");
+			}
+
+			// Then sign in with the email and password
+			await login(emailData.email, password);
+			router.push("/home");
+		} catch (error) {
+			console.error("Login error:", error);
+			setError(
+				error instanceof Error ? error.message : "ログインに失敗しました。"
+			);
+		} finally {
+			setIsLoading(false);
 		}
-
-		setIsLoading(false);
 	}
 
 	return (

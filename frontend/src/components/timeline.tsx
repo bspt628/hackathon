@@ -148,7 +148,9 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 
 	const renderPost = (post: TimelinePost, isReplyTo: boolean = false) => {
 		return (
+			
 			<div key={post.id}>
+				
 				<Post
 					{...post}
 					isReplyTo={isReplyTo}

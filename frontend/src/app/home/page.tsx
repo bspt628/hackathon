@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { Home, Search, Bell, Mail, User, LogOut } from "lucide-react"; // ログアウトアイコンを追加
 import { Timeline } from "@/components/timeline";
 import { YouTubeSearch } from "@/components/youtube-search";
-import { CreatePost } from '@/components/create-post'
+import { CreatePost } from "@/components/create-post";
 import { AudioPlayer } from "@/components/audio-player";
 import Link from "next/link";
 import { Input } from "@/components/ui/input";
@@ -15,21 +15,19 @@ import { useRouter } from "next/navigation";
 export default function HomePage() {
 	const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
 	// const [showTimeline, setShowTimeline] = useState(false);
-	const { user, logout } = useAuth(); // signOutを取得
-	
+	const { user, logout, idToken } = useAuth(); // signOutを取得
+
 	const router = useRouter();
 	const [refreshTrigger, setRefreshTrigger] = useState(0);
+	const [isLoading, setIsLoading] = useState(true);
 
-	
 	useEffect(() => {
-		if (!user) {
+		if (idToken === null && !localStorage.getItem("idToken")) {
 			router.push("/login");
+		} else {
+			setIsLoading(false);
 		}
-	}, [user, router]);
-
-	if (!user) {
-		return null;
-	}
+	}, [idToken, router]);
 
 	// ログアウト処理
 	const handleSignOut = async () => {
@@ -39,6 +37,14 @@ export default function HomePage() {
 
 	const hundlePostSuccess = () => {
 		setRefreshTrigger((prev) => prev + 1);
+	};
+
+	if (isLoading) {
+		return (
+			<div className="min-h-screen bg-black text-white flex items-center justify-center">
+				読み込み中...
+			</div>
+		);
 	}
 
 	return (
@@ -47,7 +53,10 @@ export default function HomePage() {
 				{/* Left Sidebar */}
 				<div className="w-64 fixed h-screen border-r border-[#2f3336] p-4">
 					<div className="space-y-4">
-						<Link href="/home" className="block p-3 hover:bg-white/10 rounded-full">
+						<Link
+							href="/home"
+							className="block p-3 hover:bg-white/10 rounded-full"
+						>
 							<Home className="w-7 h-7" />
 						</Link>
 						<Link href="#" className="block p-3 hover:bg-white/10 rounded-full">

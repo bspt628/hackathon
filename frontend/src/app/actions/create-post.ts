@@ -43,6 +43,10 @@ export async function createPost(content: string, idToken: string) {
 			is_reply: false,
 		};
 
+		if (content.length > 140) {
+			throw new Error("Post content is too long");
+		}
+
 		const response = await fetch(
 			"https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/posts",
 			{
