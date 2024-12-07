@@ -9,9 +9,9 @@ import { Post } from "@/components/post";
 import { Repost } from "@/components/repost";
 import { Reply } from "@/components/reply";
 import { YouTubeSearch } from "@/components/youtube-search";
+import { AudioPlayer } from "@/components/audio-player";
 import { useAuth } from "@/contexts/auth-context";
 import { useYouTube } from "@/contexts/youtube-context";
-
 
 interface PostDetail {
 	id: string;
@@ -27,15 +27,17 @@ interface PostDetail {
 	replies?: PostDetail[];
 }
 
-export default function PostDetailPage({ params }: {params: Promise<{ id: string }>;}) {
+export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
+	const { id } = use(params);
 	const router = useRouter();
 	const { idToken } = useAuth();
-	const { id } = use(params);
-	const { setCurrentVideoId, isEnabled: isYouTubeEnabled } = useYouTube();
+	const { isEnabled: isYouTubeEnabled } = useYouTube();
 	const [post, setPost] = useState<PostDetail | null>(null);
 	const [error, setError] = useState<string | null>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [replyingTo, setReplyingTo] = useState<string | null>(null);
+	const [currentVideoId, setCurrentVideoId] = useState<string | null>(null);
+	const [postContent, setPostContent] = useState("");
 
 	const fetchPost = async () => {
 		if (!idToken) return;
@@ -156,6 +158,14 @@ export default function PostDetailPage({ params }: {params: Promise<{ id: string
 					</div>
 				)}
 			</div>
+			{currentVideoId && (
+				<AudioPlayer
+					key={currentVideoId}
+					videoId={currentVideoId}
+					onClose={() => setCurrentVideoId(null)}
+					onCopy={(text) => setPostContent(text)}
+				/>
+			)}
 		</div>
 	);
 }

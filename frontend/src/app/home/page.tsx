@@ -17,33 +17,28 @@ export default function HomePage() {
 	const [refreshTrigger, setRefreshTrigger] = useState(0);
 	const [isLoading, setIsLoading] = useState(true);
 	const [postContent, setPostContent] = useState("");
+	const [currentVideoId, setCurrentVideoId] = useState<string | null>(null); // Update 1
 
 	const { user, idToken, logout } = useAuth();
-	const {
-		currentVideoId,
-		setCurrentVideoId,
-		copiedText,
-		isEnabled: isYouTubeEnabled,
-	} = useYouTube();
+	const { copiedText } = useYouTube();
 	const router = useRouter();
 
 	useEffect(() => {
-		if (idToken === "" && !localStorage.getItem("idToken")) {
+		if (idToken === null && !localStorage.getItem("idToken")) {
 			router.push("/login");
 		} else {
 			setIsLoading(false);
 		}
 	}, [idToken, router]);
 
-	// ログアウト処理
 	const handleSignOut = async () => {
-		await logout(); // signOutを呼び出してログアウト
-		router.push("/login"); // ログインページにリダイレクト
+		await logout();
+		router.push("/login");
 	};
 
-	const hundlePostSuccess = () => {
+	const handlePostSuccess = () => {
 		setRefreshTrigger((prev) => prev + 1);
-		setPostContent("");
+		setPostContent(""); // Clear the post content after successful post
 	};
 
 	useEffect(() => {
@@ -115,30 +110,29 @@ export default function HomePage() {
 						</div>
 					</div>
 					<CreatePost
-						onPostSuccess={hundlePostSuccess}
+						onPostSuccess={handlePostSuccess}
 						initialContent={postContent}
 					/>
 					<Timeline refreshTrigger={refreshTrigger} />
 				</main>
 
 				{/* Right Sidebar */}
-				{isYouTubeEnabled && (
-					<div className="w-80 fixed right-0 h-screen overflow-y-auto p-4">
-						<div className="sticky top-0 bg-black pb-4">
-							<div className="relative mb-4">
-								<Search className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
-								<Input
-									placeholder="検索"
-									className="pl-10 bg-[#202327] border-transparent focus:border-[#1d9bf0] text-white"
-								/>
-							</div>
-							<YouTubeSearch onVideoSelect={setCurrentVideoId} />
+				<div className="w-80 fixed right-0 h-screen overflow-y-auto p-4">
+					<div className="sticky top-0 bg-black pb-4">
+						<div className="relative mb-4">
+							<Search className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
+							<Input
+								placeholder="検索"
+								className="pl-10 bg-[#202327] border-transparent focus:border-[#1d9bf0] text-white"
+							/>
 						</div>
+						<YouTubeSearch onVideoSelect={setCurrentVideoId} />
 					</div>
-				)}
+				</div>
 			</div>
-			{isYouTubeEnabled && currentVideoId && (
+			{currentVideoId && (
 				<AudioPlayer
+					key={currentVideoId} // Update 2
 					videoId={currentVideoId}
 					onClose={() => setCurrentVideoId(null)}
 					onCopy={(text) => setPostContent(text)}

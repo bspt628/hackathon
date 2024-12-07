@@ -19,6 +19,7 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 	const [duration, setDuration] = useState(0);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [isLoading, setIsLoading] = useState(true);
+	const [isPlayerReady, setIsPlayerReady] = useState(false);
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 	const { user } = useAuth();
 
@@ -41,6 +42,12 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 
 		const initializePlayer = async () => {
 			setIsLoading(true);
+			setIsPlaying(false);
+			setCurrentTime(0);
+			setDuration(0);
+			setTitle("");
+			setIsPlayerReady(false);
+
 			try {
 				await loadYouTubeAPI();
 				if (playerRef.current) {
@@ -58,9 +65,14 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 		}
 
 		return () => {
-			if (playerRef.current) {
+			if (
+				playerRef.current &&
+				typeof playerRef.current.destroy === "function"
+			) {
 				playerRef.current.destroy();
 			}
+			playerRef.current = null;
+			setIsPlayerReady(false);
 			if (intervalRef.current) {
 				clearInterval(intervalRef.current);
 			}
@@ -70,23 +82,32 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 	function initPlayer() {
 		if (typeof window.YT !== "undefined" && window.YT.Player && videoId) {
 			console.log("Initializing YouTube player with video ID:", videoId);
+			const videoIdOrUrl = videoId.includes("youtube.com")
+				? videoId
+				: `https://www.youtube.com/watch?v=${videoId}`;
 			playerRef.current = new window.YT.Player("youtube-audio-player", {
 				height: "0",
 				width: "0",
-				videoId: videoId,
+				videoId: videoId.includes("youtube.com") ? undefined : videoId,
 				playerVars: {
-					autoplay: 1,
+					autoplay: 0,
 					controls: 0,
+					...(videoId.includes("youtube.com")
+						? { origin: window.location.origin }
+						: {}),
 				},
 				events: {
 					onReady: (event: YT.OnReadyEvent) => {
 						console.log("YouTube player is ready");
 						const player = event.target;
+						if (videoId.includes("youtube.com")) {
+							player.loadVideoByUrl(videoIdOrUrl);
+						}
 						setTitle(player.getVideoData().title);
 						setDuration(player.getDuration());
-						startTimeUpdate();
 						setIsLoading(false);
-						setIsPlaying(true);
+						setIsPlayerReady(true);
+						setIsPlaying(false);
 					},
 					onStateChange: (event: YT.OnStateChangeEvent) => {
 						console.log("YouTube player state changed:", event.data);
@@ -97,6 +118,7 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 						);
 						if (newState === YT.PlayerState.PLAYING) {
 							startTimeUpdate();
+							setIsLoading(false);
 						} else if (
 							newState === YT.PlayerState.PAUSED ||
 							newState === YT.PlayerState.ENDED
@@ -136,12 +158,24 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 	};
 
 	const togglePlayPause = () => {
-		if (playerRef.current) {
-			if (isPlaying) {
-				playerRef.current.pauseVideo();
-			} else {
-				playerRef.current.playVideo();
+		if (
+			isPlayerReady &&
+			playerRef.current &&
+			typeof playerRef.current.getPlayerState === "function"
+		) {
+			try {
+				if (isPlaying) {
+					playerRef.current.pauseVideo();
+				} else {
+					playerRef.current.playVideo();
+				}
+				setIsPlaying(!isPlaying);
+			} catch (error) {
+				console.error("Error toggling play/pause:", error);
+				setIsPlaying(false);
 			}
+		} else {
+			console.error("Player is not ready");
 		}
 	};
 
@@ -165,7 +199,10 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 		) {
 			const currentTime = playerRef.current.getCurrentTime();
 			const formattedTime = formatTime(currentTime);
-			const videoUrl = `https://www.youtube.com/watch?v=${videoId}`;
+			if (!videoId) return;
+			const videoUrl = videoId.includes("youtube.com")
+				? videoId
+				: `https://www.youtube.com/watch?v=${videoId}`;
 			const copyText = `${user.displayName} is playing ${title} ${formattedTime} (${videoUrl})`;
 
 			navigator.clipboard
@@ -195,7 +232,12 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 						</div>
 					) : (
 						<>
-							<Button onClick={togglePlayPause} variant="ghost" size="icon">
+							<Button
+								onClick={togglePlayPause}
+								variant="ghost"
+								size="icon"
+								disabled={!isPlayerReady}
+							>
 								{isPlaying ? (
 									<Pause className="h-4 w-4" />
 								) : (
@@ -229,10 +271,12 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 					className="w-full"
 				/>
 			)}
-			{isLoading && (
+			{(isLoading || !isPlayerReady) && (
 				<div className="text-xs text-gray-400 mt-2">
-					Debug: Loading... Player state:{" "}
-					{playerRef.current ? "Initialized" : "Not initialized"}
+					Debug: {isLoading ? "Loading..." : "Waiting for player to be ready"}
+					Player state: {isPlayerReady ? "Ready" : "Not ready"}, Title: {title},
+					Duration: {duration}, Current Time: {currentTime}, Is Playing:{" "}
+					{isPlaying ? "Yes" : "No"}
 				</div>
 			)}
 		</div>
