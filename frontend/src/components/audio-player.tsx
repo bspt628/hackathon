@@ -203,7 +203,8 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 			const videoUrl = videoId.includes("youtube.com")
 				? videoId
 				: `https://www.youtube.com/watch?v=${videoId}`;
-			const copyText = `${user.displayName} is playing ${title} ${formattedTime} (${videoUrl})`;
+				const copyText = `🎵 ${user.displayName} is enjoying *${title}* 🎶 \n ⏱️ ${formattedTime}\n 🔗 [Listen now](${videoUrl})`;
+				
 
 			navigator.clipboard
 				.writeText(copyText)
