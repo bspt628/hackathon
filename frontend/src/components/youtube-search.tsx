@@ -24,13 +24,9 @@ interface YouTubeSearchResponse {
 	items: YouTubeSearchResultItem[];
 }
 
-export function YouTubeSearch({
-	onVideoSelect,
-}: {
-	onVideoSelect: (videoId: string) => void;
-}) {
+export function YouTubeSearch() {
 	const [query, setQuery] = useState("");
-	const { searchResults, setSearchResults } = useYouTube();
+	const { searchResults, setSearchResults, setCurrentVideoId } = useYouTube();
 	const [isSearching, setIsSearching] = useState(false);
 
 	const handleSearch = async () => {
@@ -61,19 +57,22 @@ export function YouTubeSearch({
 
 	return (
 		<div className="space-y-4">
+			
 			<div className="flex space-x-2">
+				
 				<Input
 					type="text"
 					placeholder="Search YouTube"
 					value={query}
 					onChange={(e) => setQuery(e.target.value)}
-					className="flex-grow text-white placeholder-gray-400"
+					className="flex-grow text-black placeholder-gray-400"
 				/>
 				<Button
 					onClick={handleSearch}
-					disabled={isSearching}
-					className="bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white"
+					disabled={isSearching || !query.trim()}
+					className="bg-primary hover:bg-secondary text-white"
 				>
+					
 					{isSearching ? (
 						<>
 							<Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -88,11 +87,11 @@ export function YouTubeSearch({
 				{searchResults.map((result) => (
 					<div
 						key={result.id}
-						className="cursor-pointer hover:bg-[#1d9bf0]/10 p-2 rounded"
-						onClick={() => onVideoSelect(result.id)}
+						className="cursor-pointer hover:bg-primary/10 p-2 rounded"
+						onClick={() => setCurrentVideoId(result.id)}
 					>
 						<img src={result.thumbnail} alt={result.title} className="w-full" />
-						<p className="mt-2 text-sm text-white">{result.title}</p>
+						<p className="mt-2 text-sm text-black">{result.title}</p>
 					</div>
 				))}
 			</div>

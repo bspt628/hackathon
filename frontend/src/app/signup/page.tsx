@@ -115,8 +115,8 @@ export default function SignupPage() {
 	}
 
 	return (
-		<div className="min-h-screen bg-black text-white flex items-center justify-center p-4">
-			<div className="w-full max-w-md bg-black rounded-2xl p-8 relative">
+		<div className="min-h-screen bg-[#F8FAFF] text-foreground bg-gradient-to-br from-[#E6EFFF] to-[#F8FAFF] flex items-center justify-center p-4">
+			<div className="w-full max-w-md bg-background rounded-2xl p-8 relative">
 				<button
 					onClick={() => router.back()}
 					className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-full"
@@ -134,7 +134,7 @@ export default function SignupPage() {
 							name="email"
 							type="email"
 							required
-							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
+							className="bg-white border-[#536471] focus:border-primary text-black"
 							placeholder="example@email.com"
 							value={email}
 							onChange={(e) => setEmail(e.target.value)}
@@ -152,7 +152,7 @@ export default function SignupPage() {
 							name="password"
 							type="password"
 							required
-							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
+							className="bg-white border-[#536471] focus:border-primary text-black"
 							placeholder="••••••••"
 							value={password}
 							onChange={(e) => setPassword(e.target.value)}
@@ -170,7 +170,7 @@ export default function SignupPage() {
 							name="confirm_password"
 							type="password"
 							required
-							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
+							className="bg-white border-[#536471] focus:border-primary text-black"
 							placeholder="••••••••"
 							value={confirmPassword}
 							onChange={(e) => setConfirmPassword(e.target.value)}
@@ -189,7 +189,7 @@ export default function SignupPage() {
 							id="username"
 							name="username"
 							required
-							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
+							className="bg-white border-[#536471] focus:border-primary text-black"
 							placeholder="@username"
 							value={username}
 							onChange={(e) => setUsername(e.target.value)}
@@ -206,7 +206,7 @@ export default function SignupPage() {
 							id="display_name"
 							name="display_name"
 							required
-							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
+							className="bg-white border-[#536471] focus:border-primary text-black"
 							placeholder="表示名"
 							value={displayName}
 							onChange={(e) => setDisplayName(e.target.value)}

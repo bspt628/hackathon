@@ -74,7 +74,7 @@ export function Repost({ postId, username }: RepostProps) {
 							placeholder={`repost from @${username}`}
 							value={additionalComment}
 							onChange={(e) => setAdditionalComment(e.target.value)}
-							className="bg-black border-[#536471] focus:border-[#1d9bf0] text-white"
+							className="bg-black border-[#536471] focus:border-primary text-white"
 						/>
 					)}
 					{isQuoteRepost && (

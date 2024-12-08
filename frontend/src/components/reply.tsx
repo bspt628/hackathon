@@ -61,7 +61,7 @@ export function Reply({
 						<Button
 							onClick={handleReply}
 							disabled={!replyContent.trim() || isSubmitting}
-							className="rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] px-4"
+							className="rounded-full bg-primary hover:bg-secondary px-4"
 						>
 							{isSubmitting ? "送信中..." : "返信"}
 						</Button>

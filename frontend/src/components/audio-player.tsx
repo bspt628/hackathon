@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 import { X, Play, Pause, Loader2, Copy } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -23,52 +21,48 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 	const intervalRef = useRef<NodeJS.Timeout | null>(null);
 	const { user } = useAuth();
 
-	useEffect(() => {
-		const loadYouTubeAPI = () => {
+	const loadYouTubeAPI = () => {
+		return new Promise<void>((resolve) => {
 			if (typeof window !== "undefined" && !window.YT) {
 				const tag = document.createElement("script");
 				tag.src = "https://www.youtube.com/iframe_api";
 				const firstScriptTag = document.getElementsByTagName("script")[0];
 				firstScriptTag.parentNode?.insertBefore(tag, firstScriptTag);
 
-				return new Promise<void>((resolve) => {
-					window.onYouTubeIframeAPIReady = () => {
-						resolve();
-					};
-				});
+				window.onYouTubeIframeAPIReady = () => resolve();
+			} else {
+				resolve();
 			}
-			return Promise.resolve();
-		};
+		});
+	};
 
-		const initializePlayer = async () => {
-			setIsLoading(true);
-			setIsPlaying(false);
-			setCurrentTime(0);
-			setDuration(0);
-			setTitle("");
-			setIsPlayerReady(false);
+	const initializePlayer = async () => {
+		setIsLoading(true);
+		setIsPlaying(false);
+		setCurrentTime(0);
+		setDuration(0);
+		setTitle("");
+		setIsPlayerReady(false);
 
-			try {
-				await loadYouTubeAPI();
-				if (playerRef.current) {
-					playerRef.current.destroy();
-				}
-				initPlayer();
-			} catch (error) {
-				console.error("Failed to initialize player:", error);
-				setIsLoading(false);
+		try {
+			await loadYouTubeAPI();
+			if (playerRef.current) {
+				playerRef.current.destroy();
 			}
-		};
+			initPlayer();
+		} catch (error) {
+			console.error("Failed to initialize player:", error);
+			setIsLoading(false);
+		}
+	};
 
+	useEffect(() => {
 		if (videoId) {
 			initializePlayer();
 		}
 
 		return () => {
-			if (
-				playerRef.current &&
-				typeof playerRef.current.destroy === "function"
-			) {
+			if (playerRef.current) {
 				playerRef.current.destroy();
 			}
 			playerRef.current = null;
@@ -79,9 +73,8 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 		};
 	}, [videoId]);
 
-	function initPlayer() {
+	const initPlayer = () => {
 		if (typeof window.YT !== "undefined" && window.YT.Player && videoId) {
-			console.log("Initializing YouTube player with video ID:", videoId);
 			const videoIdOrUrl = videoId.includes("youtube.com")
 				? videoId
 				: `https://www.youtube.com/watch?v=${videoId}`;
@@ -98,7 +91,6 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 				},
 				events: {
 					onReady: (event: YT.OnReadyEvent) => {
-						console.log("YouTube player is ready");
 						const player = event.target;
 						if (videoId.includes("youtube.com")) {
 							player.loadVideoByUrl(videoIdOrUrl);
@@ -110,7 +102,6 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 						setIsPlaying(false);
 					},
 					onStateChange: (event: YT.OnStateChangeEvent) => {
-						console.log("YouTube player state changed:", event.data);
 						const newState = event.data;
 						setIsPlaying(
 							newState === YT.PlayerState.PLAYING ||
@@ -137,7 +128,7 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 			console.error("YouTube API is not loaded or videoId is missing");
 			setIsLoading(false);
 		}
-	}
+	};
 
 	const startTimeUpdate = () => {
 		if (intervalRef.current) clearInterval(intervalRef.current);
@@ -203,8 +194,7 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 			const videoUrl = videoId.includes("youtube.com")
 				? videoId
 				: `https://www.youtube.com/watch?v=${videoId}`;
-				const copyText = `🎵 ${user.displayName} is enjoying *${title}* 🎶 \n ⏱️ ${formattedTime}\n 🔗 [Listen now](${videoUrl})`;
-				
+			const copyText = `🎵 ${user.displayName} is enjoying *${title}* 🎶 \n ⏱️ ${formattedTime}\n 🔗 [Listen now](${videoUrl}) \n\n`;
 
 			navigator.clipboard
 				.writeText(copyText)
@@ -222,7 +212,7 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 	if (!videoId) return null;
 
 	return (
-		<div className="fixed bottom-0 left-0 right-0 bg-gray-900 text-white p-4 flex flex-col">
+		<div className="fixed bottom-0 left-0 right-0 bg-white text-black p-4 flex flex-col">
 			<div id="youtube-audio-player"></div>
 			<div className="flex items-center justify-between mb-2">
 				<div className="flex items-center space-x-4">
@@ -271,14 +261,6 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 					onValueChange={handleSeek}
 					className="w-full"
 				/>
-			)}
-			{(isLoading || !isPlayerReady) && (
-				<div className="text-xs text-gray-400 mt-2">
-					Debug: {isLoading ? "Loading..." : "Waiting for player to be ready"}
-					Player state: {isPlayerReady ? "Ready" : "Not ready"}, Title: {title},
-					Duration: {duration}, Current Time: {currentTime}, Is Playing:{" "}
-					{isPlaying ? "Yes" : "No"}
-				</div>
 			)}
 		</div>
 	);

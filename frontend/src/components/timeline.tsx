@@ -127,11 +127,11 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 	};
 
 	if (isLoading) {
-		return <div className="p-4 text-center">読み込み中...</div>;
+		return <div className="p-4 text-center text-muted-foreground">読み込み中...</div>;
 	}
 
 	if (error) {
-		return <div className="p-4 text-center text-red-500">{error}</div>;
+		return <div className="p-4 text-center text-destructive">{error}</div>;
 	}
 	console.log(posts.length, "posts fetched");
 

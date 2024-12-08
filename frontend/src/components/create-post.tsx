@@ -1,25 +1,78 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
-import { Image, SmilePlus, MapPin, Calendar, ListFilter } from "lucide-react";
+import {
+	Sparkles,
+	Loader2,
+} from "lucide-react";
 import { createPost } from "@/app/actions/create-post";
+import { useYouTube } from "@/contexts/youtube-context";
 
 interface CreatePostProps {
 	onPostSuccess?: () => void;
 	initialContent?: string;
 }
 
-export function CreatePost({ onPostSuccess, initialContent="" }: CreatePostProps) {
+export function CreatePost({
+	onPostSuccess,
+	initialContent = "",
+}: CreatePostProps) {
 	const [content, setContent] = useState(initialContent);
 	const [isLoading, setIsLoading] = useState(false);
+	const [isGenerating, setIsGenerating] = useState(false);
 	const { idToken } = useAuth();
+	const { currentVideoId, searchResults } = useYouTube();
 
 	useEffect(() => {
 		setContent(initialContent);
-	},	[initialContent]);
+	}, [initialContent]);
+
+	useEffect(() => {
+		console.log("isGenerating:", isGenerating);
+	}, [isGenerating]);
+
+	const generateContent = useCallback(async () => {
+		console.log("Generating content...");
+		if (!idToken || !currentVideoId) return;
+		setIsGenerating(true);
+		setIsLoading(true);  // ここで isLoading を true にセット
+	
+		const videoTitle =
+			searchResults.find((result) => result.id === currentVideoId)?.title || "";
+	
+		try {
+			const response = await fetch(
+				"https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/generate-content",
+				{
+					method: "POST",
+					headers: {
+						"Content-Type": "application/json",
+						Authorization: `Bearer ${idToken}`,
+					},
+					body: JSON.stringify({
+						prompt: `Generate an appealing description of the video titled "${videoTitle}" in Japanese. Highlight its key features and why it's worth watching. translation to english is not required.`,
+					}),
+				}
+			);
+	
+			if (!response.ok) {
+				throw new Error("Failed to generate content");
+			}
+	
+			const data = await response.json();
+			const generatedContent = data.Candidates[0].Content.Parts[0];
+			setContent((prevContent) => prevContent + generatedContent);
+		} catch (error) {
+			console.error("Error generating content:", error);
+		} finally {
+			setIsGenerating(false);  // isGenerating を false にセット
+			setIsLoading(false);     // isLoading を false にセット
+		}
+	}, [idToken, currentVideoId, searchResults]);
+	
 
 	const handleSubmit = async () => {
 		if (!content || !idToken) return;
@@ -51,55 +104,34 @@ export function CreatePost({ onPostSuccess, initialContent="" }: CreatePostProps
 						rows={6}
 					/>
 					<div className="flex items-center justify-between mt-4">
-						<div className="flex -ml-2">
+						<div className="flex space-x-2">
 							<Button
-								size="icon"
-								variant="ghost"
-								className="rounded-full text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
+								onClick={generateContent}
+								variant="outline"
+								size="sm"
+								className="rounded-full text-primary hover:bg-primary/10"
+								disabled={!currentVideoId || isGenerating}
 							>
-								<Image className="w-5 h-5" />
-								<span className="sr-only">Add image</span>
+								{isGenerating ? (
+									<>
+										<Loader2 className="w-4 h-4 mr-2 animate-spin" />
+										生成中...
+									</>
+								) : (
+									<>
+										<Sparkles className="w-5 h-5 mr-2" />
+										魅力を生成
+									</>
+								)}
 							</Button>
 							<Button
-								size="icon"
-								variant="ghost"
-								className="rounded-full text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
+								onClick={handleSubmit}
+								disabled={!content || isLoading}
+								className="rounded-full bg-secondary hover:bg-secondary/90 text-white px-4"
 							>
-								<ListFilter className="w-5 h-5" />
-								<span className="sr-only">Add GIF</span>
-							</Button>
-							<Button
-								size="icon"
-								variant="ghost"
-								className="rounded-full text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
-							>
-								<Calendar className="w-5 h-5" />
-								<span className="sr-only">Add poll</span>
-							</Button>
-							<Button
-								size="icon"
-								variant="ghost"
-								className="rounded-full text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
-							>
-								<SmilePlus className="w-5 h-5" />
-								<span className="sr-only">Add emoji</span>
-							</Button>
-							<Button
-								size="icon"
-								variant="ghost"
-								className="rounded-full text-[#1d9bf0] hover:bg-[#1d9bf0]/10"
-							>
-								<MapPin className="w-5 h-5" />
-								<span className="sr-only">Add location</span>
+								{isLoading ? "投稿中..." : "ポストする"}
 							</Button>
 						</div>
-						<Button
-							onClick={handleSubmit}
-							disabled={!content || isLoading}
-							className="rounded-full bg-[#1d9bf0] hover:bg-[#1a8cd8] text-white px-4"
-						>
-							{isLoading ? "投稿中..." : "ポストする"}
-						</Button>
 					</div>
 				</div>
 			</div>
