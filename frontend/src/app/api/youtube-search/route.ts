@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server'
 
-const NEXT_PUBLIC_YOUTUBE_API_KEY = process.env.NEXT_PUBLIC_YOUTUBE_API_KEY
+const NEXT_PUBLIC_YOUTUBE_API_KEY = "AIzaSyCB-aNbuHZiBjdFtuL3LmRu_hqJE3seoSw"
+
+console.log('NEXT_PUBLIC_YOUTUBE_API_KEY:', NEXT_PUBLIC_YOUTUBE_API_KEY) 
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url)
@@ -15,6 +17,7 @@ export async function GET(request: Request) {
       query
     )}&key=${NEXT_PUBLIC_YOUTUBE_API_KEY}&type=video&maxResults=20`
   )
+  
 
   const data = await response.json()
 
