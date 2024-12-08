@@ -75,3 +75,8 @@ WHERE p.user_id IN (
 )
 ORDER BY p.created_at DESC
 LIMIT ?;
+
+-- name: ClearReplyToID :exec
+UPDATE posts
+SET reply_to_id = NULL
+WHERE reply_to_id = ?;

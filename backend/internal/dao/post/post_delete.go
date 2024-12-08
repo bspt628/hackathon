@@ -36,6 +36,7 @@ func (dao *PostDAO) DeletePost(ctx context.Context, postID string) error {
 		}
 	}
 
+
 	// トランザクションのコミット
 	err = tx.Commit()
 	if err != nil {

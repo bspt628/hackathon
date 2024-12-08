@@ -39,6 +39,17 @@ func (q *Queries) CheckRootPostValidity(ctx context.Context, id string) (bool, e
 	return is_valid, err
 }
 
+const clearReplyToID = `-- name: ClearReplyToID :exec
+UPDATE posts
+SET reply_to_id = NULL
+WHERE reply_to_id = ?
+`
+
+func (q *Queries) ClearReplyToID(ctx context.Context, replyToID sql.NullString) error {
+	_, err := q.db.ExecContext(ctx, clearReplyToID, replyToID)
+	return err
+}
+
 const countReplyPosts = `-- name: CountReplyPosts :one
 SELECT COUNT(*) AS reply_count
 FROM posts
