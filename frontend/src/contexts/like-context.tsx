@@ -13,7 +13,7 @@ interface LikesContextType {
 	likedPosts: Set<string>;
 	toggleLike: (postId: string) => Promise<void>;
 	isLiked: (postId: string) => boolean;
-	fetchLikeStatus: (postId: string) => Promise<void>;
+	fetchLikeStatus: (postId: string) => Promise<boolean>;
 }
 
 const LikesContext = createContext<LikesContextType | undefined>(undefined);
@@ -23,9 +23,9 @@ export function LikesProvider({ children }: { children: React.ReactNode }) {
 	const { idToken } = useAuth();
 
 	const fetchLikeStatus = useCallback(
-		async (postId: string) => {
-			if (!idToken) return;
-
+		async (postId: string): Promise<boolean> => {
+			if (!idToken) return false;
+	
 			try {
 				const response = await fetch(
 					`https://hackathon-uchida-hiroto-241499864821.us-central1.run.app/api/likes/${postId}/status`,
@@ -36,21 +36,33 @@ export function LikesProvider({ children }: { children: React.ReactNode }) {
 						},
 					}
 				);
-
+				
+	
 				if (!response.ok) {
 					throw new Error("Failed to fetch like status");
 				}
-
+	
 				const data = await response.json();
-				if (data.is_liked) {
+				console.log("Server response:", data.like_status); 
+				if (data.like_status) {
 					setLikedPosts((prev) => new Set(prev).add(postId));
+				} else {
+					setLikedPosts((prev) => {
+						const newSet = new Set(prev);
+						newSet.delete(postId);
+						return newSet;
+					});
 				}
+	
+				return data.like_status; // 取得した結果を返す
 			} catch (error) {
 				console.error("Error fetching like status:", error);
+				return false; // エラー時はデフォルト値として false を返す
 			}
 		},
 		[idToken]
 	);
+	
 
 	const toggleLike = useCallback(
 		async (postId: string) => {

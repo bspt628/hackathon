@@ -55,17 +55,22 @@ export function Post({
 	is_deleted,
 }: PostProps) {
 	const router = useRouter();
-	const { isLiked, toggleLike, fetchLikeStatus } = useLikes();
+	const { isLiked, toggleLike, fetchLikeStatus, likedPosts } = useLikes();
 	const [liked, setLiked] = useState(isLiked(id));
 	const [likesCount, setLikesCount] = useState(initialLikesCount);
 	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 	const { idToken, backendUserId } = useAuth();
+	const [isLikeLoading, setIsLikeLoading] = useState(false);
+
 
 	useEffect(() => {
-		fetchLikeStatus(id).then(() => {
-			setLiked(isLiked(id));
-		});
-	}, [id, fetchLikeStatus, isLiked]);
+		(async () => {
+			const likedStatus = await fetchLikeStatus(id); // fetchLikeStatus の結果を利用
+			setLiked(likedStatus);
+			console.log(likedStatus)
+		})();
+	}, [id, fetchLikeStatus]);
+	
 
 	const timeAgo = formatDistanceToNow(new Date(created_at), {
 		addSuffix: true,
@@ -81,10 +86,18 @@ export function Post({
 
 	const handleLikeToggle = async (e: React.MouseEvent) => {
 		e.stopPropagation();
-		await toggleLike(id);
-		const newLikedState = !liked;
-		setLiked(newLikedState);
-		setLikesCount((prev) => (newLikedState ? prev + 1 : prev - 1));
+		setIsLikeLoading(true); // ローディング状態を開始
+		try {
+			await toggleLike(id);
+			const newLikedState = !likedPosts.has(id);
+			setLiked(newLikedState);
+			setLikesCount((prev) => (newLikedState ? prev + 1 : prev - 1));
+		} catch (error) {
+			console.error("Error toggling like:", error);
+		} finally {
+			setIsLikeLoading(false); // ローディング状態を終了
+		}
+		
 	};
 
 	const handleDelete = async () => {
@@ -163,10 +176,10 @@ export function Post({
 									<span>{reposts_count}</span>
 								</button>
 								<button
-									className={`flex items-center gap-2 hover:text-[#f91880] ${
-										liked ? "text-[#f91880]" : ""
-									}`}
+									className={`flex items-center gap-2 hover:text-[#f91880] ${liked ? "text-[#f91880]" : ""
+										}`}
 									onClick={handleLikeToggle}
+									disabled={isLikeLoading}
 								>
 									<Heart className={`w-5 h-5 ${liked ? "fill-current" : ""}`} />
 									<span>{likesCount}</span>
