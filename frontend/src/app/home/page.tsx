@@ -83,8 +83,8 @@ export default function HomePage() {
 				</div>
 
 				{/* Main Content */}
-				<main className="flex-1 min-h-screen border-r border-[#2f3336] ml-64 mr-80">
-					<div className="sticky top-0 z-10 bg-black/80 backdrop-blur-md border-b border-[#2f3336]">
+				<main className="flex-1 min-h-screen border-r border-[#2f3336] ml-64 mr-80 pb-24">
+					<div className="sticky top-0 z-20 bg-black/80 backdrop-blur-md border-b border-[#2f3336]">
 						<div className="flex items-center justify-between px-4 py-3">
 							<h1 className="text-xl font-bold">ホーム</h1>
 							<div className="space-x-2">
@@ -130,14 +130,16 @@ export default function HomePage() {
 					</div>
 				</div>
 			</div>
-			{currentVideoId && (
-				<AudioPlayer
-					key={currentVideoId} // Update 2
-					videoId={currentVideoId}
-					onClose={() => setCurrentVideoId(null)}
-					onCopy={(text) => setPostContent(text)}
-				/>
-			)}
+			<div className="fixed bottom-0 left-0 right-0 z-50">
+				{currentVideoId && (
+					<AudioPlayer
+						key={currentVideoId}
+						videoId={currentVideoId}
+						onClose={() => setCurrentVideoId(null)}
+						onCopy={(text) => setPostContent(text)}
+					/>
+				)}
+			</div>
 		</div>
 	);
 }

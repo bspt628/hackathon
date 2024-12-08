@@ -2,13 +2,16 @@
 
 import { use, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeft} from 'lucide-react';
+import { ArrowLeft, Search } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Post } from "@/components/post";
 import { Repost } from "@/components/repost";
 import { Reply } from "@/components/reply";
+import { YouTubeSearch } from "@/components/youtube-search";
 import { AudioPlayer } from "@/components/audio-player";
 import { useAuth } from "@/contexts/auth-context";
+import { deletePost } from "@/app/actions/delete-post";
 
 interface PostDetail {
 	id: string;
@@ -22,9 +25,15 @@ interface PostDetail {
 	is_liked: boolean;
 	reply_to_id: string | null;
 	replies?: PostDetail[];
+	user_id: string;
+	is_deleted: boolean;
 }
 
-export default function PostDetailPage({ params }: { params: Promise<{ id: string }> }) {
+export default function PostDetailPage({
+	params,
+}: {
+	params: Promise<{ id: string }>;
+}) {
 	const { id } = use(params);
 	const router = useRouter();
 	const { idToken } = useAuth();
@@ -72,6 +81,23 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 		setReplyingTo(null);
 	};
 
+	const handleDelete = async () => {
+		if (!idToken || !post) return;
+
+		try {
+			const result = await deletePost(post.id, idToken);
+			if (result.success) {
+				router.push("/home");
+			} else {
+				console.error("Failed to delete post:", result.error);
+				setError("投稿の削除に失敗しました。");
+			}
+		} catch (error) {
+			console.error("Error deleting post:", error);
+			setError("投稿の削除中にエラーが発生しました。");
+		}
+	};
+
 	if (isLoading) {
 		return <div className="p-4 text-center">読み込み中...</div>;
 	}
@@ -93,6 +119,8 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 					hasReplies={!!post.replies && post.replies.length > 0}
 					onReplyClick={() => setReplyingTo(post.id)}
 					onRepostClick={() => {}} // Implement repost functionality if needed
+					onDelete={handleDelete}
+					className="relative z-0"
 				/>
 				{replyingTo === post.id && (
 					<Reply
@@ -138,20 +166,18 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 				</div>
 
 				{/* Right Sidebar */}
-				{/*isYouTubeEnabled && (
-					<div className="w-80 fixed right-0 h-screen overflow-y-auto p-4">
-						<div className="sticky top-0 bg-black pb-4">
-							<div className="relative mb-4">
-								<Search className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
-								<Input
-									placeholder="検索"
-									className="pl-10 bg-[#202327] border-transparent focus:border-[#1d9bf0] text-white"
-								/>
-							</div>
-							<YouTubeSearch onVideoSelect={setCurrentVideoId} />
+				<div className="w-80 fixed right-0 h-screen overflow-y-auto p-4">
+					<div className="sticky top-0 bg-black pb-4">
+						<div className="relative mb-4">
+							<Search className="absolute left-3 top-3 h-5 w-5 text-gray-500" />
+							<Input
+								placeholder="検索"
+								className="pl-10 bg-[#202327] border-transparent focus:border-[#1d9bf0] text-white"
+							/>
 						</div>
+						<YouTubeSearch onVideoSelect={setCurrentVideoId} />
 					</div>
-				)*/}
+				</div>
 			</div>
 			{currentVideoId && (
 				<AudioPlayer
@@ -163,4 +189,3 @@ export default function PostDetailPage({ params }: { params: Promise<{ id: strin
 		</div>
 	);
 }
-

@@ -17,6 +17,8 @@ interface TimelinePost {
 	reply_to_id: string;
 	original_post_id: string;
 	replies?: TimelinePost[];
+	user_id: string;
+	is_deleted: boolean;
 }
 
 interface TimelineProps {
@@ -113,6 +115,15 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 	};
 
 	const handleRepostClick = () => {
+		// Implement repost functionality if needed
+	};
+
+	const handleDelete = (postId: string) => {
+		setPosts((prevPosts) =>
+			prevPosts.map((post) =>
+				post.id === postId ? { ...post, is_deleted: true } : post
+			)
+		);
 	};
 
 	if (isLoading) {
@@ -122,7 +133,7 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 	if (error) {
 		return <div className="p-4 text-center text-red-500">{error}</div>;
 	}
-
+	console.log(posts.length, "posts fetched");
 
 	if (posts.length === 0) {
 		return (
@@ -144,15 +155,16 @@ export function Timeline({ refreshTrigger }: TimelineProps) {
 
 	const renderPost = (post: TimelinePost, isReplyTo: boolean = false) => {
 		return (
-			
 			<div key={post.id}>
-				
 				<Post
 					{...post}
+					is_deleted={post.is_deleted}
 					isReplyTo={isReplyTo}
 					hasReplies={!!post.replies && post.replies.length > 0}
 					onReplyClick={() => handleReply(post.id)}
 					onRepostClick={() => handleRepostClick()}
+					onDelete={() => handleDelete(post.id)}
+					className="relative z-0"
 				/>
 				{replyingTo === post.id && (
 					<Reply
