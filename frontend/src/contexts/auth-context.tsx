@@ -50,7 +50,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     const storedBackendUserId = localStorage.getItem('backendUserId')
     if (storedBackendUserId) {
-      console.log('Restoring backend user ID:', storedBackendUserId)
       setBackendUserId(storedBackendUserId)
     }
 
@@ -86,7 +85,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       )
       if (response.ok) {
         const data = await response.json()
-        console.log('Backend user ID:', data.user_id)
         setBackendUserId(data.user_id)
         localStorage.setItem('backendUserId', data.user_id)
       }

@@ -43,7 +43,6 @@ export function LikesProvider({ children }: { children: React.ReactNode }) {
 				}
 	
 				const data = await response.json();
-				console.log("Server response:", data.like_status); 
 				if (data.like_status) {
 					setLikedPosts((prev) => new Set(prev).add(postId));
 				} else {

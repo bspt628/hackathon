@@ -71,7 +71,7 @@ export default function LoginPage() {
 							name="username"
 							required
 							className="bg-white border-[#536471] focus:border-primary text-black"
-							placeholder="@username"
+							placeholder="username"
 						/>
 					</div>
 

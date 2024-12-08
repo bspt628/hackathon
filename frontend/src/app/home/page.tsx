@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Home, Search, Bell, Mail, User, LogOut } from "lucide-react";
+import { Home, LogOut } from "lucide-react";
 import { Timeline } from "@/components/timeline";
 import { CreatePost } from "@/components/create-post";
 import { YouTubeSearch } from "@/components/youtube-search";
@@ -65,30 +65,6 @@ export default function HomePage() {
 							className="block p-3 hover:bg-primary/[0.03] rounded-full"
 						>
 							<Home className="w-7 h-7" />
-						</Link>
-						<Link
-							href="#"
-							className="block p-3 hover:bg-primary/[0.03] rounded-full"
-						>
-							<Search className="w-7 h-7" />
-						</Link>
-						<Link
-							href="#"
-							className="block p-3 hover:bg-primary/[0.03] rounded-full"
-						>
-							<Bell className="w-7 h-7" />
-						</Link>
-						<Link
-							href="#"
-							className="block p-3 hover:bg-primary/[0.03] rounded-full"
-						>
-							<Mail className="w-7 h-7" />
-						</Link>
-						<Link
-							href="#"
-							className="block p-3 hover:bg-primary/[0.03] rounded-full"
-						>
-							<User className="w-7 h-7" />
 						</Link>
 					</div>
 				</div>

@@ -66,7 +66,6 @@ export function Post({
 		(async () => {
 			const likedStatus = await fetchLikeStatus(id); // fetchLikeStatus の結果を利用
 			setLiked(likedStatus);
-			console.log(likedStatus);
 		})();
 	}, [id, fetchLikeStatus]);
 

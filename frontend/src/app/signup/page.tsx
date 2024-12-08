@@ -104,7 +104,7 @@ export default function SignupPage() {
 		const result = await signupUser(formData);
 
 		if (result.success) {
-			router.push("/home");
+			router.push("/login");
 		} else {
 			setErrors({
 				...errors,
@@ -190,7 +190,7 @@ export default function SignupPage() {
 							name="username"
 							required
 							className="bg-white border-[#536471] focus:border-primary text-black"
-							placeholder="@username"
+							placeholder="username"
 							value={username}
 							onChange={(e) => setUsername(e.target.value)}
 							onBlur={() => handleBlur("username")}

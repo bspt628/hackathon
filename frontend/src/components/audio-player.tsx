@@ -99,7 +99,8 @@ export function AudioPlayer({ videoId, onClose, onCopy }: AudioPlayerProps) {
 						setDuration(player.getDuration());
 						setIsLoading(false);
 						setIsPlayerReady(true);
-						setIsPlaying(false);
+						setIsPlaying(true);
+						startTimeUpdate();
 					},
 					onStateChange: (event: YT.OnStateChangeEvent) => {
 						const newState = event.data;

@@ -30,10 +30,6 @@ export function CreatePost({
 		setContent(initialContent);
 	}, [initialContent]);
 
-	useEffect(() => {
-		console.log("isGenerating:", isGenerating);
-	}, [isGenerating]);
-
 	const generateContent = useCallback(async () => {
 		console.log("Generating content...");
 		if (!idToken || !currentVideoId) return;
