@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"hackathon/internal/model"
 )
 
 // CreateUser は新規ユーザーを作成するエンドポイント
@@ -13,12 +14,7 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS") // 許可する HTTP メソッド
 	w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization") // 許可するヘッダー
 	// リクエストボディからユーザー情報を取得
-	var request struct {
-		Email        string `json:"email"`
-		Password 	 string `json:"password"`
-		Username     string `json:"username"`
-		DisplayName  string `json:"display_name"`
-	}
+	var request model.UserCreateRequest
 
 	// リクエストのJSONデータを構造体にバインド
 	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -33,7 +29,7 @@ func (uc *UserController) CreateUser(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// 新規ユーザーを作成
-	user, err := uc.userUsecase.CreateUser(context.Background(),request.Email, request.Password, request.Username, request.DisplayName)
+	user, err := uc.userUsecase.CreateUser(context.Background(),request)
 	if err != nil {
 		http.Error(w, fmt.Sprintf("ユーザー作成に失敗しました: %v", err), http.StatusInternalServerError)
 		return

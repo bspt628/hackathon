@@ -11,7 +11,7 @@ import (
 	"encoding/json"
 )
 
-const createUser = `-- name: CreateUser :execresult
+const createUser = `-- name: CreateUser :exec
 INSERT INTO users (id, firebase_uid, email, password_hash, username, display_name)
 VALUES (?, ?, ?, ?, ?, ?)
 `
@@ -25,8 +25,8 @@ type CreateUserParams struct {
 	DisplayName  sql.NullString `json:"display_name"`
 }
 
-func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Result, error) {
-	return q.db.ExecContext(ctx, createUser,
+func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) error {
+	_, err := q.db.ExecContext(ctx, createUser,
 		arg.ID,
 		arg.FirebaseUid,
 		arg.Email,
@@ -34,6 +34,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (sql.Res
 		arg.Username,
 		arg.DisplayName,
 	)
+	return err
 }
 
 const deleteUser = `-- name: DeleteUser :execresult

@@ -3,30 +3,24 @@ package userdao
 import (
 	"context"
 	"fmt"
-	"hackathon/db/sqlc/generated"
+	sqlc "hackathon/db/sqlc/generated"
 	"hackathon/internal/auth"
-	"database/sql"
+	"hackathon/internal/model"
 )
 
-func (dao *UserDAO) CreateUser(ctx context.Context, myid, email, hashedPassword, username, displayname, password string) (*sqlc.User, error) {
+func (dao *UserDAO) CreateUser(ctx context.Context,requestDAO model.UserCreateDAORequest) (*sqlc.User, error) {
 
 	// Firebaseに新規ユーザーを登録
-	uid, err := auth.CreateFirebaseUser(email, password, username, displayname)
+	uid, err := auth.CreateFirebaseUser(requestDAO.Email, requestDAO.Password, requestDAO.Username, requestDAO.DisplayName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to create user in Firebase: %v", err)
 	}
 
-	// SQLクエリを実行して新しいユーザーを作成
-	_, err = dao.queries.CreateUser(ctx, sqlc.CreateUserParams{
-		ID: 		  myid,
-		FirebaseUid:  uid,
-		Email:        email,
-		PasswordHash: hashedPassword,
-		Username:     username,
-		DisplayName:  sql.NullString{String: displayname, Valid: true}, 
-	})
+	// UserCreateDAORequest を sqlc.CreateUserParams に変換
+	dbParams := model.ToCreateUserParams(requestDAO, uid)
 
-	if err != nil {
+	// SQLクエリを実行して新しいユーザーを作成
+	if dao.queries.CreateUser(ctx, dbParams) != nil {
 		// DBへの登録に失敗した場合、Firebase登録を削除
 		deleteErr := auth.DeleteFirebaseUser(uid)
 		if deleteErr != nil {
@@ -37,7 +31,7 @@ func (dao *UserDAO) CreateUser(ctx context.Context, myid, email, hashedPassword,
 	}
 
 	// 新しく作成されたユーザーの ID で情報を再取得
-	user, err := dao.GetUser(ctx, myid)
+	user, err := dao.GetUser(ctx, requestDAO.ID)
 	if err != nil {
 		return nil, err
 	}

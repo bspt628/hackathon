@@ -37,3 +37,4 @@ func ConvertCreateNotificationsToNotification(arg CreateNotificationParams) sqlc
 		Message: sql.NullString{String: arg.Message, Valid: true},
 	}
 }
+

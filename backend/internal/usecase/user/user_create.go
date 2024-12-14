@@ -2,34 +2,32 @@ package userusecase
 
 import (
 	"context"
-	"hackathon/db/sqlc/generated"
-	"golang.org/x/crypto/bcrypt"
-	"github.com/oklog/ulid"
-	"math/rand"
-	"time"
-	"strings"
 	"errors"
+	"hackathon/db/sqlc/generated"
+	"hackathon/internal/model"
+	"strings"
+	"golang.org/x/crypto/bcrypt"
 )
 
-func (uc *UserUsecase) CreateUser(ctx context.Context, email, password, username, displayname string) (*sqlc.User, error) {
-	// IDをulidで自動生成する
-	entropy := rand.New(rand.NewSource(time.Now().UnixNano()))
-	myid := ulid.MustNew(ulid.Now(), entropy).String()
+func (uc *UserUsecase) CreateUser(ctx context.Context, request model.UserCreateRequest) (*sqlc.User, error) {
 
 	// usernameに特殊文字が含まれているかチェック
-	if !uc.CheckUsername(username) {
+	if !uc.CheckUsername(request.Username) {
 		return nil, errors.New("usernameに特殊文字が含まれています")
 	}
 
 	// bcyptでパスワードをハッシュ化
-	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(request.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return nil, err
 	}
 
+	// DAO層に送るリクエストを作成
+	requestDAO := model.NewUserCreateDAORequest(request.Email, string(hashedPassword), request.Username, request.DisplayName)
+
 
 	// ユーザーをDBに作成
-	user, err := uc.dao.CreateUser(ctx, myid, email, string(hashedPassword), username, displayname, password)
+	user, err := uc.dao.CreateUser(ctx, requestDAO)
 	if err != nil {
 		return nil, err
 	}
